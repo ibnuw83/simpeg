@@ -6,15 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { allData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay"
 
 export default function HomePage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+   const plugin = useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true, stopOnHover: true })
+  )
 
   useEffect(() => {
     const appData = allData();
@@ -87,11 +92,14 @@ export default function HomePage() {
         <section className="py-16 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <Carousel
+                    plugins={[plugin.current]}
                     opts={{
                         align: "start",
                         loop: true,
                     }}
                     className="w-full"
+                    onMouseEnter={plugin.current.stop}
+                    onMouseLeave={plugin.current.reset}
                 >
                     <CarouselContent>
                         {(settings?.collageImages || []).map((image, index) => (
