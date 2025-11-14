@@ -66,6 +66,12 @@ export interface Departemen {
   nama: string;
 }
 
+export interface PangkatGolongan {
+  id: string;
+  pangkat: string;
+  golongan: string;
+}
+
 export interface AllData {
   pegawai: Pegawai[];
   pengguna: Pengguna[];
@@ -74,4 +80,5 @@ export interface AllData {
   cuti: Cuti[];
   dokumen: Dokumen[];
   departemen: Departemen[];
+  pangkatGolongan: PangkatGolongan[];
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -240,6 +240,10 @@ const departemenDataInitial: Departemen[] = [...new Set(pegawaiDataInitial.map(p
     nama,
 }));
 
+const pangkatGolonganDataInitial: PangkatGolongan[] = [
+    ...new Map(pegawaiDataInitial.map(p => [`${p.pangkat}-${p.golongan}`, { pangkat: p.pangkat, golongan: p.golongan }])).values()
+].map((pg, index) => ({ ...pg, id: `pg${index+1}` }));
+
 
 const allDataInitial: AllData = {
     pegawai: pegawaiDataInitial,
@@ -249,6 +253,7 @@ const allDataInitial: AllData = {
     cuti: cutiDataInitial,
     dokumen: dokumenDataInitial,
     departemen: departemenDataInitial,
+    pangkatGolongan: pangkatGolonganDataInitial,
 };
 
 const APP_DATA_KEY = 'simpegSmartData';
@@ -297,6 +302,7 @@ export const riwayatPangkatData: RiwayatPangkat[] = data.riwayatPangkat;
 export const cutiData: Cuti[] = data.cuti;
 export const dokumenData: Dokumen[] = data.dokumen;
 export const departemenData: Departemen[] = data.departemen;
+export const pangkatGolonganData: PangkatGolongan[] = data.pangkatGolongan;
 
 
 export const getPegawaiById = (id: string) => pegawaiData.find(p => p.id === id);
