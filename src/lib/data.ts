@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi } from './types';
@@ -281,8 +280,8 @@ const hukumanDataInitial: Hukuman[] = [];
 
 const cutiDataInitial: Cuti[] = [
   { id: 'c1', pegawaiId: '2', jenisCuti: 'Tahunan', tanggalMulai: '2023-07-20', tanggalSelesai: '2023-07-25', keterangan: 'Liburan keluarga', status: 'Disetujui' },
-  { id: 'c2', pegawaiId: '4', jenisCuti: 'Melahirkan', tanggalMulai: '2024-05-01', tanggalSelesai: '2024-08-01', keterangan: 'Cuti melahirkan', status: 'Disetujui' },
-  { id: 'c3', pegawaiId: '1', jenisCuti: 'Sakit', tanggalMulai: '2024-01-10', tanggalSelesai: '2024-01-12', keterangan: 'Sakit demam', status: 'Disetujui' },
+  { id: 'c2', pegawaiId: '4', jenisCuti: 'Melahirkan', tanggalMulai: '2024-05-01', tanggalSelesai: '2024-08-01', keterangan: 'Cuti melahirkan', status: 'Disetujui', linkBuktiDukung: '#' },
+  { id: 'c3', pegawaiId: '1', jenisCuti: 'Sakit', tanggalMulai: '2024-01-10', tanggalSelesai: '2024-01-12', keterangan: 'Sakit demam', status: 'Disetujui', linkBuktiDukung: '#' },
 ];
 
 const dokumenDataInitial: Dokumen[] = [

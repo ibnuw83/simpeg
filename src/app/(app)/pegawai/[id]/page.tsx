@@ -545,7 +545,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Mutasi</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast} disabled><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => router.push('/mutasi')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -561,7 +561,7 @@ export default function PegawaiDetailPage() {
                   <TableBody>
                     {riwayatMutasi.length > 0 ? riwayatMutasi.map(item => (
                       <TableRow key={item.id}>
-                        <TableCell>{item.jenisMutasi}</TableCell>
+                        <TableCell className='capitalize'>{item.jenisMutasi}</TableCell>
                         <TableCell>{item.keterangan}</TableCell>
                         <TableCell>{format(new Date(item.tanggalEfektif), 'dd-MM-yyyy')}</TableCell>
                         <TableCell>{item.nomorSK}</TableCell>
@@ -586,7 +586,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Pangkat</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast} disabled><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => router.push('/mutasi')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>

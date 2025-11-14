@@ -15,28 +15,28 @@ const processModules: { title: string; icon: React.ElementType; color: string; b
       title: 'Perpindahan Unit Kerja',
       icon: ArrowRightLeft,
       color: 'text-blue-500',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-blue-50 dark:bg-blue-900/50',
       type: 'perpindahan'
     },
     {
       title: 'Kenaikan Jabatan (Promosi)',
       icon: ArrowUpCircle,
       color: 'text-green-500',
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-green-50 dark:bg-green-900/50',
       type: 'promosi'
     },
     {
       title: 'Kenaikan Gaji Berkala',
       icon: DollarSign,
       color: 'text-purple-500',
-      bgColor: 'bg-purple-50',
+      bgColor: 'bg-purple-50 dark:bg-purple-900/50',
       type: 'gaji'
     },
     {
       title: 'Kenaikan Pangkat',
       icon: TrendingUp,
       color: 'text-orange-500',
-      bgColor: 'bg-orange-50',
+      bgColor: 'bg-orange-50 dark:bg-orange-900/50',
       type: 'pangkat'
     },
 ];

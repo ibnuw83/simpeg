@@ -337,5 +337,3 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
     </Form>
   );
 }
-
-    

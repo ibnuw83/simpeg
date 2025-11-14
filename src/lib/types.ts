@@ -78,7 +78,7 @@ export interface RiwayatPensiun {
 export interface RiwayatMutasi {
   id: string;
   pegawaiId: string;
-  jenisMutasi: 'Perpindahan' | 'Promosi' | 'Gaji' | 'Pangkat';
+  jenisMutasi: 'perpindahan' | 'promosi' | 'gaji' | 'pangkat';
   keterangan: string;
   tanggalEfektif: string;
   nomorSK: string;
