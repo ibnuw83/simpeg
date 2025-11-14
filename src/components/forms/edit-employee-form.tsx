@@ -44,23 +44,18 @@ const formSchema = z.object({
   alamat: z.string().min(5, { message: 'Alamat harus diisi.' }),
 });
 
-interface AddEmployeeFormProps {
+interface EditEmployeeFormProps {
   onSave: (employee: Pegawai) => void;
+  employeeData: Pegawai;
 }
 
-export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
+export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      nip: '',
-      jabatan: '',
-      email: '',
-      phone: '',
-      pangkat: '',
-      golongan: '',
-      status: 'Aktif',
-      alamat: '',
+      ...employeeData,
+      tanggalLahir: new Date(employeeData.tanggalLahir),
+      tanggalMasuk: new Date(employeeData.tanggalMasuk),
     },
   });
 
@@ -70,15 +65,13 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newEmployee: Pegawai = {
-        id: new Date().getTime().toString(),
-        avatarUrl: `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
-        imageHint: 'person face',
+    const updatedEmployee: Pegawai = {
+        ...employeeData,
         ...values,
         tanggalLahir: format(values.tanggalLahir, 'yyyy-MM-dd'),
         tanggalMasuk: format(values.tanggalMasuk, 'yyyy-MM-dd'),
     };
-    onSave(newEmployee);
+    onSave(updatedEmployee);
     form.reset();
   }
 
@@ -331,7 +324,7 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
             />
         </div>
         <div className="flex justify-end pt-4">
-            <Button type="submit">Simpan Pegawai</Button>
+            <Button type="submit">Simpan Perubahan</Button>
         </div>
       </form>
     </Form>
