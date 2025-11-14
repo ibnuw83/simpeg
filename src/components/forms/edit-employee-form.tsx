@@ -43,12 +43,13 @@ const formSchema = z.object({
   golongan: z.string().min(1, { message: 'Golongan harus diisi.' }),
   status: z.enum(['Aktif', 'Cuti', 'Pensiun']),
   alamat: z.string().min(5, { message: 'Alamat harus diisi.' }),
+  avatarUrl: z.string().url({ message: 'URL foto tidak valid.' }).or(z.literal('')),
 });
 
 interface EditEmployeeFormProps {
   onSave: (employee: Pegawai) => void;
   employeeData: Pegawai;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmployeeFormProps) {
@@ -178,7 +179,7 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                             form.setValue('pangkat', selected.pangkat);
                             form.setValue('golongan', selected.golongan);
                         }
-                     }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value)?.id}>
+                     }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value && p.golongan === form.getValues('golongan'))?.id}>
                         <FormControl>
                         <SelectTrigger>
                             <SelectValue placeholder="Pilih pangkat / golongan" />
@@ -318,9 +319,25 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                     </FormItem>
                 )}
             />
+            <FormField
+              control={form.control}
+              name="avatarUrl"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>URL Foto Profil</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/foto.jpg" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Masukkan URL gambar untuk mengganti foto profil.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
         </div>
         <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
+            {onCancel && <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>}
             <Button type="submit">Simpan Perubahan</Button>
         </div>
       </form>

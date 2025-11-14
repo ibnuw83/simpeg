@@ -43,6 +43,7 @@ const formSchema = z.object({
   golongan: z.string().min(1, { message: 'Golongan harus diisi.' }),
   status: z.enum(['Aktif', 'Cuti', 'Pensiun']),
   alamat: z.string().min(5, { message: 'Alamat harus diisi.' }),
+  avatarUrl: z.string().url({ message: 'URL foto tidak valid.' }).or(z.literal('')),
 });
 
 interface AddEmployeeFormProps {
@@ -62,6 +63,7 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
       golongan: '',
       status: 'Aktif',
       alamat: '',
+      avatarUrl: '',
     },
   });
 
@@ -72,9 +74,9 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const newEmployee: Pegawai = {
         id: new Date().getTime().toString(),
-        avatarUrl: `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
         imageHint: 'person face',
         ...values,
+        avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
         tanggalLahir: format(values.tanggalLahir, 'yyyy-MM-dd'),
         tanggalMasuk: format(values.tanggalMasuk, 'yyyy-MM-dd'),
     };
@@ -323,6 +325,22 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
                     <FormMessage />
                     </FormItem>
                 )}
+            />
+            <FormField
+              control={form.control}
+              name="avatarUrl"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>URL Foto Profil</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/foto.jpg" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Masukkan URL gambar. Biarkan kosong untuk menggunakan gambar default.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
         </div>
         <div className="flex justify-end pt-4">
