@@ -81,6 +81,7 @@ export interface RiwayatMutasi {
   keterangan: string;
   tanggalEfektif: string;
   nomorSK: string;
+  googleDriveLink?: string;
 }
 
 export interface Penghargaan {
@@ -116,6 +117,7 @@ export interface Dokumen {
   jenisDokumen: 'Kontrak' | 'Sertifikat' | 'SK' | 'Lainnya';
   tanggalUnggah: string;
   fileUrl: string;
+  googleDriveLink?: string;
 }
 
 export interface Departemen {

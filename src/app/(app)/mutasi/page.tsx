@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRightLeft, ArrowUpCircle, DollarSign, TrendingUp, PlusCircle, TrendingUp as TrendingUpIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MutationForm, MutationType } from '@/components/forms/mutation-form';
+import { allData, updateAllData } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
+import type { RiwayatMutasi } from '@/lib/types';
 
 const processModules: { title: string; icon: React.ElementType; color: string; bgColor: string, type: MutationType }[] = [
     {
@@ -42,6 +45,7 @@ const processModules: { title: string; icon: React.ElementType; color: string; b
 export default function MutasiPage() {
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedModule, setSelectedModule] = React.useState<(typeof processModules)[0] | null>(null);
+    const { toast } = useToast();
 
     const handleOpenDialog = (module: (typeof processModules)[0]) => {
         setSelectedModule(module);
@@ -54,9 +58,51 @@ export default function MutasiPage() {
     }
     
     const handleSave = (data: any) => {
-        console.log('Saving mutation data:', data);
-        // Here you would typically handle the data saving logic, 
-        // e.g., updating employee data and history in localStorage
+        const currentData = allData();
+        const { mutationType, pegawaiId, ...mutationData } = data;
+
+        const newMutation: RiwayatMutasi = {
+          id: `mut-${new Date().getTime()}`,
+          pegawaiId: pegawaiId,
+          jenisMutasi: mutationType,
+          keterangan: data.keterangan || `Proses ${mutationType}`,
+          tanggalEfektif: data.tanggalEfektif,
+          nomorSK: data.nomorSK,
+          googleDriveLink: data.googleDriveLink,
+        };
+
+        const updatedRiwayatMutasi = [...currentData.riwayatMutasi, newMutation];
+        
+        let updatedPegawai = [...currentData.pegawai];
+
+        // Update employee data based on mutation type
+        const employeeIndex = updatedPegawai.findIndex(p => p.id === pegawaiId);
+        if (employeeIndex !== -1) {
+            const employee = updatedPegawai[employeeIndex];
+            switch(mutationType) {
+                case 'perpindahan':
+                    updatedPegawai[employeeIndex] = { ...employee, departemen: data.departemenBaru };
+                    break;
+                case 'promosi':
+                     updatedPegawai[employeeIndex] = { ...employee, jabatan: data.jabatanBaru };
+                    break;
+                case 'pangkat':
+                    updatedPegawai[employeeIndex] = { ...employee, pangkat: data.pangkatBaru, golongan: data.golonganBaru };
+                    break;
+                // 'gaji' doesn't change the main employee data in this model
+            }
+        }
+        
+        updateAllData({ 
+            ...currentData, 
+            pegawai: updatedPegawai,
+            riwayatMutasi: updatedRiwayatMutasi 
+        });
+
+        toast({
+            title: 'Sukses',
+            description: `Proses ${selectedModule?.title} untuk pegawai berhasil disimpan.`,
+        });
         handleCloseDialog();
     }
 

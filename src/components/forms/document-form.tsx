@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,6 +30,7 @@ const formSchema = z.object({
   namaDokumen: z.string().min(3, { message: 'Nama dokumen harus diisi.' }),
   jenisDokumen: z.enum(['Kontrak', 'Sertifikat', 'SK', 'Lainnya'], { required_error: 'Jenis dokumen harus dipilih.' }),
   dokumenFile: z.any().optional(),
+  googleDriveLink: z.string().url({ message: 'URL Google Drive tidak valid.' }).or(z.literal('')),
 });
 
 interface DocumentFormProps {
@@ -43,6 +45,7 @@ export function DocumentForm({ onSave, documentData, onCancel }: DocumentFormPro
     defaultValues: {
       namaDokumen: '',
       jenisDokumen: undefined,
+      googleDriveLink: '',
     },
   });
 
@@ -51,11 +54,13 @@ export function DocumentForm({ onSave, documentData, onCancel }: DocumentFormPro
       form.reset({
         namaDokumen: documentData.namaDokumen,
         jenisDokumen: documentData.jenisDokumen,
+        googleDriveLink: documentData.googleDriveLink || '',
       });
     } else {
       form.reset({
         namaDokumen: '',
         jenisDokumen: undefined,
+        googleDriveLink: '',
       });
     }
   }, [documentData, form]);
@@ -126,9 +131,25 @@ export function DocumentForm({ onSave, documentData, onCancel }: DocumentFormPro
                             </Button>
                         </div>
                     </FormControl>
+                    <FormDescription>
+                        Anda bisa mengunggah file atau menyediakan link Google Drive di bawah.
+                    </FormDescription>
                     <FormMessage />
                 </FormItem>
             )}
+        />
+         <FormField
+          control={form.control}
+          name="googleDriveLink"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link Google Drive (Opsional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://docs.google.com/..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>

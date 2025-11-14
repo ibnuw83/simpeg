@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -44,6 +45,7 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
       tanggalEfektif: z.date({ required_error: 'Tanggal efektif harus diisi.' }),
       nomorSK: z.string().min(1, 'Nomor SK harus diisi.'),
       dokumenSK: z.any().optional(),
+      googleDriveLink: z.string().url({ message: 'URL Google Drive tidak valid.' }).or(z.literal('')),
       keterangan: z.string().optional(),
     };
 
@@ -80,6 +82,9 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
   const formSchema = getFormSchema(mutationType);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      googleDriveLink: '',
+    }
   });
 
   const { pegawai, departemen, pangkatGolongan } = allData();
@@ -296,14 +301,31 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
                                 onChange={(e) => field.onChange(e.target.files)}
                             />
                             <Button type="button" variant="outline" className="w-full pointer-events-none">
-                                <Upload className="mr-2" />
+                                <Upload className="mr-2 h-4 w-4" />
                                 {field.value?.[0]?.name || 'Pilih file...'}
                             </Button>
                         </div>
                     </FormControl>
+                    <FormDescription>
+                        Anda bisa mengunggah file atau menyediakan link Google Drive di bawah.
+                    </FormDescription>
                     <FormMessage />
                 </FormItem>
             )}
+        />
+
+        <FormField
+          control={form.control}
+          name="googleDriveLink"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link Google Drive SK (Opsional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://docs.google.com/..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
 

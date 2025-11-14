@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon, MoreHorizontal } from 'lucide-react';
-import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatMutasi } from '@/lib/types';
+import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, RiwayatMutasi } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -450,6 +450,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Detail</TableHead>
                       <TableHead>Tanggal Efektif</TableHead>
                       <TableHead>No. SK</TableHead>
+                      <TableHead className="text-right">Dokumen</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -459,9 +460,16 @@ export default function PegawaiDetailPage() {
                         <TableCell>{item.keterangan}</TableCell>
                         <TableCell>{format(new Date(item.tanggalEfektif), 'dd-MM-yyyy')}</TableCell>
                         <TableCell>{item.nomorSK}</TableCell>
+                        <TableCell className="text-right">
+                          {item.googleDriveLink && (
+                            <Button variant="ghost" size="icon" asChild>
+                              <a href={item.googleDriveLink} target="_blank" rel="noopener noreferrer"><Download className="h-4 w-4" /></a>
+                            </Button>
+                          )}
+                        </TableCell>
                       </TableRow>
                     )) : (
-                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -706,7 +714,7 @@ export default function PegawaiDetailPage() {
                         <TableCell>{format(new Date(item.tanggalUnggah), 'dd-MM-yyyy')}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" asChild>
-                            <a href={item.fileUrl} download><Download className="h-4 w-4" /></a>
+                            <a href={item.googleDriveLink || item.fileUrl} download={!item.googleDriveLink} target="_blank" rel="noopener noreferrer"><Download className="h-4 w-4" /></a>
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
