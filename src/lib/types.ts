@@ -61,6 +61,11 @@ export interface Dokumen {
   fileUrl: string;
 }
 
+export interface Departemen {
+  id: string;
+  nama: string;
+}
+
 export interface AllData {
   pegawai: Pegawai[];
   pengguna: Pengguna[];
@@ -68,4 +73,5 @@ export interface AllData {
   riwayatPangkat: RiwayatPangkat[];
   cuti: Cuti[];
   dokumen: Dokumen[];
+  departemen: Departemen[];
 }
