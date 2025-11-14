@@ -353,7 +353,7 @@ function getInitialData(): AllData {
                 const initialKeys = Object.keys(allDataInitial) as (keyof AllData)[];
                 let needsUpdate = false;
                 for (const key of initialKeys) {
-                    if (!(key in parsedData)) {
+                    if (!(key in parsedData) || !parsedData[key] || (Array.isArray(parsedData[key]) && (parsedData[key] as any[]).length === 0)) {
                         (parsedData[key] as any) = allDataInitial[key];
                         needsUpdate = true;
                     }
@@ -414,3 +414,5 @@ export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => allData().riw
 export const getRiwayatPangkatByPegawaiId = (pegawaiId: string) => allData().riwayatPangkat.filter(rp => rp.pegawaiId === pegawaiId);
 export const getCutiByPegawaiId = (pegawaiId: string) => allData().cuti.filter(c => c.pegawaiId === pegawaiId);
 export const getDokumenByPegawaiId = (pegawaiId: string) => allData().dokumen.filter(d => d.pegawaiId === pegawaiId);
+
+    
