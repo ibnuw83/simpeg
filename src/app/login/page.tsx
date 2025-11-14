@@ -16,10 +16,14 @@ import { useEffect, useState } from "react";
 import { allData } from "@/lib/data";
 import type { AppSettings } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('password');
 
   useEffect(() => {
     const loadedSettings = allData().appSettings;
@@ -27,8 +31,35 @@ export default function LoginPage() {
   }, []);
 
   const handleLogin = () => {
-    // For prototype purposes, just redirect to dashboard
-    router.push('/dashboard');
+    const users = allData().pengguna;
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+      if (user.status === 'Aktif') {
+        toast({
+          title: 'Login Berhasil',
+          description: `Selamat datang kembali, ${user.name}!`,
+        });
+        router.push('/dashboard');
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Login Gagal',
+          description: 'Akun Anda saat ini tidak aktif.',
+        });
+      }
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Gagal',
+        description: 'Email atau password yang Anda masukkan salah.',
+      });
+    }
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleLogin();
   }
 
   return (
@@ -50,19 +81,34 @@ export default function LoginPage() {
             Masukkan email dan password Anda untuk masuk ke dasbor.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="admin@example.com" defaultValue="admin@example.com" required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" defaultValue="password" required />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" onClick={handleLogin}>Masuk</Button>
-        </CardFooter>
+        <form onSubmit={handleFormSubmit}>
+            <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="admin@example.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required 
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                    id="password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required 
+                />
+            </div>
+            </CardContent>
+            <CardFooter>
+            <Button className="w-full" type="submit">Masuk</Button>
+            </CardFooter>
+        </form>
       </Card>
     </div>
   )

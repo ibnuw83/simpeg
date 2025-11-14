@@ -7,22 +7,27 @@ const penggunaDataInitial: Pengguna[] = [
     id: 'usr1',
     name: 'Admin Utama',
     email: 'admin@example.com',
+    password: 'password',
     role: 'Admin',
     status: 'Aktif',
     avatarUrl: 'https://picsum.photos/seed/user/100/100'
   },
   {
     id: 'usr2',
+    pegawaiId: '1',
     name: 'Budi Santoso',
     email: 'budi.santoso@gov.example.com',
+    password: 'password',
     role: 'Editor',
     status: 'Aktif',
     avatarUrl: 'https://picsum.photos/seed/1/100/100'
   },
   {
     id: 'usr3',
+    pegawaiId: '2',
     name: 'Citra Lestari',
     email: 'citra.lestari@gov.example.com',
+    password: 'password',
     role: 'Viewer',
     status: 'Nonaktif',
     avatarUrl: 'https://picsum.photos/seed/2/100/100'

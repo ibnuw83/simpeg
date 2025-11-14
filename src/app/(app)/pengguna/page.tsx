@@ -89,13 +89,23 @@ export default function PenggunaPage() {
 
   const handleSave = (userData: Partial<Pengguna>) => {
     if (selectedUser) { // Update
-      const updatedList = penggunaList.map(u => u.id === selectedUser.id ? { ...u, ...userData } : u);
+      const updatedList = penggunaList.map(u => {
+        if (u.id === selectedUser.id) {
+          const updatedUser = { ...u, ...userData };
+          // Only update password if a new one is provided
+          if (!userData.password) {
+            delete updatedUser.password;
+          }
+          return updatedUser;
+        }
+        return u;
+      });
       updateLocalStorage(updatedList);
       toast({ title: 'Sukses', description: `Data pengguna ${userData.name} berhasil diperbarui.` });
     } else { // Add
       const newUser: Pengguna = {
         id: `usr${new Date().getTime()}`,
-        avatarUrl: `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
+        avatarUrl: allData().pegawai.find(p => p.id === userData.pegawaiId)?.avatarUrl || `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
         ...userData
       } as Pengguna;
       const updatedList = [...penggunaList, newUser];

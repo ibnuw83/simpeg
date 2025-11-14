@@ -20,12 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Pengguna } from '@/lib/types';
+import { Pegawai, Pengguna } from '@/lib/types';
 import { useEffect } from 'react';
+import { allData } from '@/lib/data';
 
 const formSchema = z.object({
+  pegawaiId: z.string().optional(),
   name: z.string().min(2, { message: 'Nama harus diisi.' }),
   email: z.string().email({ message: 'Format email tidak valid.' }),
+  password: z.string().min(6, { message: 'Password minimal 6 karakter.' }),
   role: z.enum(['Admin', 'Editor', 'Viewer'], { required_error: 'Peran harus dipilih.' }),
   status: z.enum(['Aktif', 'Nonaktif'], { required_error: 'Status harus dipilih.' }),
 });
@@ -42,18 +45,27 @@ export function UserForm({ onSave, userData, onCancel }: UserFormProps) {
     defaultValues: {
       name: '',
       email: '',
+      password: '',
       role: 'Viewer',
       status: 'Aktif',
     },
   });
 
+  const { pegawai: pegawaiList } = allData();
+  const isEditing = !!userData;
+
   useEffect(() => {
     if (userData) {
-      form.reset(userData);
+      form.reset({
+        ...userData,
+        password: userData.password || '',
+      });
     } else {
       form.reset({
+        pegawaiId: undefined,
         name: '',
         email: '',
+        password: '',
         role: 'Viewer',
         status: 'Aktif',
       });
@@ -64,22 +76,60 @@ export function UserForm({ onSave, userData, onCancel }: UserFormProps) {
     onSave(values);
   }
 
+  const handlePegawaiSelect = (pegawaiId: string) => {
+    const selected = pegawaiList.find(p => p.id === pegawaiId);
+    if (selected) {
+      form.setValue('pegawaiId', selected.id);
+      form.setValue('name', selected.name);
+      form.setValue('email', selected.email);
+    }
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nama Lengkap</FormLabel>
-              <FormControl>
-                <Input placeholder="cth: Budi Santoso" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {isEditing ? (
+           <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nama Lengkap</FormLabel>
+                  <FormControl>
+                    <Input placeholder="cth: Budi Santoso" {...field} disabled />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        ) : (
+            <FormField
+              control={form.control}
+              name="pegawaiId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pilih dari Pegawai</FormLabel>
+                  <Select onValueChange={handlePegawaiSelect} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih pegawai untuk dijadikan pengguna" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {pegawaiList.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} ({p.nip})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        )}
+        
+        {/* Hidden fields for name and email when creating */}
+        {!isEditing && <FormField control={form.control} name="name" render={() => <FormItem className='hidden'><FormControl><Input/></FormControl></FormItem>} />}
+        
         <FormField
           control={form.control}
           name="email"
@@ -87,7 +137,20 @@ export function UserForm({ onSave, userData, onCancel }: UserFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="cth: budi@example.com" {...field} />
+                <Input type="email" placeholder="cth: budi@example.com" {...field} disabled={!isEditing} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{isEditing ? 'Password Baru (opsional)' : 'Password'}</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="******" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

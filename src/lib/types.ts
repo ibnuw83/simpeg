@@ -18,8 +18,10 @@ export interface Pegawai {
 
 export interface Pengguna {
   id: string;
+  pegawaiId?: string; // Optional link to an employee
   name: string;
   email: string;
+  password?: string;
   role: 'Admin' | 'Editor' | 'Viewer';
   status: 'Aktif' | 'Nonaktif';
   avatarUrl: string;
