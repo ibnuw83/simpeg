@@ -223,7 +223,7 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                           )}
                         >
                           {field.value ? (
-                            format(field.value, 'PPP')
+                            format(new Date(field.value), 'PPP')
                           ) : (
                             <span>Pilih tanggal</span>
                           )}
@@ -236,6 +236,9 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 60}
+                        toYear={new Date().getFullYear() - 18}
                         disabled={(date) =>
                           date > new Date() || date < new Date('1950-01-01')
                         }
@@ -264,7 +267,7 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                           )}
                         >
                           {field.value ? (
-                            format(field.value, 'PPP')
+                            format(new Date(field.value), 'PPP')
                           ) : (
                             <span>Pilih tanggal</span>
                           )}
@@ -277,6 +280,9 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 40}
+                        toYear={new Date().getFullYear()}
                         disabled={(date) =>
                           date > new Date()
                         }

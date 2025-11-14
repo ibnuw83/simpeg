@@ -242,6 +242,9 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 60}
+                        toYear={new Date().getFullYear() - 18}
                         disabled={(date) =>
                           date > new Date() || date < new Date('1950-01-01')
                         }
@@ -283,6 +286,9 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 40}
+                        toYear={new Date().getFullYear()}
                         disabled={(date) =>
                           date > new Date()
                         }
