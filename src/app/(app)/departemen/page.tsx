@@ -14,6 +14,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { PlusCircle } from 'lucide-react';
 import { allData } from '@/lib/data';
 import type { Pegawai } from '@/lib/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 
 interface DepartmentData {
   nama: string;
@@ -22,6 +32,7 @@ interface DepartmentData {
 
 export default function DepartemenPage() {
   const [departemenList, setDepartemenList] = React.useState<DepartmentData[]>([]);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   React.useEffect(() => {
     const storedData = localStorage.getItem('simpegSmartData');
@@ -42,6 +53,7 @@ export default function DepartemenPage() {
   }, []);
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
@@ -49,7 +61,7 @@ export default function DepartemenPage() {
             <CardTitle>Manajemen Departemen</CardTitle>
             <CardDescription>Lihat dan kelola departemen/unit kerja.</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => setIsAlertOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Tambah Departemen
           </Button>
@@ -84,5 +96,19 @@ export default function DepartemenPage() {
         </div>
       </CardContent>
     </Card>
+     <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Fitur Dalam Pengembangan</AlertDialogTitle>
+            <AlertDialogDescription>
+                Fungsionalitas untuk menambah/mengedit departemen sedang dalam pengembangan dan akan segera tersedia.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsAlertOpen(false)}>Mengerti</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

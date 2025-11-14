@@ -14,6 +14,15 @@ import { allData } from '@/lib/data';
 import type { Pegawai } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface PangkatData {
   pangkat: string;
@@ -23,6 +32,7 @@ interface PangkatData {
 
 export default function PangkatPage() {
   const [pangkatList, setPangkatList] = React.useState<PangkatData[]>([]);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   React.useEffect(() => {
     const storedData = localStorage.getItem('simpegSmartData');
@@ -57,6 +67,7 @@ export default function PangkatPage() {
   }, []);
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
@@ -64,7 +75,7 @@ export default function PangkatPage() {
             <CardTitle>Manajemen Pangkat & Golongan</CardTitle>
             <CardDescription>Lihat dan kelola data pangkat dan golongan pegawai.</CardDescription>
           </div>
-           <Button>
+           <Button onClick={() => setIsAlertOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Tambah Pangkat/Golongan
           </Button>
@@ -101,5 +112,19 @@ export default function PangkatPage() {
         </div>
       </CardContent>
     </Card>
+    <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Fitur Dalam Pengembangan</AlertDialogTitle>
+            <AlertDialogDescription>
+                Fungsionalitas untuk menambah/mengedit pangkat dan golongan sedang dalam pengembangan dan akan segera tersedia.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsAlertOpen(false)}>Mengerti</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
