@@ -12,11 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 import { allData, updateAllData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { useEffect } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
   logoUrl: z.string().url({ message: 'URL logo tidak valid.' }).or(z.literal('')),
   footerText: z.string().optional(),
+  heroTitle: z.string().optional(),
+  heroSubtitle: z.string().optional(),
 });
 
 export default function PengaturanPage() {
@@ -27,6 +30,8 @@ export default function PengaturanPage() {
       appName: '',
       logoUrl: '',
       footerText: '',
+      heroTitle: '',
+      heroSubtitle: '',
     },
   });
 
@@ -113,6 +118,40 @@ export default function PengaturanPage() {
                 </FormItem>
               )}
             />
+
+            <h3 className="text-lg font-medium border-t pt-6">Halaman Utama</h3>
+            
+            <FormField
+              control={form.control}
+              name="heroTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Judul Hero</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Teks utama di halaman depan..." {...field} />
+                  </FormControl>
+                   <FormDescription>
+                    Anda bisa menggunakan tag &lt;br/&gt; untuk baris baru dan &lt;span class="text-primary"&gt;...&lt;/span&gt; untuk highlight.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="heroSubtitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sub-judul Hero</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Teks deskripsi di bawah judul utama..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end">
               <Button type="submit">Simpan Perubahan</Button>
             </div>

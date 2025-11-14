@@ -137,6 +137,8 @@ export interface AppSettings {
   appName: string;
   logoUrl: string;
   footerText: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
 }
 
 export interface AllData {

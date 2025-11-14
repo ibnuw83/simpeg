@@ -303,7 +303,9 @@ const pangkatGolonganDataInitial: PangkatGolongan[] = [
 const appSettingsInitial: AppSettings = {
     appName: 'Simpeg Smart',
     logoUrl: '',
-    footerText: '© 2024 Pemerintah Kota'
+    footerText: '© 2024 Pemerintah Kota',
+    heroTitle: 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>',
+    heroSubtitle: 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.'
 }
 
 
