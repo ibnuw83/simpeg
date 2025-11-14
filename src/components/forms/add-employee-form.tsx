@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -64,9 +65,9 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
     },
   });
 
-  const uniqueDepartments = [...new Set(allData.pegawai.map(p => p.departemen))];
-  const uniquePangkat = [...new Set(allData.pegawai.map(p => p.pangkat))];
-  const uniqueGolongan = [...new Set(allData.pegawai.map(p => p.golongan))];
+  const uniqueDepartments = [...new Set(allData().pegawai.map(p => p.departemen))];
+  const uniquePangkat = [...new Set(allData().pegawai.map(p => p.pangkat))];
+  const uniqueGolongan = [...new Set(allData().pegawai.map(p => p.golongan))];
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -343,3 +344,5 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
     </Form>
   );
 }
+
+    

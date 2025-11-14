@@ -60,9 +60,9 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
     },
   });
 
-  const uniqueDepartments = [...new Set(allData.pegawai.map(p => p.departemen))];
-  const uniquePangkat = [...new Set(allData.pegawai.map(p => p.pangkat))];
-  const uniqueGolongan = [...new Set(allData.pegawai.map(p => p.golongan))];
+  const uniqueDepartments = [...new Set(allData().pegawai.map(p => p.departemen))];
+  const uniquePangkat = [...new Set(allData().pegawai.map(p => p.pangkat))];
+  const uniqueGolongan = [...new Set(allData().pegawai.map(p => p.golongan))];
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -337,3 +337,5 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
     </Form>
   );
 }
+
+    
