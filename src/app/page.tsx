@@ -46,7 +46,7 @@ export default function HomePage() {
         )}
 
         {/* Hero Section */}
-        <section className="relative pt-20 md:pt-32 pb-10 text-center">
+        <section className="relative pt-10 md:pt-16 pb-10 text-center">
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{backgroundImage: 'url(/hero-bg.svg)'}}
