@@ -279,10 +279,10 @@ const cutiDataInitial: Cuti[] = [
 ];
 
 const dokumenDataInitial: Dokumen[] = [
-  { id: 'd1', pegawaiId: '1', namaDokumen: 'SK Pengangkatan CPNS', jenisDokumen: 'SK', tanggalUnggah: '2010-01-10', fileUrl: '#' },
-  { id: 'd2', pegawaiId: '1', namaDokumen: 'SK Kenaikan Pangkat IIIa', jenisDokumen: 'SK', tanggalUnggah: '2014-03-28', fileUrl: '#' },
-  { id: 'd3', pegawaiId: '2', namaDokumen: 'Ijazah S1 Ekonomi', jenisDokumen: 'Sertifikat', tanggalUnggah: '2014-01-15', fileUrl: '#' },
-  { id: 'd4', pegawaiId: '3', namaDokumen: 'Sertifikat CCNA', jenisDokumen: 'Sertifikat', tanggalUnggah: '2018-09-01', fileUrl: '#' },
+  { id: 'd1', pegawaiId: '1', namaDokumen: 'SK Pengangkatan CPNS', jenisDokumen: 'SK', tanggalUnggah: '2010-01-10', fileUrl: '#', googleDriveLink: '#' },
+  { id: 'd2', pegawaiId: '1', namaDokumen: 'SK Kenaikan Pangkat IIIa', jenisDokumen: 'SK', tanggalUnggah: '2014-03-28', fileUrl: '#', googleDriveLink: '#' },
+  { id: 'd3', pegawaiId: '2', namaDokumen: 'Ijazah S1 Ekonomi', jenisDokumen: 'Sertifikat', tanggalUnggah: '2014-01-15', fileUrl: '#', googleDriveLink: '#' },
+  { id: 'd4', pegawaiId: '3', namaDokumen: 'Sertifikat CCNA', jenisDokumen: 'Sertifikat', tanggalUnggah: '2018-09-01', fileUrl: '#', googleDriveLink: '#' },
 ];
 
 const departemenDataInitial: Departemen[] = [...new Set(pegawaiDataInitial.map(p => p.departemen))].map((nama, index) => ({
@@ -344,37 +344,57 @@ export const setAuthenticatedUser = (user: Pengguna | null) => {
 
 // --- Data Functions ---
 function getInitialData(): AllData {
-    if (typeof window !== 'undefined') {
-        const storedData = localStorage.getItem(APP_DATA_KEY);
-        if (storedData) {
-            try {
-                // Ensure all data keys are present
-                const parsedData: AllData = JSON.parse(storedData);
-                const initialKeys = Object.keys(allDataInitial) as (keyof AllData)[];
-                let needsUpdate = false;
-                for (const key of initialKeys) {
-                    if (!(key in parsedData) || !parsedData[key] || (Array.isArray(parsedData[key]) && (parsedData[key] as any[]).length === 0)) {
-                        (parsedData[key] as any) = allDataInitial[key];
-                        needsUpdate = true;
-                    }
-                }
-                if (needsUpdate) {
-                  localStorage.setItem(APP_DATA_KEY, JSON.stringify(parsedData));
-                }
-                return parsedData;
-            } catch (e) {
-                console.error("Failed to parse data from localStorage", e);
-                // Fallback to initial data if parsing fails
-                localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
-                return allDataInitial;
-            }
-        } else {
-            localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
-            return allDataInitial;
-        }
+    if (typeof window === 'undefined') {
+        return allDataInitial;
     }
-    // Return initial data for server-side rendering
-    return allDataInitial;
+
+    const storedData = localStorage.getItem(APP_DATA_KEY);
+
+    if (!storedData) {
+        localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
+        return allDataInitial;
+    }
+
+    try {
+        let parsedData: AllData = JSON.parse(storedData);
+        let needsUpdate = false;
+
+        // Check each key from the initial data blueprint
+        for (const key in allDataInitial) {
+            const typedKey = key as keyof AllData;
+            // If key is missing, or is an empty array (for list-based data)
+            if (!parsedData.hasOwnProperty(typedKey) || 
+                (Array.isArray(parsedData[typedKey]) && (parsedData[typedKey] as any[]).length === 0 && (allDataInitial[typedKey] as any[]).length > 0)
+            ) {
+                 // Special check for 'pengguna' to ensure admin always exists
+                if (typedKey === 'pengguna' && (!parsedData.pengguna || parsedData.pengguna.length === 0)) {
+                    parsedData.pengguna = penggunaDataInitial;
+                    needsUpdate = true;
+                } else if (typedKey !== 'pengguna') {
+                     (parsedData as any)[typedKey] = allDataInitial[typedKey];
+                     needsUpdate = true;
+                }
+            }
+        }
+        
+        // Final robust check for admin user
+        if (!parsedData.pengguna || !parsedData.pengguna.find(u => u.role === 'Admin')) {
+            parsedData.pengguna = penggunaDataInitial;
+            needsUpdate = true;
+        }
+
+
+        if (needsUpdate) {
+            localStorage.setItem(APP_DATA_KEY, JSON.stringify(parsedData));
+        }
+        
+        return parsedData;
+
+    } catch (e) {
+        console.error("Failed to parse or correct data from localStorage. Resetting to initial data.", e);
+        localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
+        return allDataInitial;
+    }
 }
 
 // Global data object
@@ -382,6 +402,7 @@ let data = getInitialData();
 
 export const allData = (): AllData => {
   if (typeof window !== 'undefined') {
+    // Re-initialize data from localStorage on every call to ensure freshness
     data = getInitialData();
   }
   return data;
@@ -414,5 +435,7 @@ export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => allData().riw
 export const getRiwayatPangkatByPegawaiId = (pegawaiId: string) => allData().riwayatPangkat.filter(rp => rp.pegawaiId === pegawaiId);
 export const getCutiByPegawaiId = (pegawaiId: string) => allData().cuti.filter(c => c.pegawaiId === pegawaiId);
 export const getDokumenByPegawaiId = (pegawaiId: string) => allData().dokumen.filter(d => d.pegawaiId === pegawaiId);
+
+    
 
     
