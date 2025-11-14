@@ -95,22 +95,6 @@ export function Header() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{currentUser?.name || 'Pengguna'}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {currentUser?.role === 'Pengguna' && currentUser?.pegawaiId && (
-             <DropdownMenuItem asChild>
-                <Link href={`/pegawai/${currentUser.pegawaiId}`}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil Saya</span>
-                </Link>
-             </DropdownMenuItem>
-          )}
-          {currentUser?.role === 'Admin' && (
-             <DropdownMenuItem asChild>
-                <Link href="/pengguna">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil</span>
-                </Link>
-            </DropdownMenuItem>
-          )}
           {currentUser?.role === 'Admin' && (
              <DropdownMenuItem asChild>
                 <Link href="/pengaturan">

@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive } from 'lucide-react';
+import { LayoutDashboard, Users, User, Settings, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { allData, getAuthenticatedUser } from '@/lib/data';
 import type { AppSettings, Pengguna } from '@/lib/types';
@@ -20,6 +20,7 @@ import { Skeleton } from '../ui/skeleton';
 const allNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Pengguna'] },
   { href: '/pegawai', icon: Users, label: 'Pegawai', roles: ['Admin'] },
+  { href: '/pegawai/[id]', icon: User, label: 'Profil Saya', roles: ['Pengguna'] },
   { href: '/departemen', icon: Building, label: 'Departemen', roles: ['Admin'] },
   { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol', roles: ['Admin'] },
   { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi', roles: ['Admin'] },
@@ -45,8 +46,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
 
   const getVisibleItems = (items: typeof allNavItems) => {
     if (!currentUser) return [];
-    if (currentUser.role === 'Admin') return items;
-    return items.filter(item => item.roles.includes('Pengguna'));
+    return items.filter(item => item.roles.includes(currentUser.role));
   }
   
   const navItems = getVisibleItems(allNavItems);
@@ -55,11 +55,11 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
 
   const renderNavItems = (items: typeof navItems) => {
     return items.map((item) => {
-      const href = (currentUser?.role === 'Pengguna' && item.href === '/pegawai')
-        ? `/pegawai/${currentUser.pegawaiId}`
+      const href = item.href.includes('[id]')
+        ? item.href.replace('[id]', currentUser?.pegawaiId || '')
         : item.href;
 
-      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href) && !item.href.includes('[id]'));
       
       const linkClasses = cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
@@ -79,11 +79,11 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
 
   const renderNavItemsCollapsed = (items: typeof navItems) => {
     return items.map((item) => {
-       const href = (currentUser?.role === 'Pengguna' && item.href === '/pegawai')
-        ? `/pegawai/${currentUser.pegawaiId}`
+       const href = item.href.includes('[id]')
+        ? item.href.replace('[id]', currentUser?.pegawaiId || '')
         : item.href;
       
-      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href) && !item.href.includes('[id]'));
       const linkClasses = cn(
           "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
           isActive && "bg-accent text-accent-foreground"
