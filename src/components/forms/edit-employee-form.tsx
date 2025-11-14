@@ -34,6 +34,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: 'Nama harus diisi, minimal 2 karakter.' }),
   nip: z.string().min(10, { message: 'NIP harus diisi, minimal 10 digit.' }),
   jabatan: z.string().min(2, { message: 'Jabatan harus diisi.' }),
+  jenisJabatan: z.enum(['Jabatan Struktural', 'Jabatan Fungsional Tertentu', 'Jabatan Fungsional Umum'], { required_error: 'Jenis jabatan harus dipilih.' }),
   departemen: z.string().min(2, { message: 'Departemen harus dipilih.' }),
   email: z.string().email({ message: 'Format email tidak valid.' }),
   phone: z.string().min(10, { message: 'Nomor telepon minimal 10 digit.' }),
@@ -196,7 +197,7 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                 name="jabatan"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Jabatan</FormLabel>
+                    <FormLabel>Nama Jabatan</FormLabel>
                     <FormControl>
                         <Input placeholder="cth: Analis Kebijakan" {...field} />
                     </FormControl>
@@ -204,6 +205,28 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                     </FormItem>
                 )}
              />
+            <FormField
+                control={form.control}
+                name="jenisJabatan"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Jenis Jabatan</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Pilih jenis jabatan" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                           <SelectItem value="Jabatan Struktural">Jabatan Struktural</SelectItem>
+                           <SelectItem value="Jabatan Fungsional Tertentu">Jabatan Fungsional Tertentu (JFT)</SelectItem>
+                           <SelectItem value="Jabatan Fungsional Umum">Jabatan Fungsional Umum (JFU)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
               <FormField
                 control={form.control}
                 name="departemen"
@@ -358,5 +381,3 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
     </Form>
   );
 }
-
-    
