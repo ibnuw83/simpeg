@@ -31,13 +31,9 @@ const features = [
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-            <Briefcase className="h-7 w-7 text-primary" />
-            <span className="text-xl font-bold">Simpeg Smart</span>
-        </div>
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-end">
         <nav>
-          <Button asChild>
+          <Button asChild variant="outline">
             <Link href="/login">Masuk Aplikasi</Link>
           </Button>
         </nav>
@@ -52,6 +48,10 @@ export default function HomePage() {
             ></div>
             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div>
             <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-center items-center gap-3 mb-6">
+                    <Briefcase className="h-10 w-10 text-primary" />
+                    <span className="text-3xl font-bold">Simpeg Smart</span>
+                </div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
                     Transformasi Manajemen <br/> <span className="text-primary">Kepegawaian Digital</span>
                 </h1>
