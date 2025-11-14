@@ -27,6 +27,8 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { allData } from '@/lib/data';
+import { RiwayatJabatan } from '@/lib/types';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   jabatan: z.string().min(2, { message: 'Jabatan harus diisi.' }),
@@ -37,20 +39,37 @@ const formSchema = z.object({
 
 interface HistoryFormProps {
   onSave: (data: any) => void;
+  historyData?: RiwayatJabatan | null;
 }
 
-export function HistoryForm({ onSave }: HistoryFormProps) {
+export function HistoryForm({ onSave, historyData }: HistoryFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       jabatan: '',
       departemen: '',
-      tanggalMulai: undefined,
-      tanggalSelesai: undefined,
     },
   });
+  
+  useEffect(() => {
+    if (historyData) {
+        form.reset({
+            jabatan: historyData.jabatan,
+            departemen: historyData.departemen,
+            tanggalMulai: new Date(historyData.tanggalMulai),
+            tanggalSelesai: historyData.tanggalSelesai ? new Date(historyData.tanggalSelesai) : undefined,
+        });
+    } else {
+        form.reset({
+            jabatan: '',
+            departemen: '',
+            tanggalMulai: undefined,
+            tanggalSelesai: undefined,
+        });
+    }
+  }, [historyData, form]);
 
-  const { departemen } = allData;
+  const { departemen } = allData();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave({

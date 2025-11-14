@@ -311,9 +311,23 @@ function getInitialData(): AllData {
     return allDataInitial;
 }
 
-const data = getInitialData();
+// Global data object
+let data = getInitialData();
 
-export const allData = data;
+export const allData = (): AllData => {
+  if (typeof window !== 'undefined') {
+    data = getInitialData();
+  }
+  return data;
+}
+
+export const updateAllData = (newData: AllData) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(APP_DATA_KEY, JSON.stringify(newData));
+    data = newData;
+  }
+}
+
 export const pegawaiData: Pegawai[] = data.pegawai;
 export const penggunaData: Pengguna[] = data.pengguna;
 export const riwayatJabatanData: RiwayatJabatan[] = data.riwayatJabatan;
@@ -329,8 +343,8 @@ export const hukumanData: Hukuman[] = data.hukuman;
 
 
 
-export const getPegawaiById = (id: string) => pegawaiData.find(p => p.id === id);
-export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => riwayatJabatanData.filter(rj => rj.pegawaiId === pegawaiId);
-export const getRiwayatPangkatByPegawaiId = (pegawaiId: string) => riwayatPangkatData.filter(rp => rp.pegawaiId === pegawaiId);
-export const getCutiByPegawaiId = (pegawaiId: string) => cutiData.filter(c => c.pegawaiId === pegawaiId);
-export const getDokumenByPegawaiId = (pegawaiId: string) => dokumenData.filter(d => d.pegawaiId === pegawaiId);
+export const getPegawaiById = (id: string) => allData().pegawai.find(p => p.id === id);
+export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => allData().riwayatJabatan.filter(rj => rj.pegawaiId === pegawaiId);
+export const getRiwayatPangkatByPegawaiId = (pegawaiId: string) => allData().riwayatPangkat.filter(rp => rp.pegawaiId === pegawaiId);
+export const getCutiByPegawaiId = (pegawaiId: string) => allData().cuti.filter(c => c.pegawaiId === pegawaiId);
+export const getDokumenByPegawaiId = (pegawaiId: string) => allData().dokumen.filter(d => d.pegawaiId === pegawaiId);

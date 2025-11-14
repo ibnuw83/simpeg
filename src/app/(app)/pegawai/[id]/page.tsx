@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import {
-  allData
+  allData,
+  updateAllData
 } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon } from 'lucide-react';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon, MoreHorizontal } from 'lucide-react';
 import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
 import { useToast } from '@/hooks/use-toast';
 import { HistoryForm } from '@/components/forms/history-form';
@@ -43,17 +46,18 @@ export default function PegawaiDetailPage() {
   const [hukuman, setHukuman] = useState<Hukuman[]>([]);
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
+  // Dialog States
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isAddHistoryDialogOpen, setIsAddHistoryDialogOpen] = useState(false);
-  
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<{type: string, data: any} | null>(null);
+
   const id = typeof params.id === 'string' ? params.id : null;
 
   const loadData = React.useCallback(() => {
     if (!id) return;
 
-    const storedData = localStorage.getItem('simpegSmartData');
-    const data = storedData ? JSON.parse(storedData) : allData;
-
+    const data = allData();
     const pegawaiData = data.pegawai.find(p => p.id === id);
     setPegawai(pegawaiData ?? null);
 
@@ -80,47 +84,71 @@ export default function PegawaiDetailPage() {
   }, [pegawai]);
 
   const handleUpdate = (updatedEmployee: Pegawai) => {
-    setPegawai(updatedEmployee);
-
-    try {
-        const storedData = localStorage.getItem('simpegSmartData');
-        const currentData = storedData ? JSON.parse(storedData) : allData;
-        const updatedPegawaiList = currentData.pegawai.map(p => p.id === updatedEmployee.id ? updatedEmployee : p);
-        currentData.pegawai = updatedPegawaiList;
-        localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
-    } catch(e) {
-        console.error("Failed to update localStorage", e);
-    }
-    
+    const currentData = allData();
+    const updatedPegawaiList = currentData.pegawai.map(p => p.id === updatedEmployee.id ? updatedEmployee : p);
+    updateAllData({ ...currentData, pegawai: updatedPegawaiList });
+    loadData();
     setIsEditDialogOpen(false);
   };
   
-  const handleSaveJabatan = (newHistory: Omit<RiwayatJabatan, 'id' | 'pegawaiId'>) => {
+  const handleSaveHistory = (newHistory: Omit<RiwayatJabatan, 'id' | 'pegawaiId'>) => {
     if (!id) return;
-    const newRecord: RiwayatJabatan = {
-      ...newHistory,
-      id: new Date().getTime().toString(),
-      pegawaiId: id,
-    };
-    
-    try {
-      const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData));
-      currentData.riwayatJabatan.push(newRecord);
-      localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
-      loadData();
-      setIsAddHistoryDialogOpen(false);
-      toast({ title: 'Sukses', description: 'Riwayat jabatan berhasil ditambahkan.' });
-    } catch (e) {
-      console.error("Failed to update localStorage", e);
-      toast({ variant: 'destructive', title: 'Gagal', description: 'Gagal menyimpan riwayat jabatan.' });
+
+    const currentData = allData();
+    let updatedHistory;
+
+    if (selectedHistory) { // Update
+        updatedHistory = currentData.riwayatJabatan.map(item => item.id === selectedHistory.data.id ? { ...selectedHistory.data, ...newHistory } : item);
+    } else { // Create
+        const newRecord: RiwayatJabatan = {
+          ...newHistory,
+          id: new Date().getTime().toString(),
+          pegawaiId: id,
+        };
+        updatedHistory = [...currentData.riwayatJabatan, newRecord];
     }
+    
+    updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+    loadData();
+    setIsHistoryDialogOpen(false);
+    setSelectedHistory(null);
+    toast({ title: 'Sukses', description: `Riwayat jabatan berhasil ${selectedHistory ? 'diperbarui' : 'ditambahkan'}.` });
   };
+
+  const handleDeleteHistory = () => {
+    if (!selectedHistory) return;
+    
+    const currentData = allData();
+    let updatedHistory;
+
+    // A more generic delete logic can be implemented here if needed
+    if (selectedHistory.type === 'jabatan') {
+        updatedHistory = currentData.riwayatJabatan.filter(item => item.id !== selectedHistory.data.id);
+        updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+    }
+
+    loadData();
+    setIsDeleteDialogOpen(false);
+    setSelectedHistory(null);
+    toast({ title: 'Sukses', description: 'Data riwayat berhasil dihapus.' });
+  }
+
+  const openHistoryDialog = (type: string, data: any | null = null) => {
+    setSelectedHistory({ type, data });
+    setIsHistoryDialogOpen(true);
+  }
+
+  const openDeleteDialog = (type: string, data: any) => {
+    setSelectedHistory({ type, data });
+    setIsDeleteDialogOpen(true);
+  }
+
 
   const showNotImplementedToast = () => {
     toast({
         variant: 'destructive',
         title: 'Fitur Belum Tersedia',
-        description: 'Fungsionalitas untuk menambahkan data ini sedang dalam pengembangan.',
+        description: 'Fungsionalitas untuk ini sedang dalam pengembangan.',
     });
   }
 
@@ -219,7 +247,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Jabatan</CardTitle>
-                <Button size="sm" onClick={() => setIsAddHistoryDialogOpen(true)}>
+                <Button size="sm" onClick={() => openHistoryDialog('jabatan')}>
                   <PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat
                 </Button>
               </CardHeader>
@@ -231,6 +259,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Departemen</TableHead>
                       <TableHead>Tanggal Mulai</TableHead>
                       <TableHead>Tanggal Selesai</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -240,9 +269,20 @@ export default function PegawaiDetailPage() {
                         <TableCell>{item.departemen}</TableCell>
                         <TableCell>{item.tanggalMulai}</TableCell>
                         <TableCell>{item.tanggalSelesai || 'Sekarang'}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => openHistoryDialog('jabatan', item)}>Ubah</DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('jabatan', item)}>Hapus</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     )) : (
-                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -288,6 +328,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Institusi</TableHead>
                       <TableHead>Jurusan</TableHead>
                       <TableHead>Tahun Lulus</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -297,9 +338,12 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.institusi}</TableCell>
                           <TableCell>{item.jurusan}</TableCell>
                           <TableCell>{item.tahunLulus}</TableCell>
+                           <TableCell className="text-right">
+                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                           </TableCell>
                         </TableRow>
                       )) : (
-                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
                       )}
                   </TableBody>
                 </Table>
@@ -321,6 +365,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Penyelenggara</TableHead>
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Jumlah Jam</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -330,9 +375,12 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.penyelenggara}</TableCell>
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.jumlahJam}</TableCell>
+                           <TableCell className="text-right">
+                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                           </TableCell>
                         </TableRow>
                       )) : (
-                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
                       )}
                   </TableBody>
                 </Table>
@@ -354,6 +402,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Keterangan</TableHead>
                       <TableHead>Status</TableHead>
+                       <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -363,9 +412,12 @@ export default function PegawaiDetailPage() {
                         <TableCell>{item.tanggalMulai} - {item.tanggalSelesai}</TableCell>
                         <TableCell>{item.keterangan}</TableCell>
                         <TableCell><Badge variant="outline">{item.status}</Badge></TableCell>
+                        <TableCell className="text-right">
+                            <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                        </TableCell>
                       </TableRow>
                     )) : (
-                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -386,6 +438,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Nama Penghargaan</TableHead>
                       <TableHead>Pemberi</TableHead>
                       <TableHead>Tanggal</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -394,9 +447,12 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.nama}</TableCell>
                           <TableCell>{item.pemberi}</TableCell>
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
+                           <TableCell className="text-right">
+                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                           </TableCell>
                         </TableRow>
                       )) : (
-                        <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
                       )}
                   </TableBody>
                 </Table>
@@ -417,6 +473,7 @@ export default function PegawaiDetailPage() {
                       <TableHead>Jenis Hukuman</TableHead>
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Keterangan</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -425,9 +482,12 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.jenis}</TableCell>
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.keterangan}</TableCell>
+                           <TableCell className="text-right">
+                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                           </TableCell>
                         </TableRow>
                       )) : (
-                        <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
                       )}
                   </TableBody>
                 </Table>
@@ -461,6 +521,7 @@ export default function PegawaiDetailPage() {
                           <Button variant="ghost" size="icon" asChild>
                             <a href={item.fileUrl} download><Download className="h-4 w-4" /></a>
                           </Button>
+                          <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
                         </TableCell>
                       </TableRow>
                     )) : (
@@ -488,17 +549,37 @@ export default function PegawaiDetailPage() {
         </Dialog>
       )}
 
-      <Dialog open={isAddHistoryDialogOpen} onOpenChange={setIsAddHistoryDialogOpen}>
+      <Dialog open={isHistoryDialogOpen} onOpenChange={(isOpen) => {
+          setIsHistoryDialogOpen(isOpen);
+          if (!isOpen) setSelectedHistory(null);
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tambah Riwayat Jabatan</DialogTitle>
+            <DialogTitle>{selectedHistory?.data ? 'Ubah' : 'Tambah'} Riwayat {selectedHistory?.type === 'jabatan' && 'Jabatan'}</DialogTitle>
             <DialogDescription>
-              Isi detail riwayat jabatan baru untuk pegawai ini.
+              Isi detail riwayat baru atau perbarui yang sudah ada.
             </DialogDescription>
           </DialogHeader>
-          <HistoryForm onSave={handleSaveJabatan} />
+          {selectedHistory?.type === 'jabatan' && (
+            <HistoryForm onSave={handleSaveHistory} historyData={selectedHistory.data} />
+          )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+              <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+              <AlertDialogDescription>
+                  Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data riwayat secara permanen.
+              </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setSelectedHistory(null)}>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteHistory} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
