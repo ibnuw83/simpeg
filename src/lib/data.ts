@@ -363,21 +363,21 @@ function getInitialData(): AllData {
     }
 
     try {
-        let parsedData: AllData = JSON.parse(storedData);
+        const parsedData: AllData = JSON.parse(storedData);
         let needsUpdate = false;
 
-        // Ensure all top-level keys exist
+        // Ensure all top-level keys exist by merging with initial data
         for (const key of Object.keys(allDataInitial) as Array<keyof AllData>) {
-            if (!(key in parsedData)) {
+            if (!(key in parsedData) || parsedData[key] === undefined || (Array.isArray(parsedData[key]) && (parsedData[key] as any[]).length === 0 && (allDataInitial[key] as any[]).length > 0)) {
                 (parsedData as any)[key] = allDataInitial[key];
                 needsUpdate = true;
             }
         }
         
         // Specifically check for 'pengguna' data integrity
-        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin');
+        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin' && u.email === 'admin@example.com');
         if (!parsedData.pengguna || parsedData.pengguna.length === 0 || !hasAdmin) {
-            // Preserve other data, but reset 'pengguna'
+            // Overwrite pengguna array with initial data if it's missing or corrupted
             parsedData.pengguna = penggunaDataInitial;
             needsUpdate = true;
         }
@@ -414,5 +414,3 @@ export const updateAllData = (newData: AllData) => {
     data = newData;
   }
 }
-
-    
