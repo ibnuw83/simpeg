@@ -382,8 +382,7 @@ function getInitialData(): AllData {
         
         // Specifically check for 'pengguna' data integrity.
         // If 'pengguna' array is missing, empty, or doesn't have the main admin, reset it.
-        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin' && u.email === penggunaDataInitial[0].email);
-        if (!parsedData.pengguna || parsedData.pengguna.length === 0 || !hasAdmin) {
+        if (!parsedData.pengguna || parsedData.pengguna.length === 0 || !parsedData.pengguna.some(u => u.role === 'Admin')) {
             parsedData.pengguna = penggunaDataInitial;
             needsUpdate = true;
         }

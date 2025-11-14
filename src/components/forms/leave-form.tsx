@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Cuti } from '@/lib/types';
+import { Cuti, Pengguna } from '@/lib/types';
 import { useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Textarea } from '../ui/textarea';
+import { getAuthenticatedUser } from '@/lib/data';
 
 const formSchema = z.object({
   jenisCuti: z.enum(['Tahunan', 'Sakit', 'Penting', 'Melahirkan'], { required_error: 'Jenis cuti harus dipilih.' }),
@@ -43,6 +44,9 @@ interface LeaveFormProps {
 }
 
 export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
+  const currentUser = getAuthenticatedUser();
+  const isAdmin = currentUser?.role === 'Admin';
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,6 +79,7 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
       ...values,
       tanggalMulai: format(values.tanggalMulai, 'yyyy-MM-dd'),
       tanggalSelesai: format(values.tanggalSelesai, 'yyyy-MM-dd'),
+      status: isAdmin && leaveData ? values.status : 'Menunggu', // Only admin can change status on existing leave
     });
     form.reset();
   }
@@ -172,28 +177,31 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Menunggu">Menunggu</SelectItem>
-                  <SelectItem value="Disetujui">Disetujui</SelectItem>
-                  <SelectItem value="Ditolak">Ditolak</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Only show status field to Admins when they are editing an existing leave request */}
+        {isAdmin && leaveData && (
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Menunggu">Menunggu</SelectItem>
+                    <SelectItem value="Disetujui">Disetujui</SelectItem>
+                    <SelectItem value="Ditolak">Ditolak</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
           <Button type="submit">Simpan</Button>
