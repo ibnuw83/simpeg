@@ -7,36 +7,40 @@ import Image from 'next/image';
 
 const features = [
   {
-    icon: <Users className="h-10 w-10 text-primary" />,
+    icon: <Users className="h-10 w-10 text-blue-500" />,
     title: 'Manajemen Pegawai',
     description: 'Kelola data induk pegawai, riwayat jabatan, pangkat, dan pendidikan secara terpusat.',
+    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+    iconBgColor: 'bg-blue-100 dark:bg-blue-900/50',
   },
   {
-    icon: <CalendarOff className="h-10 w-10 text-primary" />,
+    icon: <CalendarOff className="h-10 w-10 text-green-500" />,
     title: 'Manajemen Cuti & Absensi',
     description: 'Proses pengajuan dan persetujuan cuti secara digital. Pantau status kehadiran pegawai.',
+    bgColor: 'bg-green-50 dark:bg-green-900/20',
+    iconBgColor: 'bg-green-100 dark:bg-green-900/50',
   },
   {
-    icon: <Briefcase className="h-10 w-10 text-primary" />,
+    icon: <Briefcase className="h-10 w-10 text-purple-500" />,
     title: 'Mutasi & Promosi',
     description: 'Fasilitasi proses kenaikan pangkat, promosi jabatan, dan perpindahan unit kerja dengan mudah.',
+    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+    iconBgColor: 'bg-purple-100 dark:bg-purple-900/50',
   },
   {
-    icon: <FileText className="h-10 w-10 text-primary" />,
+    icon: <FileText className="h-10 w-10 text-orange-500" />,
     title: 'Laporan & Analitik',
     description: 'Hasilkan berbagai laporan kepegawaian dan lihat statistik penting melalui dasbor interaktif.',
+    bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+    iconBgColor: 'bg-orange-100 dark:bg-orange-900/50',
   },
 ];
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-end">
-        <nav>
-          <Button asChild variant="outline">
-            <Link href="/login">Masuk Aplikasi</Link>
-          </Button>
-        </nav>
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-center">
+        {/* Navigation removed as requested */}
       </header>
 
       <main className="flex-grow">
@@ -78,9 +82,9 @@ export default function HomePage() {
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {features.map((feature, index) => (
-                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <Card key={index} className={`text-center hover:shadow-lg transition-shadow border-none ${feature.bgColor}`}>
                   <CardHeader className="items-center">
-                    <div className="bg-primary/10 p-4 rounded-full">
+                    <div className={`p-4 rounded-full ${feature.iconBgColor}`}>
                       {feature.icon}
                     </div>
                   </CardHeader>
