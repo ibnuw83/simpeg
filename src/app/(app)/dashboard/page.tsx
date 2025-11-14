@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building, Bell, CheckCircle } from "lucide-react";
+import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift } from "lucide-react";
 import { allData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,13 +20,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const RETIREMENT_AGE = 58;
 
-const UpcomingSalaryIncrease = ({ data }: { data: Pegawai[] }) => {
+const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
     const [upcomingIncreases, setUpcomingIncreases] = useState<any[]>([]);
+    const [upcomingRetirements, setUpcomingRetirements] = useState<any[]>([]);
 
     useEffect(() => {
         const today = new Date();
         const oneYearFromNow = add(today, { years: 1 });
 
+        // Salary Increases
         const increases = data
             .filter(p => p.status === 'Aktif' && p.tanggalMasuk)
             .map(p => {
@@ -34,16 +36,32 @@ const UpcomingSalaryIncrease = ({ data }: { data: Pegawai[] }) => {
                 const yearsOfService = differenceInCalendarYears(today, startDate);
                 const nextIncreaseYear = Math.floor((yearsOfService / 2) + 1) * 2;
                 const nextIncreaseDate = add(startDate, { years: nextIncreaseYear });
-                return { ...p, nextIncreaseDate };
+                return { ...p, nextIncreaseDate, notificationType: 'Kenaikan Gaji' };
             })
-            .filter(p => p.nextIncreaseDate > today && p.nextIncreaseDate <= oneYearFromNow)
-            .sort((a, b) => a.nextIncreaseDate.getTime() - b.nextIncreaseDate.getTime());
+            .filter(p => p.nextIncreaseDate > today && p.nextIncreaseDate <= oneYearFromNow);
+
+        // Retirements
+        const retirements = data
+            .filter(p => p.status === 'Aktif' && p.tanggalLahir)
+            .map(p => {
+                const birthDate = new Date(p.tanggalLahir);
+                const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
+                return { ...p, retirementDate, notificationType: 'Pensiun' };
+            })
+            .filter(p => p.retirementDate > today && p.retirementDate <= oneYearFromNow);
+
+        const allNotifications = [
+            ...increases.map(p => ({...p, effectiveDate: p.nextIncreaseDate})),
+            ...retirements.map(p => ({...p, effectiveDate: p.retirementDate}))
+        ].sort((a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime());
             
-        setUpcomingIncreases(increases);
+        setUpcomingIncreases(allNotifications.filter(n => n.notificationType === 'Kenaikan Gaji'));
+        setUpcomingRetirements(allNotifications.filter(n => n.notificationType === 'Pensiun'));
+
     }, [data]);
 
-    if (upcomingIncreases.length === 0) {
-        return null; // Don't render the card if there are no upcoming increases
+    if (upcomingIncreases.length === 0 && upcomingRetirements.length === 0) {
+        return null; // Don't render if no notifications
     }
 
     return (
@@ -53,19 +71,33 @@ const UpcomingSalaryIncrease = ({ data }: { data: Pegawai[] }) => {
                     <Bell className="h-6 w-6" />
                     <div>
                         <CardTitle>Notifikasi Penting</CardTitle>
-                        <CardDescription>Pengingat terkait kepegawaian yang akan datang.</CardDescription>
+                        <CardDescription>Pengingat terkait kepegawaian yang akan datang dalam 1 tahun ke depan.</CardDescription>
                     </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-2">
                 {upcomingIncreases.map(pegawai => (
-                    <div key={pegawai.id} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                    <div key={`increase-${pegawai.id}`} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
                            <CheckCircle className="h-6 w-6 text-primary" />
                         </div>
                         <div className="flex-1">
                             <p className="font-semibold">Kenaikan Gaji Berkala - {pegawai.name}</p>
                             <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(pegawai.nextIncreaseDate, 'dd MMM yyyy')}</p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/pegawai/${pegawai.id}`}>Lihat Detail</Link>
+                        </Button>
+                    </div>
+                ))}
+                {upcomingRetirements.map(pegawai => (
+                    <div key={`retire-${pegawai.id}`} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
+                           <Gift className="h-6 w-6 text-orange-500" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-semibold">Pensiun - {pegawai.name}</p>
+                            <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(pegawai.retirementDate, 'dd MMM yyyy')}</p>
                         </div>
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/pegawai/${pegawai.id}`}>Lihat Detail</Link>
@@ -178,7 +210,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-       <UpcomingSalaryIncrease data={data} />
+       <ImportantNotifications data={data} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-blue-50 dark:bg-blue-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -227,7 +259,8 @@ export default function DashboardPage() {
         <DepartmentChart data={data} />
       </div>
       
-      <UpcomingRetirements data={data} />
+      {/* This card is now redundant as it's merged into ImportantNotifications */}
+      {/* <UpcomingRetirements data={data} /> */}
 
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -270,3 +303,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
