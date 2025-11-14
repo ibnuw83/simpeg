@@ -1,6 +1,33 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, RiwayatJabatan, RiwayatPangkat } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat } from './types';
+
+const penggunaDataInitial: Pengguna[] = [
+  {
+    id: 'usr1',
+    name: 'Admin Utama',
+    email: 'admin@example.com',
+    role: 'Admin',
+    status: 'Aktif',
+    avatarUrl: 'https://picsum.photos/seed/user/100/100'
+  },
+  {
+    id: 'usr2',
+    name: 'Budi Santoso',
+    email: 'budi.santoso@gov.example.com',
+    role: 'Editor',
+    status: 'Aktif',
+    avatarUrl: 'https://picsum.photos/seed/1/100/100'
+  },
+  {
+    id: 'usr3',
+    name: 'Citra Lestari',
+    email: 'citra.lestari@gov.example.com',
+    role: 'Viewer',
+    status: 'Nonaktif',
+    avatarUrl: 'https://picsum.photos/seed/2/100/100'
+  }
+];
 
 const pegawaiDataInitial: Pegawai[] = [
   {
@@ -200,6 +227,7 @@ const dokumenDataInitial: Dokumen[] = [
 
 const allDataInitial: AllData = {
     pegawai: pegawaiDataInitial,
+    pengguna: penggunaDataInitial,
     riwayatJabatan: riwayatJabatanDataInitial,
     riwayatPangkat: riwayatPangkatDataInitial,
     cuti: cutiDataInitial,
@@ -213,7 +241,13 @@ function getInitialData(): AllData {
         const storedData = localStorage.getItem(APP_DATA_KEY);
         if (storedData) {
             try {
-                return JSON.parse(storedData);
+                // Ensure pengguna data is populated if it's missing from old localStorage
+                const parsedData = JSON.parse(storedData);
+                if (!parsedData.pengguna) {
+                  parsedData.pengguna = penggunaDataInitial;
+                  localStorage.setItem(APP_DATA_KEY, JSON.stringify(parsedData));
+                }
+                return parsedData;
             } catch (e) {
                 console.error("Failed to parse data from localStorage", e);
                 // Fallback to initial data if parsing fails

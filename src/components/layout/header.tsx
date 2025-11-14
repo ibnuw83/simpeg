@@ -22,6 +22,7 @@ import { usePathname } from "next/navigation";
 const pathToTitle: { [key: string]: string } = {
   '/dashboard': 'Dashboard',
   '/pegawai': 'Manajemen Pegawai',
+  '/pengguna': 'Manajemen Pengguna',
   '/analitik': 'Analitik & Laporan',
 }
 

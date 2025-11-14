@@ -15,6 +15,15 @@ export interface Pegawai {
   alamat: string;
 }
 
+export interface Pengguna {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Admin' | 'Editor' | 'Viewer';
+  status: 'Aktif' | 'Nonaktif';
+  avatarUrl: string;
+}
+
 export interface RiwayatJabatan {
   id: string;
   pegawaiId: string;
@@ -53,6 +62,7 @@ export interface Dokumen {
 
 export interface AllData {
   pegawai: Pegawai[];
+  pengguna: Pengguna[];
   riwayatJabatan: RiwayatJabatan[];
   riwayatPangkat: RiwayatPangkat[];
   cuti: Cuti[];
