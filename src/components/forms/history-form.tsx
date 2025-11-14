@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -35,12 +36,18 @@ const formSchema = z.object({
 });
 
 interface HistoryFormProps {
-  onSave: (data: z.infer<typeof formSchema>) => void;
+  onSave: (data: any) => void;
 }
 
 export function HistoryForm({ onSave }: HistoryFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      jabatan: '',
+      departemen: '',
+      tanggalMulai: undefined,
+      tanggalSelesai: undefined,
+    },
   });
 
   const { departemen } = allData;
@@ -121,6 +128,9 @@ export function HistoryForm({ onSave }: HistoryFormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
+                      captionLayout="dropdown-buttons"
+                      fromYear={new Date().getFullYear() - 40}
+                      toYear={new Date().getFullYear()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -159,6 +169,9 @@ export function HistoryForm({ onSave }: HistoryFormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
+                      captionLayout="dropdown-buttons"
+                      fromYear={new Date().getFullYear() - 40}
+                      toYear={new Date().getFullYear()}
                       initialFocus
                     />
                   </PopoverContent>
