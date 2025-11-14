@@ -180,44 +180,44 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6">
        <UpcomingSalaryIncrease data={data} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-blue-50 dark:bg-blue-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pegawai</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-200">Total Pegawai</CardTitle>
+            <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalPegawai}</div>
-            <p className="text-xs text-muted-foreground">Jumlah seluruh pegawai terdaftar</p>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{totalPegawai}</div>
+            <p className="text-xs text-blue-700 dark:text-blue-300">Jumlah seluruh pegawai terdaftar</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-green-50 dark:bg-green-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pegawai Aktif</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-green-800 dark:text-green-200">Pegawai Aktif</CardTitle>
+            <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pegawaiAktif}</div>
-            <p className="text-xs text-muted-foreground">Pegawai dengan status aktif</p>
+            <div className="text-2xl font-bold text-green-900 dark:text-green-100">{pegawaiAktif}</div>
+            <p className="text-xs text-green-700 dark:text-green-300">Pegawai dengan status aktif</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-yellow-50 dark:bg-yellow-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pegawai Cuti</CardTitle>
-            <UserX className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Pegawai Cuti</CardTitle>
+            <UserX className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pegawaiCuti}</div>
-            <p className="text-xs text-muted-foreground">Pegawai yang sedang cuti</p>
+            <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{pegawaiCuti}</div>
+            <p className="text-xs text-yellow-700 dark:text-yellow-300">Pegawai yang sedang cuti</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-purple-50 dark:bg-purple-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Departemen</CardTitle>
-            <Building className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-200">Total Departemen</CardTitle>
+            <Building className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{departments}</div>
-            <p className="text-xs text-muted-foreground">Jumlah departemen/dinas</p>
+            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{departments}</div>
+            <p className="text-xs text-purple-700 dark:text-purple-300">Jumlah departemen/dinas</p>
           </CardContent>
         </Card>
       </div>
