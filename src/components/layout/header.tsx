@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Menu, User, LogOut, Settings } from "lucide-react";
 import { SidebarNav } from "./sidebar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 const pathToTitle: { [key: string]: string } = {
   '/dashboard': 'Dashboard',
@@ -36,7 +37,12 @@ function getTitle(path: string): string {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const title = getTitle(pathname);
+
+  const handleLogout = () => {
+    router.push('/login');
+  };
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
@@ -69,16 +75,20 @@ export function Header() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Admin</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profil</span>
+          <DropdownMenuItem asChild>
+            <Link href="/pengguna">
+              <User className="mr-2 h-4 w-4" />
+              <span>Profil</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Pengaturan</span>
+          <DropdownMenuItem asChild>
+             <Link href="/pengaturan">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Pengaturan</span>
+             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Keluar</span>
           </DropdownMenuItem>
