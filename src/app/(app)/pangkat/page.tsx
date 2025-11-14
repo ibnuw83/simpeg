@@ -34,13 +34,10 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PangkatForm } from '@/components/forms/pangkat-form';
 
-interface PangkatData extends PangkatGolongan {
-  jumlahPegawai: number;
-}
+interface PangkatData extends PangkatGolongan {}
 
 export default function PangkatPage() {
   const [pangkatList, setPangkatList] = React.useState<PangkatData[]>([]);
-  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>([]);
 
   // Dialog states
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = React.useState(false);
@@ -51,22 +48,8 @@ export default function PangkatPage() {
     const storedData = localStorage.getItem('simpegSmartData');
     const data = storedData ? JSON.parse(storedData) : allData;
     const pangkatGolongan: PangkatGolongan[] = data.pangkatGolongan || [];
-    const pegawai: Pegawai[] = data.pegawai || [];
-
-    setPegawaiList(pegawai);
-
-    const counts: { [key: string]: number } = {};
-    pegawai.forEach(p => {
-      const key = `${p.pangkat}-${p.golongan}`;
-      counts[key] = (counts[key] || 0) + 1;
-    });
-
-    const pangkatData = pangkatGolongan.map(pg => ({
-      ...pg,
-      jumlahPegawai: counts[`${pg.pangkat}-${pg.golongan}`] || 0,
-    }));
     
-    pangkatData.sort((a, b) => {
+    pangkatGolongan.sort((a, b) => {
         if (a.golongan > b.golongan) return -1;
         if (a.golongan < b.golongan) return 1;
         if (a.pangkat > b.pangkat) return -1;
@@ -74,7 +57,7 @@ export default function PangkatPage() {
         return 0;
     });
 
-    setPangkatList(pangkatData);
+    setPangkatList(pangkatGolongan);
   };
 
 
@@ -156,7 +139,6 @@ export default function PangkatPage() {
               <TableRow>
                 <TableHead>Pangkat</TableHead>
                 <TableHead>Golongan</TableHead>
-                <TableHead className="text-right">Jumlah Pegawai</TableHead>
                 <TableHead className="w-[100px] text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -166,7 +148,6 @@ export default function PangkatPage() {
                   <TableRow key={`${item.id}`}>
                     <TableCell className="font-medium">{item.pangkat}</TableCell>
                     <TableCell>{item.golongan}</TableCell>
-                    <TableCell className="text-right">{item.jumlahPegawai}</TableCell>
                     <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -188,7 +169,7 @@ export default function PangkatPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={3} className="h-24 text-center">
                     Tidak ada data.
                   </TableCell>
                 </TableRow>

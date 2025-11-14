@@ -38,13 +38,11 @@ import { DepartmentForm } from '@/components/forms/department-form';
 interface DepartmentData {
   id: string;
   nama: string;
-  jumlahPegawai: number;
 }
 
 export default function DepartemenPage() {
   const [departemenList, setDepartemenList] = React.useState<DepartmentData[]>([]);
-  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>([]);
-
+  
   // Dialog states
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
@@ -54,21 +52,7 @@ export default function DepartemenPage() {
     const storedData = localStorage.getItem('simpegSmartData');
     const data = storedData ? JSON.parse(storedData) : allData;
     const departemen: Departemen[] = data.departemen || [];
-    const pegawai: Pegawai[] = data.pegawai || [];
-
-    setPegawaiList(pegawai);
-
-    const counts: { [key: string]: number } = {};
-    pegawai.forEach(p => {
-      counts[p.departemen] = (counts[p.departemen] || 0) + 1;
-    });
-
-    const departemenData = departemen.map(d => ({
-      ...d,
-      jumlahPegawai: counts[d.nama] || 0,
-    }));
-
-    setDepartemenList(departemenData);
+    setDepartemenList(departemen);
   };
 
 
@@ -149,8 +133,7 @@ export default function DepartemenPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nama Departemen</TableHead>
-                <TableHead className="text-right">Jumlah Pegawai</TableHead>
-                 <TableHead className="w-[100px] text-right">Aksi</TableHead>
+                <TableHead className="w-[100px] text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,7 +141,6 @@ export default function DepartemenPage() {
                 departemenList.map((dep) => (
                   <TableRow key={dep.id}>
                     <TableCell className="font-medium">{dep.nama}</TableCell>
-                    <TableCell className="text-right">{dep.jumlahPegawai}</TableCell>
                      <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -180,7 +162,7 @@ export default function DepartemenPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
+                  <TableCell colSpan={2} className="h-24 text-center">
                     Tidak ada data departemen.
                   </TableCell>
                 </TableRow>
