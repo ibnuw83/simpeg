@@ -10,11 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/pegawai', icon: Users, label: 'Pegawai' },
+  { href: '/departemen', icon: Building, label: 'Departemen' },
+  { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol' },
   { href: '/pengguna', icon: UserCog, label: 'Pengguna' },
   { href: '/analitik', icon: BarChart, label: 'Analitik' },
 ];

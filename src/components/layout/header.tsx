@@ -23,6 +23,8 @@ import Link from "next/link";
 const pathToTitle: { [key: string]: string } = {
   '/dashboard': 'Dashboard',
   '/pegawai': 'Manajemen Pegawai',
+  '/departemen': 'Manajemen Departemen',
+  '/pangkat': 'Manajemen Pangkat & Golongan',
   '/pengguna': 'Manajemen Pengguna',
   '/analitik': 'Analitik & Laporan',
   '/pengaturan': 'Pengaturan',
