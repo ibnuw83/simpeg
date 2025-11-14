@@ -1,6 +1,6 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -236,7 +236,7 @@ const riwayatPensiunDataInitial: RiwayatPensiun[] = [
 ];
 
 const penghargaanDataInitial: Penghargaan[] = [
-    { id: 'pg1', pegawaiId: '5', nama: 'Satyalancana Karya Satya XX Tahun', pemberi: 'Presiden RI', tanggal: new Date('2021-08-17') },
+    { id: 'pg1', pegawaiId: '5', nama: 'Satyalancana Karya Satya XX Tahun', pemberi: 'Presiden RI', tanggal: '2021-08-17' },
 ];
 
 const hukumanDataInitial: Hukuman[] = [];
@@ -263,6 +263,12 @@ const pangkatGolonganDataInitial: PangkatGolongan[] = [
     ...new Map(pegawaiDataInitial.map(p => [`${p.pangkat}-${p.golongan}`, { pangkat: p.pangkat, golongan: p.golongan }])).values()
 ].map((pg, index) => ({ ...pg, id: `pg${index+1}` }));
 
+const appSettingsInitial: AppSettings = {
+    appName: 'Simpeg Smart',
+    logoUrl: '',
+    footerText: '© 2024 Pemerintah Kota'
+}
+
 
 const allDataInitial: AllData = {
     pegawai: pegawaiDataInitial,
@@ -278,6 +284,7 @@ const allDataInitial: AllData = {
     dokumen: dokumenDataInitial,
     departemen: departemenDataInitial,
     pangkatGolongan: pangkatGolonganDataInitial,
+    appSettings: appSettingsInitial,
 };
 
 const APP_DATA_KEY = 'simpegSmartData';

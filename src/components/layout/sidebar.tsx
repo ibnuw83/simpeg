@@ -11,6 +11,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { allData } from '@/lib/data';
+import type { AppSettings } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -30,6 +34,12 @@ const bottomNavItems = [
 
 export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
+  const [settings, setSettings] = useState<AppSettings | null>(null);
+
+  useEffect(() => {
+    const loadedSettings = allData().appSettings;
+    setSettings(loadedSettings);
+  }, []);
 
   const renderNavItems = (items: typeof navItems) => {
     return items.map((item) => {
@@ -80,23 +90,35 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-          <span className="">Simpeg Smart</span>
+          {settings ? (
+              settings.logoUrl ? (
+                <img src={settings.logoUrl} alt="Logo" className="h-6 w-6" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              )
+          ) : <Skeleton className="h-6 w-6 rounded-full" />}
+          
+          <span className="">{settings ? settings.appName : <Skeleton className="h-4 w-24" />}</span>
         </Link>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           <ul className="space-y-1">
             {isMobile ? renderNavItems(navItems) : renderNavItems(navItems)}
           </ul>
         </nav>
       </div>
-      <div className="mt-auto p-4">
-      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-        <ul className="space-y-1">
-        {isMobile ? renderNavItems(bottomNavItems) : renderNavItems(bottomNavItems)}
-        </ul>
-      </nav>
+      <div className="mt-auto p-4 border-t">
+        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+          <ul className="space-y-1">
+            {isMobile ? renderNavItems(bottomNavItems) : renderNavItems(bottomNavItems)}
+          </ul>
+        </nav>
+        {settings?.footerText && (
+            <div className="px-4 pt-4 text-center text-xs text-muted-foreground">
+                {settings.footerText}
+            </div>
+        )}
       </div>
     </div>
   );

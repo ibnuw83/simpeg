@@ -102,28 +102,21 @@ export default function PegawaiDetailPage() {
       if (!id || !type) return;
 
       const currentData = allData();
-      let updatedHistory;
       let toastMessage = '';
 
       switch (type) {
           case 'jabatan':
-              if (historyDialogState.data) { // Update
-                  updatedHistory = currentData.riwayatJabatan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item);
-              } else { // Create
-                  const newRecord: RiwayatJabatan = { ...newData, id: new Date().getTime().toString(), pegawaiId: id };
-                  updatedHistory = [...currentData.riwayatJabatan, newRecord];
-              }
-              updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+              const updatedJabatan = historyDialogState.data
+                  ? currentData.riwayatJabatan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.riwayatJabatan, { ...newData, id: new Date().getTime().toString(), pegawaiId: id }];
+              updateAllData({ ...currentData, riwayatJabatan: updatedJabatan });
               toastMessage = 'Riwayat jabatan';
               break;
           case 'penghargaan':
-                if (historyDialogState.data) { // Update
-                    updatedHistory = currentData.penghargaan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item);
-                } else { // Create
-                    const newRecord: Penghargaan = { ...newData, id: new Date().getTime().toString(), pegawaiId: id };
-                    updatedHistory = [...currentData.penghargaan, newRecord];
-                }
-                updateAllData({ ...currentData, penghargaan: updatedHistory });
+                const updatedPenghargaan = historyDialogState.data
+                    ? currentData.penghargaan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                    : [...currentData.penghargaan, { ...newData, id: new Date().getTime().toString(), pegawaiId: id }];
+                updateAllData({ ...currentData, penghargaan: updatedPenghargaan });
                 toastMessage = 'Riwayat penghargaan';
                 break;
           default:
@@ -140,18 +133,17 @@ export default function PegawaiDetailPage() {
     if (!historyDialogState.type || !historyDialogState.data) return;
     
     const currentData = allData();
-    let updatedHistory;
     let toastMessage = '';
 
     switch (historyDialogState.type) {
         case 'jabatan':
-            updatedHistory = currentData.riwayatJabatan.filter(item => item.id !== historyDialogState.data.id);
-            updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+            const updatedJabatan = currentData.riwayatJabatan.filter(item => item.id !== historyDialogState.data.id);
+            updateAllData({ ...currentData, riwayatJabatan: updatedJabatan });
             toastMessage = 'Riwayat jabatan';
             break;
         case 'penghargaan':
-            updatedHistory = currentData.penghargaan.filter(item => item.id !== historyDialogState.data.id);
-            updateAllData({ ...currentData, penghargaan: updatedHistory });
+            const updatedPenghargaan = currentData.penghargaan.filter(item => item.id !== historyDialogState.data.id);
+            updateAllData({ ...currentData, penghargaan: updatedPenghargaan });
             toastMessage = 'Riwayat penghargaan';
             break;
         default:
@@ -179,7 +171,7 @@ export default function PegawaiDetailPage() {
 
   const openDeleteDialog = (type: DialogState['type'], data: any) => {
     if (['jabatan', 'penghargaan'].includes(type as string)) {
-        setHistoryDialogState({ isOpen: false, type, data });
+        setHistoryDialogState({ isOpen: false, type, data }); // Temporarily store item to be deleted
         setIsDeleteDialogOpen(true);
     } else {
         showNotImplementedToast();
@@ -341,8 +333,8 @@ export default function PegawaiDetailPage() {
                       <TableRow key={item.id}>
                         <TableCell>{item.jabatan}</TableCell>
                         <TableCell>{item.departemen}</TableCell>
-                        <TableCell>{item.tanggalMulai}</TableCell>
-                        <TableCell>{item.tanggalSelesai || 'Sekarang'}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalMulai), 'dd-MM-yyyy')}</TableCell>
+                        <TableCell>{item.tanggalSelesai ? format(new Date(item.tanggalSelesai), 'dd-MM-yyyy') : 'Sekarang'}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -650,7 +642,7 @@ export default function PegawaiDetailPage() {
               <AlertDialogHeader>
               <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
               <AlertDialogDescription>
-                  Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data riwayat secara permanen.
+                  Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data riwayat &quot;{historyDialogState.data?.nama || historyDialogState.data?.jabatan}&quot; secara permanen.
               </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

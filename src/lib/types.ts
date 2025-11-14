@@ -73,7 +73,7 @@ export interface Penghargaan {
     pegawaiId: string;
     nama: string;
     pemberi: string;
-    tanggal: Date;
+    tanggal: string;
 }
 
 export interface Hukuman {
@@ -114,6 +114,12 @@ export interface PangkatGolongan {
   golongan: string;
 }
 
+export interface AppSettings {
+  appName: string;
+  logoUrl: string;
+  footerText: string;
+}
+
 export interface AllData {
   pegawai: Pegawai[];
   pengguna: Pengguna[];
@@ -128,4 +134,5 @@ export interface AllData {
   dokumen: Dokumen[];
   departemen: Departemen[];
   pangkatGolongan: PangkatGolongan[];
+  appSettings: AppSettings;
 }
