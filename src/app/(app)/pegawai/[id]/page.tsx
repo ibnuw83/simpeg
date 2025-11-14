@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle } from 'lucide-react';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon } from 'lucide-react';
 import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -144,16 +144,20 @@ export default function PegawaiDetailPage() {
           </CardHeader>
         </Card>
         
-        <Tabs defaultValue="info">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
-            <TabsTrigger value="info">Info Pribadi</TabsTrigger>
-            <TabsTrigger value="jabatan">Riwayat Jabatan</TabsTrigger>
-            <TabsTrigger value="pangkat">Riwayat Pangkat</TabsTrigger>
-            <TabsTrigger value="cuti">Cuti</TabsTrigger>
-            <TabsTrigger value="dokumen">Dokumen</TabsTrigger>
+        <Tabs defaultValue="pribadi">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
+            <TabsTrigger value="pribadi"><UserIcon className="mr-2 h-4 w-4" />Pribadi</TabsTrigger>
+            <TabsTrigger value="jabatan"><Briefcase className="mr-2 h-4 w-4" />Jabatan</TabsTrigger>
+            <TabsTrigger value="mutasi"><ArrowRightLeft className="mr-2 h-4 w-4" />Mutasi</TabsTrigger>
+            <TabsTrigger value="pendidikan"><GraduationCap className="mr-2 h-4 w-4" />Pendidikan</TabsTrigger>
+            <TabsTrigger value="diklat"><BookOpen className="mr-2 h-4 w-4" />Diklat</TabsTrigger>
+            <TabsTrigger value="cuti"><Cake className="mr-2 h-4 w-4" />Cuti</TabsTrigger>
+            <TabsTrigger value="penghargaan"><Trophy className="mr-2 h-4 w-4" />Penghargaan</TabsTrigger>
+            <TabsTrigger value="hukuman"><Gavel className="mr-2 h-4 w-4" />Hukuman</TabsTrigger>
+            <TabsTrigger value="dokumen"><Download className="mr-2 h-4 w-4" />Dokumen</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="info">
+          <TabsContent value="pribadi">
             <Card>
               <CardHeader>
                 <CardTitle>Informasi Pribadi</CardTitle>
@@ -202,31 +206,72 @@ export default function PegawaiDetailPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="pangkat">
+          <TabsContent value="mutasi">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Riwayat Pangkat</CardTitle>
+                <CardTitle>Riwayat Mutasi</CardTitle>
                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Pangkat</TableHead>
-                      <TableHead>Golongan</TableHead>
-                      <TableHead>Tanggal Kenaikan</TableHead>
+                      <TableHead>Jenis Mutasi</TableHead>
+                      <TableHead>Detail</TableHead>
+                      <TableHead>Tanggal Efektif</TableHead>
+                      <TableHead>No. SK</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {riwayatPangkat.length > 0 ? riwayatPangkat.map(item => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.pangkat}</TableCell>
-                        <TableCell>{item.golongan}</TableCell>
-                        <TableCell>{item.tanggalKenaikan}</TableCell>
-                      </TableRow>
-                    )) : (
-                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
-                    )}
+                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pendidikan">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Pendidikan</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Jenjang</TableHead>
+                      <TableHead>Institusi</TableHead>
+                      <TableHead>Jurusan</TableHead>
+                      <TableHead>Tahun Lulus</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="diklat">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Diklat</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nama Diklat</TableHead>
+                      <TableHead>Penyelenggara</TableHead>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Jumlah Jam</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
                   </TableBody>
                 </Table>
               </CardContent>
@@ -260,6 +305,52 @@ export default function PegawaiDetailPage() {
                     )) : (
                       <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
                     )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="penghargaan">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Penghargaan</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nama Penghargaan</TableHead>
+                      <TableHead>Pemberi</TableHead>
+                      <TableHead>Tanggal</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="hukuman">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Hukuman</CardTitle>
+                <Button size="sm" variant="destructive"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Jenis Hukuman</TableHead>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Keterangan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
                   </TableBody>
                 </Table>
               </CardContent>
@@ -321,3 +412,5 @@ export default function PegawaiDetailPage() {
     </>
   );
 }
+
+    
