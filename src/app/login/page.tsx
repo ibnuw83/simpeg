@@ -18,13 +18,15 @@ import type { AppSettings, Pengguna } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Briefcase } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('admin@simpeg.com');
+  const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -76,22 +78,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <div className="flex items-center gap-2 mb-2">
+        <CardHeader className="text-center">
+          <div className="flex flex-col items-center gap-2 mb-2">
             {settings ? (
               settings.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="h-6 w-6" />
+                <img src={settings.logoUrl} alt="Logo" className="h-8 w-8" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <Briefcase className="h-8 w-8 text-primary" />
               )
-            ) : <Skeleton className="h-6 w-6 rounded-full" />}
-            <span className="text-xl font-semibold">{settings?.appName || <Skeleton className="h-6 w-32" />}</span>
+            ) : <Skeleton className="h-8 w-8 rounded-full" />}
+            <span className="text-2xl font-bold">{settings?.appName || <Skeleton className="h-7 w-36" />}</span>
           </div>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-xl">Login Akun</CardTitle>
           <CardDescription>
-            Masukkan email dan password Anda untuk masuk ke dasbor.
+            Masuk untuk mengakses dasbor kepegawaian Anda.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleFormSubmit}>
@@ -128,6 +130,11 @@ export default function LoginPage() {
             </CardFooter>
         </form>
       </Card>
+      <div className="mt-4 text-center text-sm">
+        <Link href="/" className="underline text-muted-foreground hover:text-primary">
+          Kembali ke halaman utama
+        </Link>
+      </div>
     </div>
   )
 }
