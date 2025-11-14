@@ -1,12 +1,9 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import { notFound } from 'next/navigation';
 import {
-  getCutiByPegawaiId,
-  getDokumenByPegawaiId,
-  getPegawaiById,
-  getRiwayatJabatanByPegawaiId,
-  getRiwayatPangkatByPegawaiId,
+  allData
 } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, CalendarOff, FileText, Download } from 'lucide-react';
-import type { Pegawai } from '@/lib/types';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download } from 'lucide-react';
+import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -27,16 +25,63 @@ function getStatusVariant(status: Pegawai['status']) {
 }
 
 export default function PegawaiDetailPage({ params }: { params: { id: string } }) {
-  const pegawai = getPegawaiById(params.id);
+  const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
+  const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
+  const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
+  const [cuti, setCuti] = useState<Cuti[]>([]);
+  const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
-  if (!pegawai) {
-    notFound();
+  useEffect(() => {
+    // This logic now runs on the client after hydration.
+    const pegawaiData = allData.pegawai.find(p => p.id === params.id);
+    setPegawai(pegawaiData);
+
+    if (pegawaiData) {
+      setRiwayatJabatan(allData.riwayatJabatan.filter(rj => rj.pegawaiId === params.id));
+      setRiwayatPangkat(allData.riwayatPangkat.filter(rp => rp.pegawaiId === params.id));
+      setCuti(allData.cuti.filter(c => c.pegawaiId === params.id));
+      setDokumen(allData.dokumen.filter(d => d.pegawaiId === params.id));
+    } else if (pegawai === undefined) {
+        // If still loading, do nothing yet. Once done, if it's null, notFound will trigger.
+    } else {
+      notFound();
+    }
+  }, [params.id, pegawai]);
+
+  if (pegawai === undefined) {
+    return (
+        <div className="flex flex-col gap-6">
+            <Card>
+                <CardHeader>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <Skeleton className="h-24 w-24 rounded-full" />
+                        <div className="flex-1 space-y-4">
+                             <Skeleton className="h-8 w-1/2" />
+                             <Skeleton className="h-6 w-1/4" />
+                             <Skeleton className="h-6 w-3/4" />
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+            <Skeleton className="h-10 w-full" />
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-8 w-1/3" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-2/3" />
+                </CardContent>
+            </Card>
+        </div>
+    );
   }
 
-  const riwayatJabatan = getRiwayatJabatanByPegawaiId(params.id);
-  const riwayatPangkat = getRiwayatPangkatByPegawaiId(params.id);
-  const cuti = getCutiByPegawaiId(params.id);
-  const dokumen = getDokumenByPegawaiId(params.id);
+  if (!pegawai) {
+    // This will be caught by notFound() in useEffect, but as a fallback:
+    return notFound();
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -202,3 +247,5 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
     </div>
   );
 }
+
+    
