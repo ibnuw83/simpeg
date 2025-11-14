@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi, FeatureSetting } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -301,32 +301,12 @@ const pangkatGolonganDataInitial: PangkatGolongan[] = [
     ...new Map(pegawaiDataInitial.map(p => [`${p.pangkat}-${p.golongan}`, { pangkat: p.pangkat, golongan: p.golongan }])).values()
 ].map((pg, index) => ({ ...pg, id: `pg${index+1}` }));
 
-const featuresInitial: FeatureSetting[] = [
-  {
-    title: 'Manajemen Pegawai',
-    description: 'Kelola data induk pegawai, riwayat jabatan, pangkat, dan pendidikan secara terpusat.',
-  },
-  {
-    title: 'Manajemen Cuti & Absensi',
-    description: 'Proses pengajuan dan persetujuan cuti secara digital. Pantau status kehadiran pegawai.',
-  },
-  {
-    title: 'Mutasi & Promosi',
-    description: 'Fasilitasi proses kenaikan pangkat, promosi jabatan, dan perpindahan unit kerja dengan mudah.',
-  },
-  {
-    title: 'Laporan & Analitik',
-    description: 'Hasilkan berbagai laporan kepegawaian dan lihat statistik penting melalui dasbor interaktif.',
-  },
-];
-
 const appSettingsInitial: AppSettings = {
     appName: 'Simpeg Smart',
     logoUrl: '',
     footerText: '© 2024 Pemerintah Kota',
-    heroTitle: 'Administrasi Kepegawaian<br/><span class="text-primary">Terintegrasi</span>',
+    heroTitle: 'Administrasi Kepegawaian <span class=\'text-primary\'>Terintegrasi</span>',
     heroSubtitle: 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.',
-    features: featuresInitial,
 }
 
 

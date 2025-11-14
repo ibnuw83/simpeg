@@ -8,32 +8,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { allData } from '@/lib/data';
-import type { AppSettings, FeatureSetting } from '@/lib/types';
+import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const featureVisuals = [
-  {
-    icon: <Users className="h-10 w-10 text-blue-500" />,
-    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-    iconBgColor: 'bg-blue-100 dark:bg-blue-900/50',
-  },
-  {
-    icon: <CalendarOff className="h-10 w-10 text-green-500" />,
-    bgColor: 'bg-green-50 dark:bg-green-900/20',
-    iconBgColor: 'bg-green-100 dark:bg-green-900/50',
-  },
-  {
-    icon: <Briefcase className="h-10 w-10 text-purple-500" />,
-    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-    iconBgColor: 'bg-purple-100 dark:bg-purple-900/50',
-  },
-  {
-    icon: <FileText className="h-10 w-10 text-orange-500" />,
-    bgColor: 'bg-orange-50 dark:bg-orange-900/20',
-    iconBgColor: 'bg-orange-100 dark:bg-orange-900/50',
-  },
-];
-
 
 export default function HomePage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -48,12 +24,6 @@ export default function HomePage() {
   const heroTitle = settings?.heroTitle || 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>';
   const heroSubtitle = settings?.heroSubtitle || 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.';
   
-  const features = settings?.features?.map((feature, index) => ({
-    ...feature,
-    ...featureVisuals[index]
-  })) || [];
-
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-grow">
@@ -98,35 +68,6 @@ export default function HomePage() {
                     </Button>
                 </div>
             </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-20 bg-card/50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Fitur Unggulan</h2>
-              <p className="mt-4 text-muted-foreground">
-                Semua yang Anda butuhkan untuk administrasi kepegawaian modern.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {isLoading ? Array(4).fill(0).map((_, index) => (
-                <Card key={index}><CardHeader><Skeleton className="h-10 w-10 mx-auto" /></CardHeader><CardContent><Skeleton className="h-6 w-3/4 mx-auto" /><Skeleton className="h-4 w-full mx-auto mt-2" /><Skeleton className="h-4 w-5/6 mx-auto mt-1" /></CardContent></Card>
-              )) : features.map((feature, index) => (
-                <Card key={index} className={`text-center hover:shadow-lg transition-shadow border-none ${feature.bgColor}`}>
-                  <CardHeader className="items-center">
-                    <div className={`p-4 rounded-full ${feature.iconBgColor}`}>
-                      {feature.icon}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
         </section>
       </main>
 

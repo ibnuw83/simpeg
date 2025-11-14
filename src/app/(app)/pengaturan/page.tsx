@@ -14,18 +14,12 @@ import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 
-const featureSchema = z.object({
-  title: z.string().min(3, { message: 'Judul fitur minimal 3 karakter.' }),
-  description: z.string().min(10, { message: 'Deskripsi fitur minimal 10 karakter.' }),
-});
-
 const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
   logoUrl: z.string().url({ message: 'URL logo tidak valid.' }).or(z.literal('')),
   footerText: z.string().optional(),
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
-  features: z.array(featureSchema).optional(),
 });
 
 export default function PengaturanPage() {
@@ -38,13 +32,7 @@ export default function PengaturanPage() {
       footerText: '',
       heroTitle: '',
       heroSubtitle: '',
-      features: [],
     },
-  });
-
-  const { fields } = useFieldArray({
-    control: form.control,
-    name: "features"
   });
 
   useEffect(() => {
@@ -165,43 +153,6 @@ export default function PengaturanPage() {
                 </FormItem>
               )}
             />
-            
-            <Separator className="my-8" />
-            <h3 className="text-lg font-medium">Pengaturan Fitur Unggulan</h3>
-            <div className="space-y-6">
-              {fields.map((field, index) => (
-                <div key={field.id} className="space-y-4 rounded-md border p-4">
-                  <h4 className="font-medium">Fitur #{index + 1}</h4>
-                   <FormField
-                    control={form.control}
-                    name={`features.${index}.title`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Judul Fitur</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`features.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Deskripsi Fitur</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              ))}
-            </div>
-
 
             <div className="flex justify-end pt-4">
               <Button type="submit">Simpan Perubahan</Button>

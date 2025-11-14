@@ -133,18 +133,12 @@ export interface PangkatGolongan {
   golongan: string;
 }
 
-export interface FeatureSetting {
-  title: string;
-  description: string;
-}
-
 export interface AppSettings {
   appName: string;
   logoUrl: string;
   footerText: string;
   heroTitle?: string;
   heroSubtitle?: string;
-  features?: FeatureSetting[];
 }
 
 export interface AllData {
