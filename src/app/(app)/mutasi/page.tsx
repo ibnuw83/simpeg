@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -5,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRightLeft, ArrowUpCircle, DollarSign, TrendingUp, PlusCircle, TrendingUp as TrendingUpIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { MutationForm, MutationType } from '@/components/forms/mutation-form';
-import { allData, updateAllData } from '@/lib/data';
+import { MutationForm } from '@/components/forms/mutation-form';
+import { allData, getAuthenticatedUser, updateAllData } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import type { RiwayatMutasi } from '@/lib/types';
+import type { RiwayatMutasi, Pengguna } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 const processModules: { title: string; icon: React.ElementType; color: string; bgColor: string, type: MutationType }[] = [
     {
@@ -43,9 +45,20 @@ const processModules: { title: string; icon: React.ElementType; color: string; b
 
 
 export default function MutasiPage() {
+    const router = useRouter();
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedModule, setSelectedModule] = React.useState<(typeof processModules)[0] | null>(null);
+    const [currentUser, setCurrentUser] = React.useState<Pengguna | null>(null);
     const { toast } = useToast();
+
+    React.useEffect(() => {
+        const user = getAuthenticatedUser();
+        if (user?.role !== 'Admin') {
+            router.replace('/dashboard');
+            return;
+        }
+        setCurrentUser(user);
+    }, [router]);
 
     const handleOpenDialog = (module: (typeof processModules)[0]) => {
         setSelectedModule(module);
@@ -105,6 +118,11 @@ export default function MutasiPage() {
         });
         handleCloseDialog();
     }
+    
+  if (!currentUser) {
+    return null; // Or a loading spinner
+  }
+
 
   return (
     <>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -26,8 +27,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { allData } from '@/lib/data';
+import { allData, getAuthenticatedUser } from '@/lib/data';
 import { Textarea } from '../ui/textarea';
+import { useMemo } from 'react';
+import type { Pegawai } from '@/lib/types';
 
 export type MutationType = 'perpindahan' | 'promosi' | 'gaji' | 'pangkat';
 
@@ -87,7 +90,17 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
     }
   });
 
-  const { pegawai, departemen, pangkatGolongan } = allData();
+  const { departemen, pangkatGolongan } = allData();
+  const currentUser = getAuthenticatedUser();
+
+  const employeeList: Pegawai[] = useMemo(() => {
+    const allPegawai = allData().pegawai;
+    if (currentUser?.role === 'Admin') {
+      return allPegawai;
+    }
+    return allPegawai.filter(p => p.id === currentUser?.pegawaiId);
+  }, [currentUser]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const dataToSave = {
@@ -209,7 +222,7 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {pegawai.map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.nip})</SelectItem>)}
+                  {employeeList.map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.nip})</SelectItem>)}
                 </SelectContent>
               </Select>
               <FormMessage />
