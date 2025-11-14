@@ -7,17 +7,75 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building, Bell } from "lucide-react";
+import { Users, UserCheck, UserX, Building, Bell, CheckCircle } from "lucide-react";
 import { pegawaiData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { add, format, differenceInYears } from 'date-fns';
+import { add, format, differenceInYears, differenceInCalendarYears } from 'date-fns';
 import type { Pegawai } from "@/lib/types";
 
 const RETIREMENT_AGE = 58;
+
+const UpcomingSalaryIncrease = ({ data }: { data: Pegawai[] }) => {
+    const [upcomingIncreases, setUpcomingIncreases] = useState<any[]>([]);
+
+    useEffect(() => {
+        const today = new Date();
+        const oneYearFromNow = add(today, { years: 1 });
+
+        const increases = data
+            .filter(p => p.status === 'Aktif' && p.tanggalMasuk)
+            .map(p => {
+                const startDate = new Date(p.tanggalMasuk);
+                const yearsOfService = differenceInCalendarYears(today, startDate);
+                const nextIncreaseYear = Math.floor((yearsOfService / 2) + 1) * 2;
+                const nextIncreaseDate = add(startDate, { years: nextIncreaseYear });
+                return { ...p, nextIncreaseDate };
+            })
+            .filter(p => p.nextIncreaseDate > today && p.nextIncreaseDate <= oneYearFromNow)
+            .sort((a, b) => a.nextIncreaseDate.getTime() - b.nextIncreaseDate.getTime());
+            
+        setUpcomingIncreases(increases);
+    }, [data]);
+
+    if (upcomingIncreases.length === 0) {
+        return null; // Don't render the card if there are no upcoming increases
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <div className="flex items-center gap-4">
+                    <Bell className="h-6 w-6" />
+                    <div>
+                        <CardTitle>Notifikasi Penting</CardTitle>
+                        <CardDescription>Pengingat terkait kepegawaian yang akan datang.</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+                {upcomingIncreases.map(pegawai => (
+                    <div key={pegawai.id} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
+                           <CheckCircle className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-semibold">Kenaikan Gaji Berkala - {pegawai.name}</p>
+                            <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(pegawai.nextIncreaseDate, 'dd MMM yyyy')}</p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/pegawai/${pegawai.id}`}>Lihat Detail</Link>
+                        </Button>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+    );
+};
+
 
 const UpcomingRetirements = ({ data }: { data: Pegawai[] }) => {
   const [upcomingRetirements, setUpcomingRetirements] = useState<any[]>([]);
@@ -99,6 +157,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+       <UpcomingSalaryIncrease data={data} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
