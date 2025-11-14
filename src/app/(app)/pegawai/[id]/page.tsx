@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import {
   allData
@@ -11,9 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download } from 'lucide-react';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Sparkles, Loader2 } from 'lucide-react';
 import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { generateEmployeeSummary } from '@/ai/flows/generate-employee-summary';
+import { Textarea } from '@/components/ui/textarea';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -27,17 +30,19 @@ function getStatusVariant(status: Pegawai['status']) {
 export default function PegawaiDetailPage() {
   const params = useParams();
   const id = typeof params.id === 'string' ? params.id : null;
+  const { toast } = useToast();
+  const [isPendingSummary, startTransitionSummary] = useTransition();
 
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
   const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
   const [cuti, setCuti] = useState<Cuti[]>([]);
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
+  const [summary, setSummary] = useState<string | null>(null);
   
   useEffect(() => {
     if (!id) return;
 
-    // This logic now runs on the client after hydration.
     const pegawaiData = allData.pegawai.find(p => p.id === id);
     setPegawai(pegawaiData ?? null);
 
@@ -54,6 +59,36 @@ export default function PegawaiDetailPage() {
       notFound();
     }
   }, [pegawai]);
+
+  const handleGenerateSummary = () => {
+    if (!pegawai) return;
+
+    startTransitionSummary(async () => {
+        setSummary(null);
+        try {
+            const allPegawaiData = {
+                ...pegawai,
+                riwayatJabatan,
+                riwayatPangkat,
+                cuti,
+                dokumen
+            };
+            const result = await generateEmployeeSummary({ employeeData: JSON.stringify(allPegawaiData, null, 2) });
+            if (result.summary) {
+                setSummary(result.summary);
+            } else {
+                throw new Error("Gagal membuat ringkasan.");
+            }
+        } catch (error) {
+            console.error("Error generating summary:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Gagal Membuat Ringkasan',
+                description: 'Terjadi kesalahan saat berkomunikasi dengan AI. Silakan coba lagi.'
+            });
+        }
+    });
+  };
 
 
   if (pegawai === undefined) {
@@ -114,6 +149,43 @@ export default function PegawaiDetailPage() {
             </div>
           </div>
         </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+            <CardTitle>Ringkasan Pegawai Berbasis AI</CardTitle>
+            <CardDescription>Buat ringkasan singkat dari data lengkap pegawai menggunakan AI.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Button onClick={handleGenerateSummary} disabled={isPendingSummary}>
+                {isPendingSummary ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Membuat Ringkasan...
+                    </>
+                ) : (
+                    <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Buat Ringkasan AI
+                    </>
+                )}
+            </Button>
+
+            {(isPendingSummary || summary) && (
+                <div className="mt-4">
+                    <Label htmlFor="summary">Hasil Ringkasan</Label>
+                    {isPendingSummary ? (
+                         <div className="space-y-2 mt-2">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
+                    ) : (
+                        <Textarea id="summary" readOnly value={summary ?? ""} className="mt-2 h-32 bg-secondary" />
+                    )}
+                </div>
+            )}
+        </CardContent>
       </Card>
       
       <Tabs defaultValue="info">

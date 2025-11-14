@@ -12,6 +12,7 @@ import { pegawaiData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
+import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
 
 export default function DashboardPage() {
   const [data, setData] = useState(pegawaiData);
@@ -72,6 +73,12 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+       <div className="grid gap-6 md:grid-cols-2">
+        <StatusChart data={data} />
+        <DepartmentChart data={data} />
+      </div>
+
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
