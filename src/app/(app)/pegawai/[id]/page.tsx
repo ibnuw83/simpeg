@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon, MoreHorizontal } from 'lucide-react';
-import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman } from '@/lib/types';
+import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatMutasi } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -23,6 +23,11 @@ import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
 import { useToast } from '@/hooks/use-toast';
 import { HistoryForm } from '@/components/forms/history-form';
 import { AwardForm } from '@/components/forms/award-form';
+import { EducationForm } from '@/components/forms/education-form';
+import { TrainingForm } from '@/components/forms/training-form';
+import { LeaveForm } from '@/components/forms/leave-form';
+import { PunishmentForm } from '@/components/forms/punishment-form';
+import { DocumentForm } from '@/components/forms/document-form';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -45,7 +50,7 @@ export default function PegawaiDetailPage() {
   
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
-  const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
+  const [riwayatMutasi, setRiwayatMutasi] = useState<RiwayatMutasi[]>([]);
   const [riwayatPendidikan, setRiwayatPendidikan] = useState<RiwayatPendidikan[]>([]);
   const [riwayatDiklat, setRiwayatDiklat] = useState<RiwayatDiklat[]>([]);
   const [cuti, setCuti] = useState<Cuti[]>([]);
@@ -53,7 +58,6 @@ export default function PegawaiDetailPage() {
   const [hukuman, setHukuman] = useState<Hukuman[]>([]);
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
-  // Dialog States
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [historyDialogState, setHistoryDialogState] = useState<DialogState>({ isOpen: false, type: null, data: null });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -69,7 +73,7 @@ export default function PegawaiDetailPage() {
 
     if (pegawaiData) {
       setRiwayatJabatan(data.riwayatJabatan.filter(rj => rj.pegawaiId === id));
-      setRiwayatPangkat(data.riwayatPangkat.filter(rp => rp.pegawaiId === id));
+      setRiwayatMutasi(data.riwayatMutasi.filter(rm => rm.pegawaiId === id));
       setRiwayatPendidikan(data.riwayatPendidikan.filter(rp => rp.pegawaiId === id));
       setRiwayatDiklat(data.riwayatDiklat.filter(rd => rd.pegawaiId === id));
       setCuti(data.cuti.filter(c => c.pegawaiId === id));
@@ -103,22 +107,60 @@ export default function PegawaiDetailPage() {
 
       const currentData = allData();
       let toastMessage = '';
+      const isEditing = !!historyDialogState.data;
+
+      const generateId = () => new Date().getTime().toString();
 
       switch (type) {
           case 'jabatan':
-              const updatedJabatan = historyDialogState.data
+              const updatedJabatan = isEditing
                   ? currentData.riwayatJabatan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
-                  : [...currentData.riwayatJabatan, { ...newData, id: new Date().getTime().toString(), pegawaiId: id }];
+                  : [...currentData.riwayatJabatan, { ...newData, id: generateId(), pegawaiId: id }];
               updateAllData({ ...currentData, riwayatJabatan: updatedJabatan });
               toastMessage = 'Riwayat jabatan';
               break;
           case 'penghargaan':
-                const updatedPenghargaan = historyDialogState.data
-                    ? currentData.penghargaan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
-                    : [...currentData.penghargaan, { ...newData, id: new Date().getTime().toString(), pegawaiId: id }];
-                updateAllData({ ...currentData, penghargaan: updatedPenghargaan });
-                toastMessage = 'Riwayat penghargaan';
-                break;
+              const updatedPenghargaan = isEditing
+                  ? currentData.penghargaan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.penghargaan, { ...newData, id: generateId(), pegawaiId: id }];
+              updateAllData({ ...currentData, penghargaan: updatedPenghargaan });
+              toastMessage = 'Riwayat penghargaan';
+              break;
+          case 'pendidikan':
+              const updatedPendidikan = isEditing
+                  ? currentData.riwayatPendidikan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.riwayatPendidikan, { ...newData, id: generateId(), pegawaiId: id }];
+              updateAllData({ ...currentData, riwayatPendidikan: updatedPendidikan });
+              toastMessage = 'Riwayat pendidikan';
+              break;
+          case 'diklat':
+              const updatedDiklat = isEditing
+                  ? currentData.riwayatDiklat.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.riwayatDiklat, { ...newData, id: generateId(), pegawaiId: id }];
+              updateAllData({ ...currentData, riwayatDiklat: updatedDiklat });
+              toastMessage = 'Riwayat diklat';
+              break;
+          case 'cuti':
+              const updatedCuti = isEditing
+                  ? currentData.cuti.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.cuti, { ...newData, id: generateId(), pegawaiId: id }];
+              updateAllData({ ...currentData, cuti: updatedCuti });
+              toastMessage = 'Riwayat cuti';
+              break;
+          case 'hukuman':
+              const updatedHukuman = isEditing
+                  ? currentData.hukuman.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.hukuman, { ...newData, id: generateId(), pegawaiId: id }];
+              updateAllData({ ...currentData, hukuman: updatedHukuman });
+              toastMessage = 'Riwayat hukuman';
+              break;
+          case 'dokumen':
+              const updatedDokumen = isEditing
+                  ? currentData.dokumen.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item)
+                  : [...currentData.dokumen, { ...newData, id: generateId(), pegawaiId: id, fileUrl: '#' }];
+              updateAllData({ ...currentData, dokumen: updatedDokumen });
+              toastMessage = 'Dokumen';
+              break;
           default:
               showNotImplementedToast();
               return;
@@ -126,7 +168,7 @@ export default function PegawaiDetailPage() {
       
       loadData();
       closeHistoryDialog();
-      toast({ title: 'Sukses', description: `${toastMessage} berhasil ${historyDialogState.data ? 'diperbarui' : 'ditambahkan'}.` });
+      toast({ title: 'Sukses', description: `${toastMessage} berhasil ${isEditing ? 'diperbarui' : 'ditambahkan'}.` });
   };
 
   const handleDeleteHistory = () => {
@@ -134,17 +176,36 @@ export default function PegawaiDetailPage() {
     
     const currentData = allData();
     let toastMessage = '';
+    const idToDelete = historyDialogState.data.id;
 
     switch (historyDialogState.type) {
         case 'jabatan':
-            const updatedJabatan = currentData.riwayatJabatan.filter(item => item.id !== historyDialogState.data.id);
-            updateAllData({ ...currentData, riwayatJabatan: updatedJabatan });
+            updateAllData({ ...currentData, riwayatJabatan: currentData.riwayatJabatan.filter(item => item.id !== idToDelete) });
             toastMessage = 'Riwayat jabatan';
             break;
         case 'penghargaan':
-            const updatedPenghargaan = currentData.penghargaan.filter(item => item.id !== historyDialogState.data.id);
-            updateAllData({ ...currentData, penghargaan: updatedPenghargaan });
+            updateAllData({ ...currentData, penghargaan: currentData.penghargaan.filter(item => item.id !== idToDelete) });
             toastMessage = 'Riwayat penghargaan';
+            break;
+        case 'pendidikan':
+            updateAllData({ ...currentData, riwayatPendidikan: currentData.riwayatPendidikan.filter(item => item.id !== idToDelete) });
+            toastMessage = 'Riwayat pendidikan';
+            break;
+        case 'diklat':
+            updateAllData({ ...currentData, riwayatDiklat: currentData.riwayatDiklat.filter(item => item.id !== idToDelete) });
+            toastMessage = 'Riwayat diklat';
+            break;
+        case 'cuti':
+            updateAllData({ ...currentData, cuti: currentData.cuti.filter(item => item.id !== idToDelete) });
+            toastMessage = 'Riwayat cuti';
+            break;
+        case 'hukuman':
+            updateAllData({ ...currentData, hukuman: currentData.hukuman.filter(item => item.id !== idToDelete) });
+            toastMessage = 'Riwayat hukuman';
+            break;
+        case 'dokumen':
+            updateAllData({ ...currentData, dokumen: currentData.dokumen.filter(item => item.id !== idToDelete) });
+            toastMessage = 'Dokumen';
             break;
         default:
             showNotImplementedToast();
@@ -152,17 +213,12 @@ export default function PegawaiDetailPage() {
     }
 
     loadData();
-    setIsDeleteDialogOpen(false);
-    setHistoryDialogState({ isOpen: false, type: null, data: null });
+    closeDeleteDialog();
     toast({ title: 'Sukses', description: `${toastMessage} berhasil dihapus.` });
   }
 
   const openHistoryDialog = (type: DialogState['type'], data: any | null = null) => {
-    if (['jabatan', 'penghargaan'].includes(type as string)) {
-        setHistoryDialogState({ isOpen: true, type, data });
-    } else {
-        showNotImplementedToast();
-    }
+    setHistoryDialogState({ isOpen: true, type, data });
   }
 
   const closeHistoryDialog = () => {
@@ -170,19 +226,14 @@ export default function PegawaiDetailPage() {
   }
 
   const openDeleteDialog = (type: DialogState['type'], data: any) => {
-    if (['jabatan', 'penghargaan'].includes(type as string)) {
-        setHistoryDialogState({ isOpen: false, type, data }); // Temporarily store item to be deleted
-        setIsDeleteDialogOpen(true);
-    } else {
-        showNotImplementedToast();
-    }
+      setHistoryDialogState({ isOpen: false, type, data }); 
+      setIsDeleteDialogOpen(true);
   }
 
   const closeDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setHistoryDialogState({ isOpen: false, type: null, data: null });
   }
-
 
   const showNotImplementedToast = () => {
     toast({
@@ -198,6 +249,16 @@ export default function PegawaiDetailPage() {
               return <HistoryForm onSave={(data) => handleSaveHistory('jabatan', data)} historyData={historyDialogState.data} onCancel={closeHistoryDialog} />;
           case 'penghargaan':
               return <AwardForm onSave={(data) => handleSaveHistory('penghargaan', data)} awardData={historyDialogState.data} onCancel={closeHistoryDialog} />;
+          case 'pendidikan':
+              return <EducationForm onSave={(data) => handleSaveHistory('pendidikan', data)} educationData={historyDialogState.data} onCancel={closeHistoryDialog} />;
+          case 'diklat':
+              return <TrainingForm onSave={(data) => handleSaveHistory('diklat', data)} trainingData={historyDialogState.data} onCancel={closeHistoryDialog} />;
+          case 'cuti':
+              return <LeaveForm onSave={(data) => handleSaveHistory('cuti', data)} leaveData={historyDialogState.data} onCancel={closeHistoryDialog} />;
+          case 'hukuman':
+              return <PunishmentForm onSave={(data) => handleSaveHistory('hukuman', data)} punishmentData={historyDialogState.data} onCancel={closeHistoryDialog} />;
+          case 'dokumen':
+              return <DocumentForm onSave={(data) => handleSaveHistory('dokumen', data)} documentData={historyDialogState.data} onCancel={closeHistoryDialog} />;
           default:
               return null;
       }
@@ -213,9 +274,24 @@ export default function PegawaiDetailPage() {
           diklat: 'Riwayat Diklat',
           hukuman: 'Riwayat Hukuman',
           dokumen: 'Dokumen',
-          cuti: 'Cuti'
+          cuti: 'Riwayat Cuti'
       };
       return `${action} ${titles[historyDialogState.type]}`;
+  }
+
+  const getDeleteDescription = () => {
+      if (!historyDialogState.type || !historyDialogState.data) return '';
+      const data = historyDialogState.data;
+      const descriptions = {
+          jabatan: `riwayat jabatan "${data.jabatan}"`,
+          penghargaan: `riwayat penghargaan "${data.nama}"`,
+          pendidikan: `riwayat pendidikan "${data.jenjang} di ${data.institusi}"`,
+          diklat: `riwayat diklat "${data.nama}"`,
+          cuti: `riwayat cuti "${data.jenisCuti} pada ${data.tanggalMulai}"`,
+          hukuman: `riwayat hukuman "${data.jenis}"`,
+          dokumen: `dokumen "${data.namaDokumen}"`,
+      };
+      return `Tindakan ini tidak dapat dibatalkan. Ini akan menghapus ${descriptions[historyDialogState.type] || 'data ini'} secara permanen.`;
   }
 
   if (pegawai === undefined) {
@@ -373,7 +449,16 @@ export default function PegawaiDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {riwayatMutasi.length > 0 ? riwayatMutasi.map(item => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.jenisMutasi}</TableCell>
+                        <TableCell>{item.keterangan}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalEfektif), 'dd-MM-yyyy')}</TableCell>
+                        <TableCell>{item.nomorSK}</TableCell>
+                      </TableRow>
+                    )) : (
                       <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -405,7 +490,13 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.jurusan}</TableCell>
                           <TableCell>{item.tahunLulus}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('pendidikan', item)}><MoreHorizontal className="h-4 w-4" /></Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => openHistoryDialog('pendidikan', item)}>Ubah</DropdownMenuItem>
+                                        <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('pendidikan', item)}>Hapus</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -442,7 +533,13 @@ export default function PegawaiDetailPage() {
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.jumlahJam}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('diklat', item)}><MoreHorizontal className="h-4 w-4" /></Button>
+                               <DropdownMenu>
+                                    <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => openHistoryDialog('diklat', item)}>Ubah</DropdownMenuItem>
+                                        <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('diklat', item)}>Hapus</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -465,21 +562,27 @@ export default function PegawaiDetailPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Jenis Cuti</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Keterangan</TableHead>
+                      <TableHead>Tanggal Mulai</TableHead>
+                      <TableHead>Tanggal Selesai</TableHead>
                       <TableHead>Status</TableHead>
-                       <TableHead className="text-right">Aksi</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {cuti.length > 0 ? cuti.map(item => (
                       <TableRow key={item.id}>
                         <TableCell>{item.jenisCuti}</TableCell>
-                        <TableCell>{item.tanggalMulai} - {item.tanggalSelesai}</TableCell>
-                        <TableCell>{item.keterangan}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalMulai), 'dd-MM-yyyy')}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalSelesai), 'dd-MM-yyyy')}</TableCell>
                         <TableCell><Badge variant="outline">{item.status}</Badge></TableCell>
                         <TableCell className="text-right">
-                            <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('cuti', item)}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => openHistoryDialog('cuti', item)}>Ubah</DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('cuti', item)}>Hapus</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     )) : (
@@ -557,7 +660,13 @@ export default function PegawaiDetailPage() {
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.keterangan}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('hukuman', item)}><MoreHorizontal className="h-4 w-4" /></Button>
+                               <DropdownMenu>
+                                    <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => openHistoryDialog('hukuman', item)}>Ubah</DropdownMenuItem>
+                                        <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('hukuman', item)}>Hapus</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -590,12 +699,18 @@ export default function PegawaiDetailPage() {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.namaDokumen}</TableCell>
                         <TableCell><Badge variant="secondary">{item.jenisDokumen}</Badge></TableCell>
-                        <TableCell>{item.tanggalUnggah}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalUnggah), 'dd-MM-yyyy')}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" asChild>
                             <a href={item.fileUrl} download><Download className="h-4 w-4" /></a>
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('dokumen', item)}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => openHistoryDialog('dokumen', item)}>Ubah</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('dokumen', item)}>Hapus</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     )) : (
@@ -642,7 +757,7 @@ export default function PegawaiDetailPage() {
               <AlertDialogHeader>
               <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
               <AlertDialogDescription>
-                  Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data riwayat &quot;{historyDialogState.data?.nama || historyDialogState.data?.jabatan}&quot; secara permanen.
+                {getDeleteDescription()}
               </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -56,7 +56,7 @@ export interface RiwayatDiklat {
     pegawaiId: string;
     nama: string;
     penyelenggara: string;
-    tanggal: Date;
+    tanggal: string;
     jumlahJam: number;
 }
 
@@ -66,6 +66,15 @@ export interface RiwayatPensiun {
     tanggalPensiun: string;
     keterangan: string;
     nomorSK: string;
+}
+
+export interface RiwayatMutasi {
+  id: string;
+  pegawaiId: string;
+  jenisMutasi: 'Perpindahan' | 'Promosi' | 'Gaji' | 'Pangkat';
+  keterangan: string;
+  tanggalEfektif: string;
+  nomorSK: string;
 }
 
 export interface Penghargaan {
@@ -79,9 +88,9 @@ export interface Penghargaan {
 export interface Hukuman {
     id: string;
     pegawaiId: string;
-    jenis: string;
+    jenis: 'Ringan' | 'Sedang' | 'Berat';
     keterangan: string;
-    tanggal: Date;
+    tanggal: string;
 }
 
 export interface Cuti {
@@ -128,6 +137,7 @@ export interface AllData {
   riwayatPendidikan: RiwayatPendidikan[];
   riwayatDiklat: RiwayatDiklat[];
   riwayatPensiun: RiwayatPensiun[];
+  riwayatMutasi: RiwayatMutasi[];
   penghargaan: Penghargaan[];
   hukuman: Hukuman[];
   cuti: Cuti[];

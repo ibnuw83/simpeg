@@ -1,6 +1,6 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -228,12 +228,14 @@ const riwayatPendidikanDataInitial: RiwayatPendidikan[] = [
 ];
 
 const riwayatDiklatDataInitial: RiwayatDiklat[] = [
-    { id: 'dk1', pegawaiId: '1', nama: 'Diklat PIM IV', penyelenggara: 'Lembaga Administrasi Negara', tanggal: new Date('2019-10-01'), jumlahJam: 72 },
+    { id: 'dk1', pegawaiId: '1', nama: 'Diklat PIM IV', penyelenggara: 'Lembaga Administrasi Negara', tanggal: '2019-10-01', jumlahJam: 72 },
 ];
 
 const riwayatPensiunDataInitial: RiwayatPensiun[] = [
     { id: 'pen1', pegawaiId: '10', tanggalPensiun: '2024-12-25', keterangan: 'Pensiun normal', nomorSK: 'SK-PEN-2024-001' }
 ];
+
+const riwayatMutasiDataInitial: RiwayatMutasi[] = [];
 
 const penghargaanDataInitial: Penghargaan[] = [
     { id: 'pg1', pegawaiId: '5', nama: 'Satyalancana Karya Satya XX Tahun', pemberi: 'Presiden RI', tanggal: '2021-08-17' },
@@ -278,6 +280,7 @@ const allDataInitial: AllData = {
     riwayatPendidikan: riwayatPendidikanDataInitial,
     riwayatDiklat: riwayatDiklatDataInitial,
     riwayatPensiun: riwayatPensiunDataInitial,
+    riwayatMutasi: riwayatMutasiDataInitial,
     penghargaan: penghargaanDataInitial,
     hukuman: hukumanDataInitial,
     cuti: cutiDataInitial,
@@ -299,7 +302,7 @@ function getInitialData(): AllData {
                 const initialKeys = Object.keys(allDataInitial) as (keyof AllData)[];
                 let needsUpdate = false;
                 for (const key of initialKeys) {
-                    if (!parsedData[key]) {
+                    if (!(key in parsedData)) {
                         (parsedData[key] as any) = allDataInitial[key];
                         needsUpdate = true;
                     }
