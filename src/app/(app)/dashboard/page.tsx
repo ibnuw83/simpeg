@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Users, UserCheck, UserX, Building, Bell, CheckCircle } from "lucide-react";
-import { pegawaiData } from "@/lib/data";
+import { allData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { add, format, differenceInYears, differenceInCalendarYears } from 'date-fns';
 import type { Pegawai } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const RETIREMENT_AGE = 58;
 
@@ -141,12 +142,14 @@ const UpcomingRetirements = ({ data }: { data: Pegawai[] }) => {
 
 
 export default function DashboardPage() {
-  const [data, setData] = useState(pegawaiData);
+  const [data, setData] = useState<Pegawai[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // This will run on the client after hydration
     // and ensure we have the latest data from localStorage
-    setData(pegawaiData);
+    setData(allData().pegawai);
+    setIsLoading(false);
   }, []);
 
   const totalPegawai = data.length;
@@ -154,6 +157,24 @@ export default function DashboardPage() {
   const pegawaiCuti = data.filter(p => p.status === 'Cuti').length;
   const departments = [...new Set(data.map(p => p.departemen))].length;
   const recentHires = data.slice(0, 5);
+
+  if (isLoading) {
+    return (
+        <div className="flex flex-col gap-6">
+            <Skeleton className="h-32 w-full" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+            </div>
+             <div className="grid gap-6 md:grid-cols-2">
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
+            </div>
+        </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">
