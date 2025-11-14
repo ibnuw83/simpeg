@@ -30,7 +30,7 @@ export default function HomePage() {
       <main className="flex-grow">
         
         {settings?.runningText && (
-          <div className="bg-secondary text-secondary-foreground overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+          <div className="bg-green-100 dark:bg-green-900/50 text-green-900 dark:text-green-100 overflow-hidden whitespace-nowrap relative h-10 flex items-center">
             <div className="marquee-text inline-block pl-[100%]">
               {settings.runningText}
             </div>
