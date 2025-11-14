@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -7,7 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift } from "lucide-react";
+import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp } from "lucide-react";
 import { allData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -19,49 +20,103 @@ import type { Pegawai } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const RETIREMENT_AGE = 58;
+const SALARY_INCREASE_INTERVAL = 2; // years
+const PROMOTION_INTERVAL = 4; // years
 
 const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
-    const [upcomingIncreases, setUpcomingIncreases] = useState<any[]>([]);
-    const [upcomingRetirements, setUpcomingRetirements] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<any[]>([]);
 
     useEffect(() => {
         const today = new Date();
         const oneYearFromNow = add(today, { years: 1 });
 
+        const activeEmployees = data.filter(p => p.status === 'Aktif');
+
         // Salary Increases
-        const increases = data
-            .filter(p => p.status === 'Aktif' && p.tanggalMasuk)
+        const salaryIncreases = activeEmployees
+            .filter(p => p.tanggalMasuk)
             .map(p => {
                 const startDate = new Date(p.tanggalMasuk);
                 const yearsOfService = differenceInCalendarYears(today, startDate);
-                const nextIncreaseYear = Math.floor((yearsOfService / 2) + 1) * 2;
+                const nextIncreaseYear = Math.floor((yearsOfService / SALARY_INCREASE_INTERVAL) + 1) * SALARY_INCREASE_INTERVAL;
                 const nextIncreaseDate = add(startDate, { years: nextIncreaseYear });
-                return { ...p, nextIncreaseDate, notificationType: 'Kenaikan Gaji' };
+                return { ...p, effectiveDate: nextIncreaseDate, notificationType: 'Kenaikan Gaji Berkala' };
             })
-            .filter(p => p.nextIncreaseDate > today && p.nextIncreaseDate <= oneYearFromNow);
+            .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
+
+        // Promotions
+        const promotions = activeEmployees
+            .filter(p => p.tanggalMasuk)
+            .map(p => {
+                const startDate = new Date(p.tanggalMasuk);
+                const yearsOfService = differenceInCalendarYears(today, startDate);
+                const nextPromotionYear = Math.floor((yearsOfService / PROMOTION_INTERVAL) + 1) * PROMOTION_INTERVAL;
+                const nextPromotionDate = add(startDate, { years: nextPromotionYear });
+                return { ...p, effectiveDate: nextPromotionDate, notificationType: 'Kenaikan Pangkat Reguler' };
+            })
+            .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
         // Retirements
-        const retirements = data
-            .filter(p => p.status === 'Aktif' && p.tanggalLahir)
+        const retirements = activeEmployees
+            .filter(p => p.tanggalLahir)
             .map(p => {
                 const birthDate = new Date(p.tanggalLahir);
                 const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
-                return { ...p, retirementDate, notificationType: 'Pensiun' };
+                return { ...p, effectiveDate: retirementDate, notificationType: 'Pensiun' };
             })
-            .filter(p => p.retirementDate > today && p.retirementDate <= oneYearFromNow);
+            .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
         const allNotifications = [
-            ...increases.map(p => ({...p, effectiveDate: p.nextIncreaseDate})),
-            ...retirements.map(p => ({...p, effectiveDate: p.retirementDate}))
+            ...salaryIncreases,
+            ...promotions,
+            ...retirements
         ].sort((a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime());
             
-        setUpcomingIncreases(allNotifications.filter(n => n.notificationType === 'Kenaikan Gaji'));
-        setUpcomingRetirements(allNotifications.filter(n => n.notificationType === 'Pensiun'));
+        setNotifications(allNotifications);
 
     }, [data]);
 
-    if (upcomingIncreases.length === 0 && upcomingRetirements.length === 0) {
-        return null; // Don't render if no notifications
+    const renderNotificationItem = (item: any) => {
+        let icon;
+        let title;
+        let colorClass;
+
+        switch (item.notificationType) {
+            case 'Kenaikan Gaji Berkala':
+                icon = <CheckCircle className="h-6 w-6 text-primary" />;
+                title = `Kenaikan Gaji Berkala - ${item.name}`;
+                break;
+            case 'Kenaikan Pangkat Reguler':
+                icon = <TrendingUp className="h-6 w-6 text-green-500" />;
+                title = `Kenaikan Pangkat Reguler - ${item.name}`;
+                break;
+            case 'Pensiun':
+                icon = <Gift className="h-6 w-6 text-orange-500" />;
+                title = `Pensiun - ${item.name}`;
+                break;
+            default:
+                return null;
+        }
+
+        return (
+             <div key={`${item.notificationType}-${item.id}`} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
+                    {icon}
+                </div>
+                <div className="flex-1">
+                    <p className="font-semibold">{title}</p>
+                    <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(item.effectiveDate, 'dd MMM yyyy')}</p>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={`/pegawai/${item.id}`}>Lihat Detail</Link>
+                </Button>
+            </div>
+        )
+    };
+
+
+    if (notifications.length === 0) {
+        return null;
     }
 
     return (
@@ -76,102 +131,11 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
                 </div>
             </CardHeader>
             <CardContent className="space-y-2">
-                {upcomingIncreases.map(pegawai => (
-                    <div key={`increase-${pegawai.id}`} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
-                           <CheckCircle className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold">Kenaikan Gaji Berkala - {pegawai.name}</p>
-                            <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(pegawai.nextIncreaseDate, 'dd MMM yyyy')}</p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/pegawai/${pegawai.id}`}>Lihat Detail</Link>
-                        </Button>
-                    </div>
-                ))}
-                {upcomingRetirements.map(pegawai => (
-                    <div key={`retire-${pegawai.id}`} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
-                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-background">
-                           <Gift className="h-6 w-6 text-orange-500" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold">Pensiun - {pegawai.name}</p>
-                            <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(pegawai.retirementDate, 'dd MMM yyyy')}</p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/pegawai/${pegawai.id}`}>Lihat Detail</Link>
-                        </Button>
-                    </div>
-                ))}
+                {notifications.map(item => renderNotificationItem(item))}
             </CardContent>
         </Card>
     );
 };
-
-
-const UpcomingRetirements = ({ data }: { data: Pegawai[] }) => {
-  const [upcomingRetirements, setUpcomingRetirements] = useState<any[]>([]);
-
-  useEffect(() => {
-    const today = new Date();
-    const oneYearFromNow = add(today, { years: 1 });
-
-    const retiringSoon = data
-      .filter(p => p.status === 'Aktif' && p.tanggalLahir)
-      .map(p => {
-        const birthDate = new Date(p.tanggalLahir);
-        const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
-        const age = differenceInYears(today, birthDate);
-        return { ...p, retirementDate, age };
-      })
-      .filter(p => p.retirementDate > today && p.retirementDate <= oneYearFromNow)
-      .sort((a, b) => a.retirementDate.getTime() - b.retirementDate.getTime());
-
-    setUpcomingRetirements(retiringSoon);
-  }, [data]);
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-4">
-            <Bell className="h-6 w-6" />
-            <div>
-                <CardTitle>Notifikasi Pensiun</CardTitle>
-                <CardDescription>Pegawai yang akan pensiun dalam 1 tahun ke depan.</CardDescription>
-            </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {upcomingRetirements.length > 0 ? (
-          <div className="space-y-4">
-            {upcomingRetirements.map((pegawai) => (
-              <div key={pegawai.id} className="flex items-center gap-4">
-                 <Avatar className="h-10 w-10">
-                    <AvatarImage src={pegawai.avatarUrl} alt={pegawai.name} data-ai-hint={pegawai.imageHint} />
-                    <AvatarFallback>{pegawai.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="text-sm font-medium leading-none">{pegawai.name}</p>
-                  <p className="text-sm text-muted-foreground">{pegawai.jabatan}</p>
-                </div>
-                <div className="text-right">
-                    <p className="text-sm font-semibold">{format(pegawai.retirementDate, 'dd MMM yyyy')}</p>
-                    <p className="text-xs text-muted-foreground">Usia {pegawai.age} thn</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-            <div className="text-center text-sm text-muted-foreground py-6">
-                Tidak ada pegawai yang akan pensiun dalam waktu dekat.
-            </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
 
 export default function DashboardPage() {
   const [data, setData] = useState<Pegawai[]>([]);
@@ -259,10 +223,6 @@ export default function DashboardPage() {
         <DepartmentChart data={data} />
       </div>
       
-      {/* This card is now redundant as it's merged into ImportantNotifications */}
-      {/* <UpcomingRetirements data={data} /> */}
-
-
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -299,6 +259,5 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
 
     
