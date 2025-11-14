@@ -31,6 +31,8 @@ import { TrainingForm } from '@/components/forms/training-form';
 import { LeaveForm } from '@/components/forms/leave-form';
 import { PunishmentForm } from '@/components/forms/punishment-form';
 import { DocumentForm } from '@/components/forms/document-form';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -43,7 +45,7 @@ function getStatusVariant(status: Pegawai['status']) {
 
 type DialogState = {
     isOpen: boolean;
-    type: 'jabatan' | 'penghargaan' | 'pendidikan' | 'diklat' | 'hukuman' | 'dokumen' | 'cuti' | null;
+    type: 'jabatan' | 'penghargaan' | 'pendidikan' | 'diklat' | 'hukuman' | 'dokumen' | 'cuti' | 'pangkat' | null;
     data: any | null;
 };
 
@@ -57,6 +59,7 @@ export default function PegawaiDetailPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
+  const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
   const [riwayatMutasi, setRiwayatMutasi] = useState<RiwayatMutasi[]>([]);
   const [riwayatPendidikan, setRiwayatPendidikan] = useState<RiwayatPendidikan[]>([]);
   const [riwayatDiklat, setRiwayatDiklat] = useState<RiwayatDiklat[]>([]);
@@ -80,6 +83,7 @@ export default function PegawaiDetailPage() {
 
     if (pegawaiData) {
       setRiwayatJabatan(data.riwayatJabatan.filter(rj => rj.pegawaiId === id));
+      setRiwayatPangkat(data.riwayatPangkat.filter(rp => rp.pegawaiId === id));
       setRiwayatMutasi(data.riwayatMutasi.filter(rm => rm.pegawaiId === id));
       setRiwayatPendidikan(data.riwayatPendidikan.filter(rp => rp.pegawaiId === id));
       setRiwayatDiklat(data.riwayatDiklat.filter(rd => rd.pegawaiId === id));
@@ -263,6 +267,80 @@ export default function PegawaiDetailPage() {
     });
   }
 
+    const handleDownloadProfile = () => {
+    if (!pegawai) return;
+
+    const doc = new jsPDF();
+    
+    doc.setFontSize(20);
+    doc.text('Profil Pegawai', 14, 22);
+    doc.setFontSize(12);
+    doc.text(pegawai.name, 14, 30);
+    doc.setFontSize(10);
+    doc.text(`NIP: ${pegawai.nip}`, 14, 36);
+
+    autoTable(doc, {
+        startY: 42,
+        head: [['Informasi', 'Detail']],
+        body: [
+            ['Jabatan', `${pegawai.jabatan} ${pegawai.eselon ? `(${pegawai.eselon})` : ''}`],
+            ['Jenis Jabatan', pegawai.jenisJabatan],
+            ['Pangkat/Golongan', `${pegawai.pangkat} (${pegawai.golongan})`],
+            ['Departemen', pegawai.departemen],
+            ['Status', pegawai.status],
+            ['Email', pegawai.email],
+            ['No. Telepon', pegawai.phone],
+            ['TTL', `${pegawai.tempatLahir}, ${format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}`],
+            ['Tanggal Masuk', format(new Date(pegawai.tanggalMasuk), 'dd MMMM yyyy')],
+            ['Alamat', pegawai.alamat],
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185] }
+    });
+
+    const addSection = (title: string, head: string[][], body: any[][]) => {
+      if (body.length > 0) {
+        autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY + 10,
+          head: [[{ content: title, colSpan: head[0].length, styles: { halign: 'center', fillColor: [41, 128, 185], textColor: 255 } }]],
+          body: [head[0]],
+          theme: 'grid',
+          didParseCell: (data) => {
+            if (data.section === 'body' && data.row.index === 0) {
+                data.cell.styles.fillColor = [236, 240, 241];
+                data.cell.styles.fontStyle = 'bold';
+            }
+          }
+        });
+         autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY,
+          body: body,
+          theme: 'grid',
+        });
+      }
+    };
+    
+    addSection(
+      'Riwayat Jabatan',
+      [['Jabatan', 'Departemen', 'Tgl Mulai', 'Tgl Selesai']],
+      riwayatJabatan.map(item => [item.jabatan, item.departemen, format(new Date(item.tanggalMulai), 'dd-MM-yy'), item.tanggalSelesai ? format(new Date(item.tanggalSelesai), 'dd-MM-yy') : 'Sekarang'])
+    );
+
+    addSection(
+      'Riwayat Pangkat',
+      [['Pangkat', 'Golongan', 'Tanggal Kenaikan']],
+      allData().riwayatPangkat.filter(r => r.pegawaiId === pegawai.id).map(item => [item.pangkat, item.golongan, format(new Date(item.tanggalKenaikan), 'dd-MM-yy')])
+    );
+
+    addSection(
+      'Riwayat Pendidikan',
+      [['Jenjang', 'Institusi', 'Jurusan', 'Thn Lulus']],
+      riwayatPendidikan.map(item => [item.jenjang, item.institusi, item.jurusan, item.tahunLulus])
+    );
+    
+    doc.save(`profil-${pegawai.nip}.pdf`);
+  };
+
   const renderHistoryForm = () => {
       switch (historyDialogState.type) {
           case 'jabatan':
@@ -289,6 +367,7 @@ export default function PegawaiDetailPage() {
       const action = historyDialogState.data ? 'Ubah' : 'Tambah';
       const titles = {
           jabatan: 'Riwayat Jabatan',
+          pangkat: 'Riwayat Pangkat',
           penghargaan: 'Riwayat Penghargaan',
           pendidikan: 'Riwayat Pendidikan',
           diklat: 'Riwayat Diklat',
@@ -304,6 +383,7 @@ export default function PegawaiDetailPage() {
       const data = historyDialogState.data;
       const descriptions = {
           jabatan: `riwayat jabatan "${data.jabatan}"`,
+          pangkat: `riwayat pangkat "${data.pangkat}"`,
           penghargaan: `riwayat penghargaan "${data.nama}"`,
           pendidikan: `riwayat pendidikan "${data.jenjang} di ${data.institusi}"`,
           diklat: `riwayat diklat "${data.nama}"`,
@@ -361,9 +441,14 @@ export default function PegawaiDetailPage() {
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-3xl">{pegawai.name}</CardTitle>
-                  <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
-                    <Edit className="mr-2 h-4 w-4" /> Ubah Data
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleDownloadProfile}>
+                        <Download className="mr-2 h-4 w-4" /> Unduh Profil
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+                        <Edit className="mr-2 h-4 w-4" /> Ubah Data
+                    </Button>
+                  </div>
                 </div>
                 <CardDescription className="mt-1 text-base">NIP: {pegawai.nip}</CardDescription>
                 <div className="mt-4 flex flex-col gap-2">
@@ -380,10 +465,11 @@ export default function PegawaiDetailPage() {
         </Card>
         
         <Tabs defaultValue="pribadi">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-10">
             <TabsTrigger value="pribadi"><UserIcon className="mr-2 h-4 w-4" />Pribadi</TabsTrigger>
             <TabsTrigger value="jabatan"><Briefcase className="mr-2 h-4 w-4" />Jabatan</TabsTrigger>
             <TabsTrigger value="mutasi"><ArrowRightLeft className="mr-2 h-4 w-4" />Mutasi</TabsTrigger>
+            <TabsTrigger value="pangkat"><Award className="mr-2 h-4 w-4" />Pangkat</TabsTrigger>
             <TabsTrigger value="pendidikan"><GraduationCap className="mr-2 h-4 w-4" />Pendidikan</TabsTrigger>
             <TabsTrigger value="diklat"><BookOpen className="mr-2 h-4 w-4" />Diklat</TabsTrigger>
             <TabsTrigger value="cuti"><Cake className="mr-2 h-4 w-4" />Cuti</TabsTrigger>
@@ -489,6 +575,37 @@ export default function PegawaiDetailPage() {
                       </TableRow>
                     )) : (
                       <TableRow><TableCell colSpan={5} className="text-center">Tidak ada data.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pangkat">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Pangkat</CardTitle>
+                <Button size="sm" onClick={showNotImplementedToast} disabled><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pangkat</TableHead>
+                      <TableHead>Golongan</TableHead>
+                      <TableHead>Tanggal Kenaikan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {riwayatPangkat.length > 0 ? riwayatPangkat.map(item => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.pangkat}</TableCell>
+                        <TableCell>{item.golongan}</TableCell>
+                        <TableCell>{format(new Date(item.tanggalKenaikan), 'dd-MM-yyyy')}</TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -800,3 +917,5 @@ export default function PegawaiDetailPage() {
     </>
   );
 }
+
+    
