@@ -93,7 +93,7 @@ export default function HomePage() {
                   </>
                 )}
                 <div className="mt-10">
-                    <Button asChild size="lg">
+                    <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
                         <Link href="/login">Mulai Kelola Sekarang</Link>
                     </Button>
                 </div>
