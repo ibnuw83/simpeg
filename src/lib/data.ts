@@ -1,6 +1,7 @@
+
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, AppSettings, RiwayatMutasi, FeatureSetting } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -300,12 +301,32 @@ const pangkatGolonganDataInitial: PangkatGolongan[] = [
     ...new Map(pegawaiDataInitial.map(p => [`${p.pangkat}-${p.golongan}`, { pangkat: p.pangkat, golongan: p.golongan }])).values()
 ].map((pg, index) => ({ ...pg, id: `pg${index+1}` }));
 
+const featuresInitial: FeatureSetting[] = [
+  {
+    title: 'Manajemen Pegawai',
+    description: 'Kelola data induk pegawai, riwayat jabatan, pangkat, dan pendidikan secara terpusat.',
+  },
+  {
+    title: 'Manajemen Cuti & Absensi',
+    description: 'Proses pengajuan dan persetujuan cuti secara digital. Pantau status kehadiran pegawai.',
+  },
+  {
+    title: 'Mutasi & Promosi',
+    description: 'Fasilitasi proses kenaikan pangkat, promosi jabatan, dan perpindahan unit kerja dengan mudah.',
+  },
+  {
+    title: 'Laporan & Analitik',
+    description: 'Hasilkan berbagai laporan kepegawaian dan lihat statistik penting melalui dasbor interaktif.',
+  },
+];
+
 const appSettingsInitial: AppSettings = {
     appName: 'Simpeg Smart',
     logoUrl: '',
     footerText: '© 2024 Pemerintah Kota',
     heroTitle: 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>',
-    heroSubtitle: 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.'
+    heroSubtitle: 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.',
+    features: featuresInitial,
 }
 
 

@@ -78,7 +78,7 @@ export interface RiwayatPensiun {
 export interface RiwayatMutasi {
   id: string;
   pegawaiId: string;
-  jenisMutasi: 'perpindahan' | 'promosi' | 'gaji' | 'pangkat';
+  jenisMutasi: 'perpindahan' | 'promosi' | 'gaji' | 'pangkat' | 'pensiun';
   keterangan: string;
   tanggalEfektif: string;
   nomorSK: string;
@@ -133,12 +133,18 @@ export interface PangkatGolongan {
   golongan: string;
 }
 
+export interface FeatureSetting {
+  title: string;
+  description: string;
+}
+
 export interface AppSettings {
   appName: string;
   logoUrl: string;
   footerText: string;
   heroTitle?: string;
   heroSubtitle?: string;
+  features?: FeatureSetting[];
 }
 
 export interface AllData {

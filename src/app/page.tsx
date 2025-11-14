@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,39 +8,32 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { allData } from '@/lib/data';
-import type { AppSettings } from '@/lib/types';
+import type { AppSettings, FeatureSetting } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const features = [
+const featureVisuals = [
   {
     icon: <Users className="h-10 w-10 text-blue-500" />,
-    title: 'Manajemen Pegawai',
-    description: 'Kelola data induk pegawai, riwayat jabatan, pangkat, dan pendidikan secara terpusat.',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     iconBgColor: 'bg-blue-100 dark:bg-blue-900/50',
   },
   {
     icon: <CalendarOff className="h-10 w-10 text-green-500" />,
-    title: 'Manajemen Cuti & Absensi',
-    description: 'Proses pengajuan dan persetujuan cuti secara digital. Pantau status kehadiran pegawai.',
     bgColor: 'bg-green-50 dark:bg-green-900/20',
     iconBgColor: 'bg-green-100 dark:bg-green-900/50',
   },
   {
     icon: <Briefcase className="h-10 w-10 text-purple-500" />,
-    title: 'Mutasi & Promosi',
-    description: 'Fasilitasi proses kenaikan pangkat, promosi jabatan, dan perpindahan unit kerja dengan mudah.',
     bgColor: 'bg-purple-50 dark:bg-purple-900/20',
     iconBgColor: 'bg-purple-100 dark:bg-purple-900/50',
   },
   {
     icon: <FileText className="h-10 w-10 text-orange-500" />,
-    title: 'Laporan & Analitik',
-    description: 'Hasilkan berbagai laporan kepegawaian dan lihat statistik penting melalui dasbor interaktif.',
     bgColor: 'bg-orange-50 dark:bg-orange-900/20',
     iconBgColor: 'bg-orange-100 dark:bg-orange-900/50',
   },
 ];
+
 
 export default function HomePage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -53,6 +47,12 @@ export default function HomePage() {
 
   const heroTitle = settings?.heroTitle || 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>';
   const heroSubtitle = settings?.heroSubtitle || 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.';
+  
+  const features = settings?.features?.map((feature, index) => ({
+    ...feature,
+    ...featureVisuals[index]
+  })) || [];
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -110,7 +110,9 @@ export default function HomePage() {
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {features.map((feature, index) => (
+              {isLoading ? Array(4).fill(0).map((_, index) => (
+                <Card key={index}><CardHeader><Skeleton className="h-10 w-10 mx-auto" /></CardHeader><CardContent><Skeleton className="h-6 w-3/4 mx-auto" /><Skeleton className="h-4 w-full mx-auto mt-2" /><Skeleton className="h-4 w-5/6 mx-auto mt-1" /></CardContent></Card>
+              )) : features.map((feature, index) => (
                 <Card key={index} className={`text-center hover:shadow-lg transition-shadow border-none ${feature.bgColor}`}>
                   <CardHeader className="items-center">
                     <div className={`p-4 rounded-full ${feature.iconBgColor}`}>

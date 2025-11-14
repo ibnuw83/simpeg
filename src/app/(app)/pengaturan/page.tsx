@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,12 @@ import { allData, updateAllData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+
+const featureSchema = z.object({
+  title: z.string().min(3, { message: 'Judul fitur minimal 3 karakter.' }),
+  description: z.string().min(10, { message: 'Deskripsi fitur minimal 10 karakter.' }),
+});
 
 const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
@@ -20,6 +27,7 @@ const formSchema = z.object({
   footerText: z.string().optional(),
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
+  features: z.array(featureSchema).optional(),
 });
 
 export default function PengaturanPage() {
@@ -32,7 +40,13 @@ export default function PengaturanPage() {
       footerText: '',
       heroTitle: '',
       heroSubtitle: '',
+      features: [],
     },
+  });
+
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: "features"
   });
 
   useEffect(() => {
@@ -73,6 +87,7 @@ export default function PengaturanPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <h3 className="text-lg font-medium">Pengaturan Umum</h3>
             <FormField
               control={form.control}
               name="appName"
@@ -119,7 +134,8 @@ export default function PengaturanPage() {
               )}
             />
 
-            <h3 className="text-lg font-medium border-t pt-6">Halaman Utama</h3>
+            <Separator className="my-8" />
+            <h3 className="text-lg font-medium">Halaman Utama</h3>
             
             <FormField
               control={form.control}
@@ -151,8 +167,45 @@ export default function PengaturanPage() {
                 </FormItem>
               )}
             />
+            
+            <Separator className="my-8" />
+            <h3 className="text-lg font-medium">Pengaturan Fitur Unggulan</h3>
+            <div className="space-y-6">
+              {fields.map((field, index) => (
+                <div key={field.id} className="space-y-4 rounded-md border p-4">
+                  <h4 className="font-medium">Fitur #{index + 1}</h4>
+                   <FormField
+                    control={form.control}
+                    name={`features.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Judul Fitur</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`features.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deskripsi Fitur</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
 
-            <div className="flex justify-end">
+
+            <div className="flex justify-end pt-4">
               <Button type="submit">Simpan Perubahan</Button>
             </div>
           </form>
