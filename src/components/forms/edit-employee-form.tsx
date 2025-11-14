@@ -237,7 +237,7 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                         selected={field.value}
                         onSelect={field.onChange}
                         captionLayout="dropdown-buttons"
-                        fromYear={new Date().getFullYear() - 60}
+                        fromYear={1960}
                         toYear={new Date().getFullYear() - 18}
                         disabled={(date) =>
                           date > new Date() || date < new Date('1950-01-01')
