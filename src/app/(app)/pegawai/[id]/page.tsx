@@ -32,21 +32,27 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
   useEffect(() => {
+    const id = params.id;
+    if (!id) return;
+
     // This logic now runs on the client after hydration.
-    const pegawaiData = allData.pegawai.find(p => p.id === params.id);
-    setPegawai(pegawaiData);
+    const pegawaiData = allData.pegawai.find(p => p.id === id);
+    setPegawai(pegawaiData ?? null);
 
     if (pegawaiData) {
-      setRiwayatJabatan(allData.riwayatJabatan.filter(rj => rj.pegawaiId === params.id));
-      setRiwayatPangkat(allData.riwayatPangkat.filter(rp => rp.pegawaiId === params.id));
-      setCuti(allData.cuti.filter(c => c.pegawaiId === params.id));
-      setDokumen(allData.dokumen.filter(d => d.pegawaiId === params.id));
-    } else if (pegawai === undefined) {
-        // If still loading, do nothing yet. Once done, if it's null, notFound will trigger.
-    } else {
+      setRiwayatJabatan(allData.riwayatJabatan.filter(rj => rj.pegawaiId === id));
+      setRiwayatPangkat(allData.riwayatPangkat.filter(rp => rp.pegawaiId === id));
+      setCuti(allData.cuti.filter(c => c.pegawaiId === id));
+      setDokumen(allData.dokumen.filter(d => d.pegawaiId === id));
+    }
+  }, [params.id]);
+
+  useEffect(() => {
+    if (pegawai === null) {
       notFound();
     }
-  }, [params.id, pegawai]);
+  }, [pegawai]);
+
 
   if (pegawai === undefined) {
     return (
@@ -79,8 +85,8 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
   }
 
   if (!pegawai) {
-    // This will be caught by notFound() in useEffect, but as a fallback:
-    return notFound();
+    // This case should be handled by the notFound call, but it's here as a safeguard.
+    return null;
   }
 
   return (
@@ -247,5 +253,3 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
     </div>
   );
 }
-
-    
