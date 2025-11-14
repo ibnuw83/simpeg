@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { allData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import images from '@/lib/placeholder-images.json';
 
 export default function HomePage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -21,8 +22,8 @@ export default function HomePage() {
     setIsLoading(false);
   }, []);
 
-  const heroTitle = settings?.heroTitle || 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>';
-  const heroSubtitle = settings?.heroSubtitle || 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.';
+  const heroTitle = settings?.heroTitle || 'Administrasi Kepegawaian <span class="text-primary">Terintegrasi</span>';
+  const heroSubtitle = settings?.heroSubtitle || 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.';
   
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -69,6 +70,27 @@ export default function HomePage() {
                 </div>
             </div>
         </section>
+
+        {/* Image Collage Section */}
+        <section className="py-16 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {images.collage.map((image, index) => (
+                        <div key={index} className="overflow-hidden rounded-lg shadow-lg group">
+                            <Image
+                                src={image.src}
+                                alt={image.alt}
+                                width={image.width}
+                                height={image.height}
+                                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                                data-ai-hint={image.hint}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
       </main>
 
       <footer className="py-6 bg-secondary">

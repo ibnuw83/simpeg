@@ -307,7 +307,7 @@ const appSettingsInitial: AppSettings = {
     footerText: '© 2024 Pemerintah Kota',
     heroTitle: 'Administrasi Kepegawaian <span class=\'text-primary\'>Terintegrasi</span>',
     heroSubtitle: 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.',
-}
+};
 
 
 const allDataInitial: AllData = {
@@ -421,5 +421,3 @@ export const updateAllData = (newData: AllData) => {
     data = newData;
   }
 }
-
-    
