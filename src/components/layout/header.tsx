@@ -24,6 +24,7 @@ const pathToTitle: { [key: string]: string } = {
   '/pegawai': 'Manajemen Pegawai',
   '/pengguna': 'Manajemen Pengguna',
   '/analitik': 'Analitik & Laporan',
+  '/pengaturan': 'Pengaturan',
 }
 
 function getTitle(path: string): string {
