@@ -30,6 +30,10 @@ type NotificationItem = Pegawai & {
     mutationType: MutationType;
 };
 
+const SALARY_INCREASE_INTERVAL = 2; // years
+const PROMOTION_INTERVAL = 4; // years
+const RETIREMENT_AGE = 58; // years
+
 const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], currentUser: Pengguna | null }) => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
