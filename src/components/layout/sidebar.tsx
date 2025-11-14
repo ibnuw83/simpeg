@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, User, Settings, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive, CalendarOff } from 'lucide-react';
+import { LayoutDashboard, Users, User, Settings, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive, CalendarOff, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { allData, getAuthenticatedUser } from '@/lib/data';
 import type { AppSettings, Pengguna } from '@/lib/types';
@@ -26,6 +26,7 @@ const allNavItems = [
   { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol', roles: ['Admin'] },
   { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi', roles: ['Admin'] },
   { href: '/pensiun', icon: Archive, label: 'Pensiun', roles: ['Admin'] },
+  { href: '/laporan', icon: FileText, label: 'Laporan', roles: ['Admin'] },
   { href: '/pengguna', icon: UserCog, label: 'Pengguna', roles: ['Admin'] },
 ];
 

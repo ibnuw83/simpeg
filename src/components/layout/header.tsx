@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -26,10 +27,12 @@ import { getAuthenticatedUser, setAuthenticatedUser } from "@/lib/data";
 const pathToTitle: { [key: string]: string } = {
   '/dashboard': 'Dashboard',
   '/pegawai': 'Manajemen Pegawai',
+  '/cuti': 'Manajemen Cuti',
   '/departemen': 'Manajemen Departemen',
   '/pangkat': 'Manajemen Pangkat & Golongan',
   '/mutasi': 'Mutasi & Promosi',
   '/pensiun': 'Manajemen Pensiun',
+  '/laporan': 'Laporan',
   '/pengguna': 'Manajemen Pengguna',
   '/analitik': 'Analitik & Laporan',
   '/pengaturan': 'Pengaturan',
@@ -95,6 +98,14 @@ export function Header() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{currentUser?.name || 'Pengguna'}</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {currentUser?.role === 'Pengguna' && (
+             <DropdownMenuItem asChild>
+                <Link href={`/pegawai/${currentUser.pegawaiId}`}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil Saya</span>
+                </Link>
+            </DropdownMenuItem>
+          )}
           {currentUser?.role === 'Admin' && (
              <DropdownMenuItem asChild>
                 <Link href="/pengaturan">
