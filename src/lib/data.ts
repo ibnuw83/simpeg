@@ -324,7 +324,7 @@ const appSettingsInitial: AppSettings = {
     appName: 'Simpeg Smart',
     logoUrl: '',
     footerText: '© 2024 Pemerintah Kota',
-    heroTitle: 'Transformasi Manajemen <br/> <span class="text-primary">Kepegawaian Digital</span>',
+    heroTitle: '<span class="text-primary">Administrasi Kepegawaian Modern, Cepat, dan Terintegrasi</span>',
     heroSubtitle: 'Simpeg Smart adalah solusi modern untuk mengelola seluruh siklus kepegawaian, mulai dari data induk, riwayat karir, hingga proses mutasi dan pelaporan, secara efisien dan terintegrasi.',
     features: featuresInitial,
 }
@@ -441,3 +441,5 @@ export const updateAllData = (newData: AllData) => {
     data = newData;
   }
 }
+
+    
