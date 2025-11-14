@@ -25,6 +25,7 @@ const pathToTitle: { [key: string]: string } = {
   '/pegawai': 'Manajemen Pegawai',
   '/departemen': 'Manajemen Departemen',
   '/pangkat': 'Manajemen Pangkat & Golongan',
+  '/mutasi': 'Mutasi & Promosi',
   '/pengguna': 'Manajemen Pengguna',
   '/analitik': 'Analitik & Laporan',
   '/pengaturan': 'Pengaturan',
