@@ -46,7 +46,7 @@ export default function HomePage() {
         )}
 
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32 text-center">
+        <section className="relative pt-20 md:pt-32 pb-10 text-center">
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{backgroundImage: 'url(/hero-bg.svg)'}}
@@ -89,7 +89,7 @@ export default function HomePage() {
         </section>
 
         {/* Carousel Section */}
-        <section className="py-16 sm:py-24">
+        <section className="pt-8 pb-16 sm:pb-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <Carousel
                     plugins={[plugin.current]}
