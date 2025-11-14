@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -54,8 +55,8 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...employeeData,
-      tanggalLahir: new Date(employeeData.tanggalLahir),
-      tanggalMasuk: new Date(employeeData.tanggalMasuk),
+      tanggalLahir: employeeData.tanggalLahir ? new Date(employeeData.tanggalLahir) : undefined,
+      tanggalMasuk: employeeData.tanggalMasuk ? new Date(employeeData.tanggalMasuk) : undefined,
     },
   });
 
