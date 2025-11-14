@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -9,13 +11,22 @@ import { Users, UserCheck, UserX, Building } from "lucide-react";
 import { pegawaiData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import React, { useEffect, useState } from "react";
 
 export default function DashboardPage() {
-  const totalPegawai = pegawaiData.length;
-  const pegawaiAktif = pegawaiData.filter(p => p.status === 'Aktif').length;
-  const pegawaiCuti = pegawaiData.filter(p => p.status === 'Cuti').length;
-  const departments = [...new Set(pegawaiData.map(p => p.departemen))].length;
-  const recentHires = pegawaiData.slice(0, 5);
+  const [data, setData] = useState(pegawaiData);
+
+  useEffect(() => {
+    // This will run on the client after hydration
+    // and ensure we have the latest data from localStorage
+    setData(pegawaiData);
+  }, []);
+
+  const totalPegawai = data.length;
+  const pegawaiAktif = data.filter(p => p.status === 'Aktif').length;
+  const pegawaiCuti = data.filter(p => p.status === 'Cuti').length;
+  const departments = [...new Set(data.map(p => p.departemen))].length;
+  const recentHires = data.slice(0, 5);
 
   return (
     <div className="flex flex-col gap-6">

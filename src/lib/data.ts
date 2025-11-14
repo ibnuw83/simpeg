@@ -1,6 +1,8 @@
+'use client';
+
 import type { AllData, Cuti, Dokumen, Pegawai, RiwayatJabatan, RiwayatPangkat } from './types';
 
-export const pegawaiData: Pegawai[] = [
+const pegawaiDataInitial: Pegawai[] = [
   {
     id: '1',
     name: 'Budi Santoso',
@@ -163,7 +165,7 @@ export const pegawaiData: Pegawai[] = [
   },
 ];
 
-export const riwayatJabatanData: RiwayatJabatan[] = [
+const riwayatJabatanDataInitial: RiwayatJabatan[] = [
   { id: 'j1', pegawaiId: '1', jabatan: 'Staf Perencanaan', departemen: 'Badan Perencanaan', tanggalMulai: '2010-01-15', tanggalSelesai: '2015-06-30' },
   { id: 'j2', pegawaiId: '1', jabatan: 'Analis Kebijakan', departemen: 'Badan Perencanaan', tanggalMulai: '2015-07-01', tanggalSelesai: null },
   { id: 'j3', pegawaiId: '2', jabatan: 'Staf Keuangan', departemen: 'Badan Keuangan', tanggalMulai: '2014-02-01', tanggalSelesai: null },
@@ -174,7 +176,7 @@ export const riwayatJabatanData: RiwayatJabatan[] = [
   { id: 'j8', pegawaiId: '5', jabatan: 'Sekretaris Dinas', departemen: 'Badan Kepegawaian', tanggalMulai: '2010-05-21', tanggalSelesai: null },
 ];
 
-export const riwayatPangkatData: RiwayatPangkat[] = [
+const riwayatPangkatDataInitial: RiwayatPangkat[] = [
   { id: 'p1', pegawaiId: '1', pangkat: 'Pengatur', golongan: 'II/c', tanggalKenaikan: '2010-01-15' },
   { id: 'p2', pegawaiId: '1', pangkat: 'Penata Muda', golongan: 'III/a', tanggalKenaikan: '2014-04-01' },
   { id: 'p3', pegawaiId: '1', pangkat: 'Penata', golongan: 'III/c', tanggalKenaikan: '2018-04-01' },
@@ -183,26 +185,59 @@ export const riwayatPangkatData: RiwayatPangkat[] = [
   { id: 'p6', pegawaiId: '3', pangkat: 'Pembina', golongan: 'IV/a', tanggalKenaikan: '2009-04-01' },
 ];
 
-export const cutiData: Cuti[] = [
+const cutiDataInitial: Cuti[] = [
   { id: 'c1', pegawaiId: '2', jenisCuti: 'Tahunan', tanggalMulai: '2023-07-20', tanggalSelesai: '2023-07-25', keterangan: 'Liburan keluarga', status: 'Disetujui' },
   { id: 'c2', pegawaiId: '4', jenisCuti: 'Melahirkan', tanggalMulai: '2024-05-01', tanggalSelesai: '2024-08-01', keterangan: 'Cuti melahirkan', status: 'Disetujui' },
   { id: 'c3', pegawaiId: '1', jenisCuti: 'Sakit', tanggalMulai: '2024-01-10', tanggalSelesai: '2024-01-12', keterangan: 'Sakit demam', status: 'Disetujui' },
 ];
 
-export const dokumenData: Dokumen[] = [
+const dokumenDataInitial: Dokumen[] = [
   { id: 'd1', pegawaiId: '1', namaDokumen: 'SK Pengangkatan CPNS', jenisDokumen: 'SK', tanggalUnggah: '2010-01-10', fileUrl: '#' },
   { id: 'd2', pegawaiId: '1', namaDokumen: 'SK Kenaikan Pangkat IIIa', jenisDokumen: 'SK', tanggalUnggah: '2014-03-28', fileUrl: '#' },
   { id: 'd3', pegawaiId: '2', namaDokumen: 'Ijazah S1 Ekonomi', jenisDokumen: 'Sertifikat', tanggalUnggah: '2014-01-15', fileUrl: '#' },
   { id: 'd4', pegawaiId: '3', namaDokumen: 'Sertifikat CCNA', jenisDokumen: 'Sertifikat', tanggalUnggah: '2018-09-01', fileUrl: '#' },
 ];
 
-export const allData: AllData = {
-    pegawai: pegawaiData,
-    riwayatJabatan: riwayatJabatanData,
-    riwayatPangkat: riwayatPangkatData,
-    cuti: cutiData,
-    dokumen: dokumenData,
+const allDataInitial: AllData = {
+    pegawai: pegawaiDataInitial,
+    riwayatJabatan: riwayatJabatanDataInitial,
+    riwayatPangkat: riwayatPangkatDataInitial,
+    cuti: cutiDataInitial,
+    dokumen: dokumenDataInitial,
+};
+
+const APP_DATA_KEY = 'simpegSmartData';
+
+function getInitialData(): AllData {
+    if (typeof window !== 'undefined') {
+        const storedData = localStorage.getItem(APP_DATA_KEY);
+        if (storedData) {
+            try {
+                return JSON.parse(storedData);
+            } catch (e) {
+                console.error("Failed to parse data from localStorage", e);
+                // Fallback to initial data if parsing fails
+                localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
+                return allDataInitial;
+            }
+        } else {
+            localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
+            return allDataInitial;
+        }
+    }
+    // Return initial data for server-side rendering
+    return allDataInitial;
 }
+
+const data = getInitialData();
+
+export const allData = data;
+export const pegawaiData: Pegawai[] = data.pegawai;
+export const riwayatJabatanData: RiwayatJabatan[] = data.riwayatJabatan;
+export const riwayatPangkatData: RiwayatPangkat[] = data.riwayatPangkat;
+export const cutiData: Cuti[] = data.cuti;
+export const dokumenData: Dokumen[] = data.dokumen;
+
 
 export const getPegawaiById = (id: string) => pegawaiData.find(p => p.id === id);
 export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => riwayatJabatanData.filter(rj => rj.pegawaiId === pegawaiId);
