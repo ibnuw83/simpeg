@@ -7,8 +7,8 @@ const penggunaDataInitial: Pengguna[] = [
   {
     id: 'usr1',
     name: 'Admin Utama',
-    email: 'admin@example.com',
-    password: 'password',
+    email: 'admin@simpeg.com',
+    password: 'admin123',
     role: 'Admin',
     status: 'Aktif',
     avatarUrl: 'https://picsum.photos/seed/admin/100/100'
@@ -355,7 +355,13 @@ function getInitialData(): AllData {
         return allDataInitial;
     }
 
-    const storedData = localStorage.getItem(APP_DATA_KEY);
+    let storedData: string | null = null;
+    try {
+        storedData = localStorage.getItem(APP_DATA_KEY);
+    } catch (e) {
+        console.error("Could not access localStorage. Using in-memory data.", e);
+        return allDataInitial;
+    }
 
     if (!storedData) {
         localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
@@ -365,19 +371,19 @@ function getInitialData(): AllData {
     try {
         const parsedData: AllData = JSON.parse(storedData);
         let needsUpdate = false;
-
-        // Ensure all top-level keys exist by merging with initial data
+        
+        // Ensure all top-level keys exist by merging with initial data keys
         for (const key of Object.keys(allDataInitial) as Array<keyof AllData>) {
-            if (!(key in parsedData) || parsedData[key] === undefined || (Array.isArray(parsedData[key]) && (parsedData[key] as any[]).length === 0 && (allDataInitial[key] as any[]).length > 0)) {
+            if (!(key in parsedData)) {
                 (parsedData as any)[key] = allDataInitial[key];
                 needsUpdate = true;
             }
         }
         
-        // Specifically check for 'pengguna' data integrity
-        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin' && u.email === 'admin@example.com');
+        // Specifically check for 'pengguna' data integrity.
+        // If 'pengguna' array is missing, empty, or doesn't have the main admin, reset it.
+        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin' && u.email === penggunaDataInitial[0].email);
         if (!parsedData.pengguna || parsedData.pengguna.length === 0 || !hasAdmin) {
-            // Overwrite pengguna array with initial data if it's missing or corrupted
             parsedData.pengguna = penggunaDataInitial;
             needsUpdate = true;
         }
