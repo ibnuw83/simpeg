@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake } from 'lucide-react';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle } from 'lucide-react';
 import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -69,7 +69,7 @@ export default function PegawaiDetailPage() {
     // Update localStorage
     try {
         const storedData = localStorage.getItem('simpegSmartData');
-        const currentData: AllData = storedData ? JSON.parse(storedData) : allData;
+        const currentData = storedData ? JSON.parse(storedData) : allData;
         const updatedPegawaiList = currentData.pegawai.map(p => p.id === updatedEmployee.id ? updatedEmployee : p);
         currentData.pegawai = updatedPegawaiList;
         localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
@@ -171,7 +171,10 @@ export default function PegawaiDetailPage() {
 
           <TabsContent value="jabatan">
             <Card>
-              <CardHeader><CardTitle>Riwayat Jabatan</CardTitle></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Jabatan</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
@@ -201,7 +204,10 @@ export default function PegawaiDetailPage() {
 
           <TabsContent value="pangkat">
             <Card>
-              <CardHeader><CardTitle>Riwayat Pangkat</CardTitle></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Pangkat</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
@@ -229,7 +235,10 @@ export default function PegawaiDetailPage() {
 
           <TabsContent value="cuti">
             <Card>
-              <CardHeader><CardTitle>Riwayat Cuti</CardTitle></CardHeader>
+               <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Riwayat Cuti</CardTitle>
+                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Ajukan Cuti</Button>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
@@ -259,7 +268,10 @@ export default function PegawaiDetailPage() {
 
           <TabsContent value="dokumen">
             <Card>
-              <CardHeader><CardTitle>Manajemen Dokumen</CardTitle></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Manajemen Dokumen</CardTitle>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Unggah Dokumen</Button>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
