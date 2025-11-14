@@ -25,7 +25,6 @@ function getStatusVariant(status: Pegawai['status']) {
 }
 
 export default function PegawaiDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
   const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
@@ -33,6 +32,7 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
   useEffect(() => {
+    const id = params.id;
     if (!id) return;
 
     // This logic now runs on the client after hydration.
@@ -45,7 +45,7 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
       setCuti(allData.cuti.filter(c => c.pegawaiId === id));
       setDokumen(allData.dokumen.filter(d => d.pegawaiId === id));
     }
-  }, [id]);
+  }, [params.id]);
 
   useEffect(() => {
     if (pegawai === null) {
