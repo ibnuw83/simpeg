@@ -272,73 +272,95 @@ export default function PegawaiDetailPage() {
 
     const doc = new jsPDF();
     
-    doc.setFontSize(20);
-    doc.text('Profil Pegawai', 14, 22);
-    doc.setFontSize(12);
-    doc.text(pegawai.name, 14, 30);
-    doc.setFontSize(10);
-    doc.text(`NIP: ${pegawai.nip}`, 14, 36);
+    // Convert image to data URL to avoid CORS issues
+    const image = new Image();
+    image.crossOrigin = "Anonymous";
+    image.src = pegawai.avatarUrl;
+    image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(image, 0, 0);
+        const dataURL = canvas.toDataURL('image/jpeg');
 
-    autoTable(doc, {
-        startY: 42,
-        head: [['Informasi', 'Detail']],
-        body: [
-            ['Jabatan', `${pegawai.jabatan} ${pegawai.eselon ? `(${pegawai.eselon})` : ''}`],
-            ['Jenis Jabatan', pegawai.jenisJabatan],
-            ['Pangkat/Golongan', `${pegawai.pangkat} (${pegawai.golongan})`],
-            ['Departemen', pegawai.departemen],
-            ['Status', pegawai.status],
-            ['Email', pegawai.email],
-            ['No. Telepon', pegawai.phone],
-            ['TTL', `${pegawai.tempatLahir}, ${format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}`],
-            ['Tanggal Masuk', format(new Date(pegawai.tanggalMasuk), 'dd MMMM yyyy')],
-            ['Alamat', pegawai.alamat],
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [41, 128, 185] }
-    });
+        // Add Image
+        doc.addImage(dataURL, 'JPEG', 14, 22, 30, 30);
 
-    const addSection = (title: string, head: string[][], body: any[][]) => {
-      if (body.length > 0) {
+        // Add Header
+        doc.setFontSize(20);
+        doc.text('Profil Pegawai', 50, 30);
+        doc.setFontSize(12);
+        doc.text(pegawai.name, 50, 38);
+        doc.setFontSize(10);
+        doc.text(`NIP: ${pegawai.nip}`, 50, 44);
+
+        // Add personal data table
         autoTable(doc, {
-          startY: (doc as any).lastAutoTable.finalY + 10,
-          head: [[{ content: title, colSpan: head[0].length, styles: { halign: 'center', fillColor: [41, 128, 185], textColor: 255 } }]],
-          body: [head[0]],
-          theme: 'grid',
-          didParseCell: (data) => {
-            if (data.section === 'body' && data.row.index === 0) {
-                data.cell.styles.fillColor = [236, 240, 241];
-                data.cell.styles.fontStyle = 'bold';
-            }
+            startY: 60,
+            head: [['Informasi Pribadi', '']],
+            body: [
+                ['Jabatan', `${pegawai.jabatan} ${pegawai.eselon ? `(${pegawai.eselon})` : ''}`],
+                ['Jenis Jabatan', pegawai.jenisJabatan],
+                ['Pangkat/Golongan', `${pegawai.pangkat} (${pegawai.golongan})`],
+                ['Departemen', pegawai.departemen],
+                ['Status', pegawai.status],
+                ['Email', pegawai.email],
+                ['No. Telepon', pegawai.phone],
+                ['TTL', `${pegawai.tempatLahir}, ${format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}`],
+                ['Tanggal Masuk', format(new Date(pegawai.tanggalMasuk), 'dd MMMM yyyy')],
+                ['Alamat', pegawai.alamat],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [41, 128, 185], halign: 'center' },
+            columnStyles: { 0: { fontStyle: 'bold' } }
+        });
+
+        const addSection = (title: string, head: string[][], body: any[][]) => {
+          if (body.length > 0) {
+            autoTable(doc, {
+              startY: (doc as any).lastAutoTable.finalY + 10,
+              head: [[{ content: title, colSpan: head[0].length, styles: { halign: 'center', fillColor: [41, 128, 185], textColor: 255 } }]],
+              body: [head[0]],
+              theme: 'grid',
+              didParseCell: (data) => {
+                if (data.section === 'body' && data.row.index === 0) {
+                    data.cell.styles.fillColor = [236, 240, 241];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+              }
+            });
+             autoTable(doc, {
+              startY: (doc as any).lastAutoTable.finalY,
+              body: body,
+              theme: 'grid',
+            });
           }
-        });
-         autoTable(doc, {
-          startY: (doc as any).lastAutoTable.finalY,
-          body: body,
-          theme: 'grid',
-        });
-      }
+        };
+        
+        addSection('Riwayat Jabatan', [['Jabatan', 'Departemen', 'Tgl Mulai', 'Tgl Selesai']], riwayatJabatan.map(item => [item.jabatan, item.departemen, format(new Date(item.tanggalMulai), 'dd-MM-yy'), item.tanggalSelesai ? format(new Date(item.tanggalSelesai), 'dd-MM-yy') : 'Sekarang']));
+        addSection('Riwayat Pangkat', [['Pangkat', 'Golongan', 'Tgl Kenaikan']], riwayatPangkat.map(item => [item.pangkat, item.golongan, format(new Date(item.tanggalKenaikan), 'dd-MM-yy')]));
+        addSection('Riwayat Mutasi', [['Jenis', 'Keterangan', 'Tgl Efektif', 'No. SK']], riwayatMutasi.map(item => [item.jenisMutasi, item.keterangan, format(new Date(item.tanggalEfektif), 'dd-MM-yy'), item.nomorSK]));
+        addSection('Riwayat Pendidikan', [['Jenjang', 'Institusi', 'Jurusan', 'Thn Lulus']], riwayatPendidikan.map(item => [item.jenjang, item.institusi, item.jurusan, item.tahunLulus]));
+        addSection('Riwayat Diklat', [['Nama Diklat', 'Penyelenggara', 'Tanggal', 'Jam']], riwayatDiklat.map(item => [item.nama, item.penyelenggara, format(new Date(item.tanggal), 'dd-MM-yy'), item.jumlahJam]));
+        addSection('Riwayat Penghargaan', [['Penghargaan', 'Pemberi', 'Tanggal']], penghargaan.map(item => [item.nama, item.pemberi, format(new Date(item.tanggal), 'dd-MM-yy')]));
+        addSection('Riwayat Hukuman', [['Jenis', 'Keterangan', 'Tanggal']], hukuman.map(item => [item.jenis, item.keterangan, format(new Date(item.tanggal), 'dd-MM-yy')]));
+        addSection('Riwayat Cuti', [['Jenis', 'Tanggal', 'Keterangan', 'Status']], cuti.map(item => [item.jenisCuti, `${format(new Date(item.tanggalMulai), 'dd-MM-yy')} - ${format(new Date(item.tanggalSelesai), 'dd-MM-yy')}`, item.keterangan, item.status]));
+        addSection('Dokumen', [['Nama Dokumen', 'Jenis', 'Tgl Unggah']], dokumen.map(item => [item.namaDokumen, item.jenisDokumen, format(new Date(item.tanggalUnggah), 'dd-MM-yy')]));
+
+        doc.save(`profil-${pegawai.nip}.pdf`);
     };
-    
-    addSection(
-      'Riwayat Jabatan',
-      [['Jabatan', 'Departemen', 'Tgl Mulai', 'Tgl Selesai']],
-      riwayatJabatan.map(item => [item.jabatan, item.departemen, format(new Date(item.tanggalMulai), 'dd-MM-yy'), item.tanggalSelesai ? format(new Date(item.tanggalSelesai), 'dd-MM-yy') : 'Sekarang'])
-    );
 
-    addSection(
-      'Riwayat Pangkat',
-      [['Pangkat', 'Golongan', 'Tanggal Kenaikan']],
-      allData().riwayatPangkat.filter(r => r.pegawaiId === pegawai.id).map(item => [item.pangkat, item.golongan, format(new Date(item.tanggalKenaikan), 'dd-MM-yy')])
-    );
-
-    addSection(
-      'Riwayat Pendidikan',
-      [['Jenjang', 'Institusi', 'Jurusan', 'Thn Lulus']],
-      riwayatPendidikan.map(item => [item.jenjang, item.institusi, item.jurusan, item.tahunLulus])
-    );
-    
-    doc.save(`profil-${pegawai.nip}.pdf`);
+    image.onerror = () => {
+        toast({
+            variant: "destructive",
+            title: "Gagal Memuat Gambar",
+            description: "Tidak dapat memuat gambar profil untuk PDF."
+        })
+        // Proceed without the image
+        autoTable(doc, { startY: 20, head: [['Profil Pegawai', '']], body: [['Nama', pegawai.name], ['NIP', pegawai.nip]] });
+        doc.save(`profil-${pegawai.nip}.pdf`);
+    }
   };
 
   const renderHistoryForm = () => {
