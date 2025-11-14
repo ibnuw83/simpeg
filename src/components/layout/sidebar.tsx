@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck, ArrowRightLeft } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -18,6 +18,7 @@ const navItems = [
   { href: '/departemen', icon: Building, label: 'Departemen' },
   { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol' },
   { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi' },
+  { href: '/pensiun', icon: Archive, label: 'Pensiun' },
   { href: '/pengguna', icon: UserCog, label: 'Pengguna' },
   { href: '/analitik', icon: BarChart, label: 'Analitik' },
 ];
@@ -79,7 +80,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
           <span className="">Simpeg Smart</span>
         </Link>
       </div>

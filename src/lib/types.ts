@@ -60,6 +60,14 @@ export interface RiwayatDiklat {
     jumlahJam: number;
 }
 
+export interface RiwayatPensiun {
+    id: string;
+    pegawaiId: string;
+    tanggalPensiun: string;
+    keterangan: string;
+    nomorSK: string;
+}
+
 export interface Penghargaan {
     id: string;
     pegawaiId: string;
@@ -113,6 +121,7 @@ export interface AllData {
   riwayatPangkat: RiwayatPangkat[];
   riwayatPendidikan: RiwayatPendidikan[];
   riwayatDiklat: RiwayatDiklat[];
+  riwayatPensiun: RiwayatPensiun[];
   penghargaan: Penghargaan[];
   hukuman: Hukuman[];
   cuti: Cuti[];

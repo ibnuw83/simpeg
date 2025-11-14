@@ -1,6 +1,6 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -231,6 +231,10 @@ const riwayatDiklatDataInitial: RiwayatDiklat[] = [
     { id: 'dk1', pegawaiId: '1', nama: 'Diklat PIM IV', penyelenggara: 'Lembaga Administrasi Negara', tanggal: new Date('2019-10-01'), jumlahJam: 72 },
 ];
 
+const riwayatPensiunDataInitial: RiwayatPensiun[] = [
+    { id: 'pen1', pegawaiId: '10', tanggalPensiun: '2024-12-25', keterangan: 'Pensiun normal', nomorSK: 'SK-PEN-2024-001' }
+];
+
 const penghargaanDataInitial: Penghargaan[] = [
     { id: 'pg1', pegawaiId: '5', nama: 'Satyalancana Karya Satya XX Tahun', pemberi: 'Presiden RI', tanggal: new Date('2021-08-17') },
 ];
@@ -267,6 +271,7 @@ const allDataInitial: AllData = {
     riwayatPangkat: riwayatPangkatDataInitial,
     riwayatPendidikan: riwayatPendidikanDataInitial,
     riwayatDiklat: riwayatDiklatDataInitial,
+    riwayatPensiun: riwayatPensiunDataInitial,
     penghargaan: penghargaanDataInitial,
     hukuman: hukumanDataInitial,
     cuti: cutiDataInitial,
