@@ -1,4 +1,5 @@
 
+
 export interface Pegawai {
   id: string;
   name: string;
@@ -26,7 +27,7 @@ export interface Pengguna {
   name: string;
   email: string;
   password?: string;
-  role: 'Admin' | 'Editor' | 'Viewer';
+  role: 'Admin' | 'Pengguna';
   status: 'Aktif' | 'Nonaktif';
   avatarUrl: string;
 }

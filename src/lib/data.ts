@@ -11,7 +11,7 @@ const penggunaDataInitial: Pengguna[] = [
     password: 'password',
     role: 'Admin',
     status: 'Aktif',
-    avatarUrl: 'https://picsum.photos/seed/user/100/100'
+    avatarUrl: 'https://picsum.photos/seed/admin/100/100'
   },
   {
     id: 'usr2',
@@ -19,7 +19,7 @@ const penggunaDataInitial: Pengguna[] = [
     name: 'Budi Santoso',
     email: 'budi.santoso@gov.example.com',
     password: 'password',
-    role: 'Editor',
+    role: 'Pengguna',
     status: 'Aktif',
     avatarUrl: 'https://picsum.photos/seed/1/100/100'
   },
@@ -29,7 +29,7 @@ const penggunaDataInitial: Pengguna[] = [
     name: 'Citra Lestari',
     email: 'citra.lestari@gov.example.com',
     password: 'password',
-    role: 'Viewer',
+    role: 'Pengguna',
     status: 'Nonaktif',
     avatarUrl: 'https://picsum.photos/seed/2/100/100'
   }
@@ -320,7 +320,29 @@ const allDataInitial: AllData = {
 };
 
 const APP_DATA_KEY = 'simpegSmartData';
+const AUTH_KEY = 'simpegAuth';
 
+// --- Auth Functions ---
+export const getAuthenticatedUser = (): Pengguna | null => {
+  if (typeof window !== 'undefined') {
+    const authData = localStorage.getItem(AUTH_KEY);
+    return authData ? JSON.parse(authData) : null;
+  }
+  return null;
+}
+
+export const setAuthenticatedUser = (user: Pengguna | null) => {
+  if (typeof window !== 'undefined') {
+    if (user) {
+      localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(AUTH_KEY);
+    }
+  }
+}
+
+
+// --- Data Functions ---
 function getInitialData(): AllData {
     if (typeof window !== 'undefined') {
         const storedData = localStorage.getItem(APP_DATA_KEY);

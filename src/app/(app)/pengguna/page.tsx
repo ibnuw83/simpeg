@@ -50,10 +50,8 @@ function getRoleVariant(role: Pengguna['role']) {
   switch (role) {
     case 'Admin':
       return 'default';
-    case 'Editor':
+    case 'Pengguna':
       return 'secondary';
-    case 'Viewer':
-      return 'outline';
     default:
       return 'outline';
   }
@@ -91,12 +89,7 @@ export default function PenggunaPage() {
     if (selectedUser) { // Update
       const updatedList = penggunaList.map(u => {
         if (u.id === selectedUser.id) {
-          const updatedUser = { ...u, ...userData };
-          // Only update password if a new one is provided
-          if (!userData.password) {
-            delete updatedUser.password;
-          }
-          return updatedUser;
+          return { ...u, ...userData };
         }
         return u;
       });
@@ -236,7 +229,10 @@ export default function PenggunaPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(isOpen) => {
+          setIsFormOpen(isOpen);
+          if (!isOpen) setSelectedUser(null);
+      }}>
           <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
               <DialogTitle>{selectedUser ? 'Ubah Pengguna' : 'Tambah Pengguna Baru'}</DialogTitle>

@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { allData } from "@/lib/data";
-import type { AppSettings } from "@/lib/types";
+import { allData, setAuthenticatedUser } from "@/lib/data";
+import type { AppSettings, Pengguna } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +26,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('password');
 
   useEffect(() => {
+    // Clear any existing auth session on load
+    setAuthenticatedUser(null);
     const loadedSettings = allData().appSettings;
     setSettings(loadedSettings);
   }, []);
@@ -36,6 +38,7 @@ export default function LoginPage() {
 
     if (user) {
       if (user.status === 'Aktif') {
+        setAuthenticatedUser(user);
         toast({
           title: 'Login Berhasil',
           description: `Selamat datang kembali, ${user.name}!`,

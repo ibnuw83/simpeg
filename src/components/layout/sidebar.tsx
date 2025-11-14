@@ -12,37 +12,55 @@ import {
 } from '@/components/ui/tooltip';
 import { LayoutDashboard, Users, BarChart, Settings, LifeBuoy, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { allData } from '@/lib/data';
-import type { AppSettings } from '@/lib/types';
+import { allData, getAuthenticatedUser } from '@/lib/data';
+import type { AppSettings, Pengguna } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/pegawai', icon: Users, label: 'Pegawai' },
-  { href: '/departemen', icon: Building, label: 'Departemen' },
-  { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol' },
-  { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi' },
-  { href: '/pensiun', icon: Archive, label: 'Pensiun' },
-  { href: '/pengguna', icon: UserCog, label: 'Pengguna' },
+const allNavItems = [
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Pengguna'] },
+  { href: '/pegawai', icon: Users, label: 'Pegawai', roles: ['Admin'] },
+  { href: '/departemen', icon: Building, label: 'Departemen', roles: ['Admin'] },
+  { href: '/pangkat', icon: ShieldCheck, label: 'Pangkat/Gol', roles: ['Admin'] },
+  { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi', roles: ['Admin'] },
+  { href: '/pensiun', icon: Archive, label: 'Pensiun', roles: ['Admin'] },
+  { href: '/pengguna', icon: UserCog, label: 'Pengguna', roles: ['Admin'] },
 ];
 
 const bottomNavItems = [
-    { href: '/pengaturan', icon: Settings, label: 'Pengaturan' },
-    { href: '/bantuan', icon: LifeBuoy, label: 'Bantuan' },
+    { href: '/pengaturan', icon: Settings, label: 'Pengaturan', roles: ['Admin'] },
+    { href: '/bantuan', icon: LifeBuoy, label: 'Bantuan', roles: ['Admin', 'Pengguna'] },
 ]
 
 export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
 
   useEffect(() => {
     const loadedSettings = allData().appSettings;
+    const user = getAuthenticatedUser();
     setSettings(loadedSettings);
+    setCurrentUser(user);
   }, []);
+
+  const getVisibleItems = (items: typeof allNavItems) => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'Admin') return items;
+    return items.filter(item => item.roles.includes('Pengguna'));
+  }
+  
+  const navItems = getVisibleItems(allNavItems);
+  const visibleBottomNavItems = getVisibleItems(bottomNavItems);
+
 
   const renderNavItems = (items: typeof navItems) => {
     return items.map((item) => {
-      const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+      const href = (currentUser?.role === 'Pengguna' && item.href === '/pegawai')
+        ? `/pegawai/${currentUser.pegawaiId}`
+        : item.href;
+
+      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+      
       const linkClasses = cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
         isActive && "bg-accent text-primary"
@@ -50,7 +68,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
       
       return (
         <li key={item.href}>
-          <Link href={item.href} className={linkClasses}>
+          <Link href={href} className={linkClasses}>
             <item.icon className="h-4 w-4" />
             {item.label}
           </Link>
@@ -61,7 +79,11 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
 
   const renderNavItemsCollapsed = (items: typeof navItems) => {
     return items.map((item) => {
-      const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+       const href = (currentUser?.role === 'Pengguna' && item.href === '/pegawai')
+        ? `/pegawai/${currentUser.pegawaiId}`
+        : item.href;
+      
+      const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
       const linkClasses = cn(
           "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
           isActive && "bg-accent text-accent-foreground"
@@ -72,7 +94,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href={item.href} className={linkClasses}>
+                  <Link href={href} className={linkClasses}>
                     <item.icon className="h-5 w-5" />
                     <span className="sr-only">{item.label}</span>
                   </Link>
@@ -110,7 +132,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
       <div className="mt-auto p-4 border-t">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           <ul className="space-y-1">
-            {isMobile ? renderNavItems(bottomNavItems) : renderNavItems(bottomNavItems)}
+            {isMobile ? renderNavItems(visibleBottomNavItems) : renderNavItems(visibleBottomNavItems)}
           </ul>
         </nav>
         {settings?.footerText && (

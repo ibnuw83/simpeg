@@ -1,11 +1,13 @@
 
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import {
   allData,
-  updateAllData
+  updateAllData,
+  getAuthenticatedUser
 } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon, MoreHorizontal } from 'lucide-react';
-import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, RiwayatMutasi } from '@/lib/types';
+import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman, RiwayatPensiun, RiwayatMutasi, Pengguna } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -47,9 +49,13 @@ type DialogState = {
 
 export default function PegawaiDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
+  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
   const [riwayatMutasi, setRiwayatMutasi] = useState<RiwayatMutasi[]>([]);
   const [riwayatPendidikan, setRiwayatPendidikan] = useState<RiwayatPendidikan[]>([]);
@@ -85,8 +91,21 @@ export default function PegawaiDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    loadData();
-  }, [id, loadData]);
+    const user = getAuthenticatedUser();
+    if (!user) {
+        router.push('/login');
+        return;
+    }
+    setCurrentUser(user);
+
+    if (user.role === 'Admin' || (user.role === 'Pengguna' && user.pegawaiId === id)) {
+        setIsAuthorized(true);
+        loadData();
+    } else {
+        setIsAuthorized(false);
+        router.push('/dashboard');
+    }
+  }, [id, loadData, router]);
 
   useEffect(() => {
     if (pegawai === null) {
@@ -295,7 +314,7 @@ export default function PegawaiDetailPage() {
       return `Tindakan ini tidak dapat dibatalkan. Ini akan menghapus ${descriptions[historyDialogState.type] || 'data ini'} secara permanen.`;
   }
 
-  if (pegawai === undefined) {
+  if (pegawai === undefined || !isAuthorized) {
     return (
         <div className="flex flex-col gap-6">
             <Card>
@@ -440,7 +459,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Mutasi</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={showNotImplementedToast} disabled><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>

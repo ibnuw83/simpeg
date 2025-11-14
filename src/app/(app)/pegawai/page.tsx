@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -42,8 +43,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
-import { allData, pegawaiData as initialPegawaiData } from '@/lib/data';
-import type { Pegawai } from '@/lib/types';
+import { allData, getAuthenticatedUser } from '@/lib/data';
+import type { Pegawai, Pengguna } from '@/lib/types';
 import { AddEmployeeForm } from '@/components/forms/add-employee-form';
 import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
 
@@ -61,30 +62,46 @@ function getStatusVariant(status: Pegawai['status']) {
 }
 
 export default function PegawaiPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>(initialPegawaiData);
+  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>([]);
+  const [currentUser, setCurrentUser] = React.useState<Pengguna | null>(null);
 
-  // State for dialogs
+  // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedPegawai, setSelectedPegawai] = React.useState<Pegawai | null>(null);
 
   React.useEffect(() => {
-    // On mount, load data from localStorage if it exists
-    const storedData = localStorage.getItem('simpegSmartData');
+    const user = getAuthenticatedUser();
+    if (user?.role === 'Pengguna' && user.pegawaiId) {
+      router.replace(`/pegawai/${user.pegawaiId}`);
+      return;
+    } else if (user?.role !== 'Admin') {
+      router.replace('/dashboard');
+      return;
+    }
+    
+    setCurrentUser(user);
+    loadData();
+
+  }, [router]);
+  
+  const loadData = () => {
+     const storedData = localStorage.getItem('simpegSmartData');
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        setPegawaiList(parsedData.pegawai || initialPegawaiData);
+        setPegawaiList(parsedData.pegawai || []);
       } catch (e) {
         console.error("Failed to parse data from localStorage", e);
-        setPegawaiList(initialPegawaiData);
+        setPegawaiList([]);
       }
     } else {
-        setPegawaiList(initialPegawaiData);
+        setPegawaiList([]);
     }
-  }, []);
+  }
 
   const updateLocalStorage = (updatedPegawaiList: Pegawai[]) => {
      try {
@@ -137,6 +154,11 @@ export default function PegawaiPage() {
       p.jabatan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.departemen.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  // Render nothing or a loading state if the user is being redirected
+  if (currentUser?.role === 'Pengguna' || !currentUser) {
+    return null;
+  }
 
   return (
     <>
