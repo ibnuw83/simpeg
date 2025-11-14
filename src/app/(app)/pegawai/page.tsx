@@ -20,11 +20,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
-import { allData } from '@/lib/data';
+import { allData, pegawaiData as initialPegawaiData } from '@/lib/data';
 import type { Pegawai } from '@/lib/types';
+import { AddEmployeeForm } from '@/components/forms/add-employee-form';
 
 function getStatusVariant(status: Pegawai['status']) {
   switch (status) {
@@ -41,11 +50,34 @@ function getStatusVariant(status: Pegawai['status']) {
 
 export default function PegawaiPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>([]);
+  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>(initialPegawaiData);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
-    setPegawaiList(allData.pegawai);
+    // On mount, load data from localStorage if it exists
+    const storedData = localStorage.getItem('simpegSmartData');
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        setPegawaiList(parsedData.pegawai || []);
+      } catch (e) {
+        console.error("Failed to parse data from localStorage", e);
+        setPegawaiList(initialPegawaiData);
+      }
+    }
   }, []);
+
+  const handleSave = (newEmployee: Pegawai) => {
+    const updatedPegawaiList = [...pegawaiList, newEmployee];
+    setPegawaiList(updatedPegawaiList);
+
+    // Update localStorage
+    const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || '{}');
+    currentData.pegawai = updatedPegawaiList;
+    localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
+
+    setIsDialogOpen(false); // Close dialog on save
+  };
 
   const filteredPegawai = pegawaiList.filter(
     (p) =>
@@ -57,28 +89,41 @@ export default function PegawaiPage() {
 
   return (
     <Card>
-        <CardHeader>
-            <div className="flex justify-between items-start">
-                <div>
-                    <CardTitle>Manajemen Pegawai</CardTitle>
-                    <CardDescription>Cari, lihat, dan kelola data pegawai.</CardDescription>
-                </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Tambah Pegawai
-                </Button>
-            </div>
-             <div className="relative mt-4">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Cari berdasarkan nama, NIP, jabatan..."
-                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-        </CardHeader>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Manajemen Pegawai</CardTitle>
+            <CardDescription>Cari, lihat, dan kelola data pegawai.</CardDescription>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Tambah Pegawai
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Tambah Pegawai Baru</DialogTitle>
+                <DialogDescription>
+                  Isi formulir di bawah ini untuk menambahkan data pegawai baru ke sistem.
+                </DialogDescription>
+              </DialogHeader>
+              <AddEmployeeForm onSave={handleSave} />
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="relative mt-4">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Cari berdasarkan nama, NIP, jabatan..."
+            className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </CardHeader>
       <CardContent>
         <div className="rounded-md border">
           <Table>
@@ -105,8 +150,8 @@ export default function PegawaiPage() {
                           <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="grid gap-0.5">
-                            <span className="font-semibold">{p.name}</span>
-                            <span className="text-sm text-muted-foreground">{p.email}</span>
+                          <span className="font-semibold">{p.name}</span>
+                          <span className="text-sm text-muted-foreground">{p.email}</span>
                         </div>
                       </div>
                     </TableCell>
