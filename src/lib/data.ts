@@ -43,6 +43,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Penata Tingkat I',
     golongan: 'III/d',
     jabatan: 'Analis Kebijakan',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Tertentu',
     departemen: 'Badan Perencanaan',
     email: 'budi.santoso@gov.example.com',
@@ -62,6 +63,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Penata Muda',
     golongan: 'III/a',
     jabatan: 'Staf Keuangan',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Umum',
     departemen: 'Badan Keuangan',
     email: 'citra.lestari@gov.example.com',
@@ -101,6 +103,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Pengatur',
     golongan: 'II/c',
     jabatan: 'Pranata Komputer',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Tertentu',
     departemen: 'Dinas Komunikasi',
     email: 'dewi.anggraini@gov.example.com',
@@ -140,6 +143,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Penata',
     golongan: 'III/c',
     jabatan: 'Analis SDM',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Tertentu',
     departemen: 'Badan Kepegawaian',
     email: 'fitri.h@gov.example.com',
@@ -179,6 +183,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Pengatur Muda',
     golongan: 'II/a',
     jabatan: 'Staf Administrasi',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Umum',
     departemen: 'Badan Keuangan',
     email: 'hesti.p@gov.example.com',
@@ -198,6 +203,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Penata Tingkat I',
     golongan: 'III/d',
     jabatan: 'Pengawas Tata Ruang',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Tertentu',
     departemen: 'Dinas Pekerjaan Umum',
     email: 'indra.n@gov.example.com',
@@ -217,6 +223,7 @@ const pegawaiDataInitial: Pegawai[] = [
     pangkat: 'Pembina Tingkat I',
     golongan: 'IV/b',
     jabatan: 'Auditor Utama',
+    eselon: undefined,
     jenisJabatan: 'Jabatan Fungsional Tertentu',
     departemen: 'Inspektorat Daerah',
     email: 'joko.susilo@gov.example.com',
@@ -359,30 +366,21 @@ function getInitialData(): AllData {
         let parsedData: AllData = JSON.parse(storedData);
         let needsUpdate = false;
 
-        // Check each key from the initial data blueprint
-        for (const key in allDataInitial) {
-            const typedKey = key as keyof AllData;
-            // If key is missing, or is an empty array (for list-based data)
-            if (!parsedData.hasOwnProperty(typedKey) || 
-                (Array.isArray(parsedData[typedKey]) && (parsedData[typedKey] as any[]).length === 0 && (allDataInitial[typedKey] as any[]).length > 0)
-            ) {
-                 // Special check for 'pengguna' to ensure admin always exists
-                if (typedKey === 'pengguna' && (!parsedData.pengguna || parsedData.pengguna.length === 0)) {
-                    parsedData.pengguna = penggunaDataInitial;
-                    needsUpdate = true;
-                } else if (typedKey !== 'pengguna') {
-                     (parsedData as any)[typedKey] = allDataInitial[typedKey];
-                     needsUpdate = true;
-                }
+        // Ensure all top-level keys exist
+        for (const key of Object.keys(allDataInitial) as Array<keyof AllData>) {
+            if (!(key in parsedData)) {
+                (parsedData as any)[key] = allDataInitial[key];
+                needsUpdate = true;
             }
         }
         
-        // Final robust check for admin user
-        if (!parsedData.pengguna || !parsedData.pengguna.find(u => u.role === 'Admin')) {
+        // Specifically check for 'pengguna' data integrity
+        const hasAdmin = parsedData.pengguna?.some(u => u.role === 'Admin');
+        if (!parsedData.pengguna || parsedData.pengguna.length === 0 || !hasAdmin) {
+            // Preserve other data, but reset 'pengguna'
             parsedData.pengguna = penggunaDataInitial;
             needsUpdate = true;
         }
-
 
         if (needsUpdate) {
             localStorage.setItem(APP_DATA_KEY, JSON.stringify(parsedData));
@@ -391,21 +389,23 @@ function getInitialData(): AllData {
         return parsedData;
 
     } catch (e) {
-        console.error("Failed to parse or correct data from localStorage. Resetting to initial data.", e);
+        console.error("Failed to parse data from localStorage. Resetting to initial data.", e);
         localStorage.setItem(APP_DATA_KEY, JSON.stringify(allDataInitial));
         return allDataInitial;
     }
 }
 
 // Global data object
-let data = getInitialData();
+let data: AllData | null = null;
 
 export const allData = (): AllData => {
   if (typeof window !== 'undefined') {
     // Re-initialize data from localStorage on every call to ensure freshness
     data = getInitialData();
+    return data;
   }
-  return data;
+  // Return a non-null version for server-side rendering, although it won't have user data.
+  return data || allDataInitial;
 }
 
 export const updateAllData = (newData: AllData) => {
@@ -414,28 +414,5 @@ export const updateAllData = (newData: AllData) => {
     data = newData;
   }
 }
-
-export const pegawaiData: Pegawai[] = data.pegawai;
-export const penggunaData: Pengguna[] = data.pengguna;
-export const riwayatJabatanData: RiwayatJabatan[] = data.riwayatJabatan;
-export const riwayatPangkatData: RiwayatPangkat[] = data.riwayatPangkat;
-export const cutiData: Cuti[] = data.cuti;
-export const dokumenData: Dokumen[] = data.dokumen;
-export const departemenData: Departemen[] = data.departemen;
-export const pangkatGolonganData: PangkatGolongan[] = data.pangkatGolongan;
-export const riwayatPendidikanData: RiwayatPendidikan[] = data.riwayatPendidikan;
-export const riwayatDiklatData: RiwayatDiklat[] = data.riwayatDiklat;
-export const penghargaanData: Penghargaan[] = data.penghargaan;
-export const hukumanData: Hukuman[] = data.hukuman;
-
-
-
-export const getPegawaiById = (id: string) => allData().pegawai.find(p => p.id === id);
-export const getRiwayatJabatanByPegawaiId = (pegawaiId: string) => allData().riwayatJabatan.filter(rj => rj.pegawaiId === pegawaiId);
-export const getRiwayatPangkatByPegawaiId = (pegawaiId: string) => allData().riwayatPangkat.filter(rp => rp.pegawaiId === pegawaiId);
-export const getCutiByPegawaiId = (pegawaiId: string) => allData().cuti.filter(c => c.pegawaiId === pegawaiId);
-export const getDokumenByPegawaiId = (pegawaiId: string) => allData().dokumen.filter(d => d.pegawaiId === pegawaiId);
-
-    
 
     
