@@ -130,7 +130,7 @@ export default function HomePage() {
 
       <footer className="py-6 bg-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>© {new Date().getFullYear()} {settings?.appName || 'Simpeg Smart'}. Didukung oleh teknologi terkini.</p>
+          <p>{settings?.footerText || `© ${new Date().getFullYear()} ${settings?.appName || 'Simpeg Smart'}. All rights reserved.`}</p>
         </div>
       </footer>
     </div>
