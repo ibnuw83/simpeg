@@ -39,10 +39,6 @@ const features = [
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-center">
-        {/* Navigation removed as requested */}
-      </header>
-
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 text-center">
