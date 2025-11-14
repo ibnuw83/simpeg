@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
-import { pegawaiData } from '@/lib/data';
+import { allData } from '@/lib/data';
 import type { Pegawai } from '@/lib/types';
 
 function getStatusVariant(status: Pegawai['status']) {
@@ -41,8 +41,13 @@ function getStatusVariant(status: Pegawai['status']) {
 
 export default function PegawaiPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
-  
-  const filteredPegawai = pegawaiData.filter(
+  const [pegawaiList, setPegawaiList] = React.useState<Pegawai[]>([]);
+
+  React.useEffect(() => {
+    setPegawaiList(allData.pegawai);
+  }, []);
+
+  const filteredPegawai = pegawaiList.filter(
     (p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.nip.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -241,10 +241,17 @@ function getInitialData(): AllData {
         const storedData = localStorage.getItem(APP_DATA_KEY);
         if (storedData) {
             try {
-                // Ensure pengguna data is populated if it's missing from old localStorage
-                const parsedData = JSON.parse(storedData);
-                if (!parsedData.pengguna) {
-                  parsedData.pengguna = penggunaDataInitial;
+                // Ensure all data keys are present
+                const parsedData: AllData = JSON.parse(storedData);
+                const initialKeys = Object.keys(allDataInitial) as (keyof AllData)[];
+                let needsUpdate = false;
+                for (const key of initialKeys) {
+                    if (!parsedData[key]) {
+                        (parsedData[key] as any) = allDataInitial[key];
+                        needsUpdate = true;
+                    }
+                }
+                if (needsUpdate) {
                   localStorage.setItem(APP_DATA_KEY, JSON.stringify(parsedData));
                 }
                 return parsedData;
@@ -267,6 +274,7 @@ const data = getInitialData();
 
 export const allData = data;
 export const pegawaiData: Pegawai[] = data.pegawai;
+export const penggunaData: Pengguna[] = data.pengguna;
 export const riwayatJabatanData: RiwayatJabatan[] = data.riwayatJabatan;
 export const riwayatPangkatData: RiwayatPangkat[] = data.riwayatPangkat;
 export const cutiData: Cuti[] = data.cuti;

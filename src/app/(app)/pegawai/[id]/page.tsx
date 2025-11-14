@@ -152,14 +152,16 @@ export default function PegawaiDetailPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {riwayatJabatan.map(item => (
+                  {riwayatJabatan.length > 0 ? riwayatJabatan.map(item => (
                     <TableRow key={item.id}>
                       <TableCell>{item.jabatan}</TableCell>
                       <TableCell>{item.departemen}</TableCell>
                       <TableCell>{item.tanggalMulai}</TableCell>
                       <TableCell>{item.tanggalSelesai || 'Sekarang'}</TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -179,13 +181,15 @@ export default function PegawaiDetailPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {riwayatPangkat.map(item => (
+                  {riwayatPangkat.length > 0 ? riwayatPangkat.map(item => (
                     <TableRow key={item.id}>
                       <TableCell>{item.pangkat}</TableCell>
                       <TableCell>{item.golongan}</TableCell>
                       <TableCell>{item.tanggalKenaikan}</TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                     <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -206,14 +210,16 @@ export default function PegawaiDetailPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cuti.map(item => (
+                  {cuti.length > 0 ? cuti.map(item => (
                     <TableRow key={item.id}>
                       <TableCell>{item.jenisCuti}</TableCell>
                       <TableCell>{item.tanggalMulai} - {item.tanggalSelesai}</TableCell>
                       <TableCell>{item.keterangan}</TableCell>
                       <TableCell><Badge variant="outline">{item.status}</Badge></TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                     <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -234,7 +240,7 @@ export default function PegawaiDetailPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dokumen.map(item => (
+                  {dokumen.length > 0 ? dokumen.map(item => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.namaDokumen}</TableCell>
                       <TableCell><Badge variant="secondary">{item.jenisDokumen}</Badge></TableCell>
@@ -245,7 +251,9 @@ export default function PegawaiDetailPage() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
