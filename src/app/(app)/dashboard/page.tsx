@@ -9,15 +9,16 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp } from "lucide-react";
-import { allData } from "@/lib/data";
+import { allData, getAuthenticatedUser } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { add, format, differenceInYears, differenceInCalendarYears } from 'date-fns';
-import type { Pegawai } from "@/lib/types";
+import type { Pegawai, Pengguna } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 const RETIREMENT_AGE = 58;
 const SALARY_INCREASE_INTERVAL = 2; // years
@@ -138,21 +139,37 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<Pegawai[]>([]);
+  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This will run on the client after hydration
-    // and ensure we have the latest data from localStorage
+    const user = getAuthenticatedUser();
+    if (!user) {
+        router.push('/login');
+        return;
+    }
+    setCurrentUser(user);
     setData(allData().pegawai);
     setIsLoading(false);
-  }, []);
+  }, [router]);
 
   const totalPegawai = data.length;
   const pegawaiAktif = data.filter(p => p.status === 'Aktif').length;
   const pegawaiCuti = data.filter(p => p.status === 'Cuti').length;
   const departments = [...new Set(data.map(p => p.departemen))].length;
   const recentHires = data.slice(0, 5);
+
+  const notificationData = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'Admin') {
+      return data;
+    }
+    // For 'Pengguna' role, filter to only their own data
+    return data.filter(p => p.id === currentUser.pegawaiId);
+  }, [data, currentUser]);
+
 
   if (isLoading) {
     return (
@@ -174,7 +191,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-       <ImportantNotifications data={data} />
+       <ImportantNotifications data={notificationData} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-blue-50 dark:bg-blue-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -259,5 +276,7 @@ export default function DashboardPage() {
       </div>
     </div>
   );
+
+    
 
     
