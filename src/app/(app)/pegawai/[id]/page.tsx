@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import {
   allData
 } from '@/lib/data';
@@ -24,7 +24,10 @@ function getStatusVariant(status: Pegawai['status']) {
     }
 }
 
-export default function PegawaiDetailPage({ params }: { params: { id: string } }) {
+export default function PegawaiDetailPage() {
+  const params = useParams();
+  const id = typeof params.id === 'string' ? params.id : null;
+
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
   const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
@@ -32,7 +35,6 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
   useEffect(() => {
-    const id = params.id;
     if (!id) return;
 
     // This logic now runs on the client after hydration.
@@ -45,7 +47,7 @@ export default function PegawaiDetailPage({ params }: { params: { id: string } }
       setCuti(allData.cuti.filter(c => c.pegawaiId === id));
       setDokumen(allData.dokumen.filter(d => d.pegawaiId === id));
     }
-  }, [params.id]);
+  }, [id]);
 
   useEffect(() => {
     if (pegawai === null) {
