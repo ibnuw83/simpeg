@@ -1,4 +1,4 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/analyze-department-turnover.ts';
+// All flows must be imported here

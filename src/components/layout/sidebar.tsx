@@ -24,7 +24,6 @@ const navItems = [
   { href: '/mutasi', icon: ArrowRightLeft, label: 'Mutasi & Promosi' },
   { href: '/pensiun', icon: Archive, label: 'Pensiun' },
   { href: '/pengguna', icon: UserCog, label: 'Pengguna' },
-  { href: '/analitik', icon: BarChart, label: 'Analitik' },
 ];
 
 const bottomNavItems = [

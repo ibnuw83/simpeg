@@ -292,9 +292,6 @@ export default function DashboardPage() {
              <Link href="/pegawai">
                 <Button className="w-full justify-start" variant="outline">Lihat Semua Pegawai</Button>
             </Link>
-            <Link href="/analitik">
-                <Button className="w-full justify-start" variant="outline">Buka Analitik Pegawai</Button>
-            </Link>
             <Button className="w-full justify-start" variant="outline">Laporan Kepegawaian</Button>
             <Button className="w-full justify-start">Tambah Pegawai Baru</Button>
           </CardContent>
