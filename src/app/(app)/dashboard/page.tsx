@@ -8,24 +8,33 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp } from "lucide-react";
-import { allData, getAuthenticatedUser } from "@/lib/data";
+import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp, PlusCircle } from "lucide-react";
+import { allData, getAuthenticatedUser, updateAllData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { add, format, differenceInYears, differenceInCalendarYears } from 'date-fns';
-import type { Pegawai, Pengguna } from "@/lib/types";
+import { add, format, differenceInCalendarYears } from 'date-fns';
+import type { Pegawai, Pengguna, RiwayatMutasi } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { MutationForm, MutationType } from "@/components/forms/mutation-form";
+import { useToast } from "@/hooks/use-toast";
 
-const RETIREMENT_AGE = 58;
-const SALARY_INCREASE_INTERVAL = 2; // years
-const PROMOTION_INTERVAL = 4; // years
 
-const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
-    const [notifications, setNotifications] = useState<any[]>([]);
+type NotificationItem = Pegawai & { 
+    effectiveDate: Date;
+    notificationType: 'Kenaikan Gaji Berkala' | 'Kenaikan Pangkat Reguler' | 'Pensiun';
+    mutationType: MutationType;
+};
+
+const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], currentUser: Pengguna | null }) => {
+    const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [selectedNotification, setSelectedNotification] = React.useState<NotificationItem | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         const today = new Date();
@@ -33,7 +42,6 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
 
         const activeEmployees = data.filter(p => p.status === 'Aktif');
 
-        // Salary Increases
         const salaryIncreases = activeEmployees
             .filter(p => p.tanggalMasuk)
             .map(p => {
@@ -41,11 +49,10 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
                 const yearsOfService = differenceInCalendarYears(today, startDate);
                 const nextIncreaseYear = Math.floor((yearsOfService / SALARY_INCREASE_INTERVAL) + 1) * SALARY_INCREASE_INTERVAL;
                 const nextIncreaseDate = add(startDate, { years: nextIncreaseYear });
-                return { ...p, effectiveDate: nextIncreaseDate, notificationType: 'Kenaikan Gaji Berkala' };
+                return { ...p, effectiveDate: nextIncreaseDate, notificationType: 'Kenaikan Gaji Berkala', mutationType: 'gaji' as MutationType };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
-        // Promotions
         const promotions = activeEmployees
             .filter(p => p.tanggalMasuk)
             .map(p => {
@@ -53,17 +60,16 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
                 const yearsOfService = differenceInCalendarYears(today, startDate);
                 const nextPromotionYear = Math.floor((yearsOfService / PROMOTION_INTERVAL) + 1) * PROMOTION_INTERVAL;
                 const nextPromotionDate = add(startDate, { years: nextPromotionYear });
-                return { ...p, effectiveDate: nextPromotionDate, notificationType: 'Kenaikan Pangkat Reguler' };
+                return { ...p, effectiveDate: nextPromotionDate, notificationType: 'Kenaikan Pangkat Reguler', mutationType: 'pangkat' as MutationType };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
-        // Retirements
         const retirements = activeEmployees
             .filter(p => p.tanggalLahir)
             .map(p => {
                 const birthDate = new Date(p.tanggalLahir);
                 const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
-                return { ...p, effectiveDate: retirementDate, notificationType: 'Pensiun' };
+                return { ...p, effectiveDate: retirementDate, notificationType: 'Pensiun', mutationType: 'pensiun' as MutationType };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
@@ -77,10 +83,52 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
 
     }, [data]);
 
-    const renderNotificationItem = (item: any) => {
+    const handleOpenDialog = (notification: NotificationItem) => {
+        setSelectedNotification(notification);
+        setIsDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedNotification(null);
+    }
+    
+    const handleSave = (data: any) => {
+        const currentData = allData();
+        const { mutationType, pegawaiId, ...mutationData } = data;
+
+        const newMutation: RiwayatMutasi = {
+          id: `mut-${new Date().getTime()}`,
+          pegawaiId: pegawaiId,
+          jenisMutasi: mutationType,
+          keterangan: data.keterangan || `Proses ${mutationType}`,
+          tanggalEfektif: data.tanggalEfektif,
+          nomorSK: data.nomorSK,
+          googleDriveLink: data.googleDriveLink,
+        };
+
+        const updatedRiwayatMutasi = [...currentData.riwayatMutasi, newMutation];
+        
+        let updatedPegawai = [...currentData.pegawai];
+
+        // This flow from dashboard is for documentation, not for applying the change.
+        // Admin applies the change from mutation module.
+        
+        updateAllData({ 
+            ...currentData, 
+            riwayatMutasi: updatedRiwayatMutasi 
+        });
+
+        toast({
+            title: 'Sukses',
+            description: `Dokumen untuk proses ${selectedNotification?.notificationType} berhasil disimpan.`,
+        });
+        handleCloseDialog();
+    }
+
+    const renderNotificationItem = (item: NotificationItem) => {
         let icon;
         let title;
-        let colorClass;
 
         switch (item.notificationType) {
             case 'Kenaikan Gaji Berkala':
@@ -108,8 +156,8 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
                     <p className="font-semibold">{title}</p>
                     <p className="text-sm text-muted-foreground">Jatuh Tempo: {format(item.effectiveDate, 'dd MMM yyyy')}</p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                    <Link href={`/pegawai/${item.id}`}>Lihat Detail</Link>
+                <Button variant="outline" size="sm" onClick={() => handleOpenDialog(item)}>
+                    Lengkapi Dokumen
                 </Button>
             </div>
         )
@@ -121,20 +169,43 @@ const ImportantNotifications = ({ data }: { data: Pegawai[] }) => {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    <Bell className="h-6 w-6" />
-                    <div>
-                        <CardTitle>Notifikasi Penting</CardTitle>
-                        <CardDescription>Pengingat terkait kepegawaian yang akan datang dalam 1 tahun ke depan.</CardDescription>
+        <>
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <Bell className="h-6 w-6" />
+                        <div>
+                            <CardTitle>Notifikasi Penting</CardTitle>
+                            <CardDescription>Pengingat terkait kepegawaian yang akan datang dalam 1 tahun ke depan.</CardDescription>
+                        </div>
                     </div>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-                {notifications.map(item => renderNotificationItem(item))}
-            </CardContent>
-        </Card>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {notifications.map(item => renderNotificationItem(item))}
+                </CardContent>
+            </Card>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    {selectedNotification && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Lengkapi Dokumen: {selectedNotification.notificationType}</DialogTitle>
+                                <DialogDescription>
+                                    Unggah atau tautkan dokumen pendukung untuk proses ini.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <MutationForm 
+                                mutationType={selectedNotification.mutationType}
+                                onSave={handleSave}
+                                onCancel={handleCloseDialog}
+                                prefilledEmployee={selectedNotification}
+                            />
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
+        </>
     );
 };
 
@@ -191,7 +262,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-       <ImportantNotifications data={notificationData} />
+       <ImportantNotifications data={notificationData} currentUser={currentUser} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-blue-50 dark:bg-blue-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -276,7 +347,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-
-    
-
-    
+ 

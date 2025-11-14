@@ -29,18 +29,19 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { allData, getAuthenticatedUser } from '@/lib/data';
 import { Textarea } from '../ui/textarea';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { Pegawai } from '@/lib/types';
 
-export type MutationType = 'perpindahan' | 'promosi' | 'gaji' | 'pangkat';
+export type MutationType = 'perpindahan' | 'promosi' | 'gaji' | 'pangkat' | 'pensiun';
 
 interface MutationFormProps {
   mutationType: MutationType;
   onSave: (data: any) => void;
   onCancel: () => void;
+  prefilledEmployee?: Pegawai;
 }
 
-export function MutationForm({ mutationType, onSave, onCancel }: MutationFormProps) {
+export function MutationForm({ mutationType, onSave, onCancel, prefilledEmployee }: MutationFormProps) {
 
   const getFormSchema = (type: MutationType) => {
     const baseSchema = {
@@ -66,16 +67,18 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
       case 'gaji':
          return z.object({
           ...baseSchema,
-          gajiBaru: z.preprocess(
-            (a) => parseFloat(z.string().parse(a)),
-            z.number().positive('Gaji baru harus angka positif.')
-          ),
+          keterangan: z.string().optional(),
         });
       case 'pangkat':
         return z.object({
           ...baseSchema,
           pangkatBaru: z.string({ required_error: 'Pangkat baru harus dipilih.' }),
           golonganBaru: z.string({ required_error: 'Golongan baru harus dipilih.' }),
+        });
+      case 'pensiun':
+         return z.object({
+          ...baseSchema,
+          keterangan: z.string().optional(),
         });
       default:
         return z.object(baseSchema);
@@ -87,19 +90,25 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
     resolver: zodResolver(formSchema),
     defaultValues: {
       googleDriveLink: '',
+      pegawaiId: prefilledEmployee?.id || undefined,
+      tanggalEfektif: prefilledEmployee && 'effectiveDate' in prefilledEmployee ? (prefilledEmployee as any).effectiveDate : new Date(),
     }
   });
 
   const { departemen, pangkatGolongan } = allData();
   const currentUser = getAuthenticatedUser();
+  const isUserRole = currentUser?.role === 'Pengguna';
 
   const employeeList: Pegawai[] = useMemo(() => {
-    const allPegawai = allData().pegawai;
-    if (currentUser?.role === 'Admin') {
-      return allPegawai;
+    return allData().pegawai;
+  }, []);
+  
+  useEffect(() => {
+    if (prefilledEmployee) {
+      form.setValue('pegawaiId', prefilledEmployee.id);
+      form.setValue('tanggalEfektif', (prefilledEmployee as any).effectiveDate || new Date());
     }
-    return allPegawai.filter(p => p.id === currentUser?.pegawaiId);
-  }, [currentUser]);
+  }, [prefilledEmployee, form]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -155,14 +164,14 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
             );
         case 'gaji':
              return (
-                <FormField
+                 <FormField
                     control={form.control}
-                    name="gajiBaru"
+                    name="keterangan"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Gaji Pokok Baru</FormLabel>
+                            <FormLabel>Keterangan (Opsional)</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="cth: 5000000" {...field} onChange={e => field.onChange(e.target.value)} />
+                                <Textarea placeholder="Tambahkan catatan jika perlu, misal Gaji Pokok baru..." {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -214,8 +223,8 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
           name="pegawaiId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Pilih Pegawai</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Pegawai</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isUserRole || !!prefilledEmployee}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Cari dan pilih nama pegawai..." />
@@ -285,20 +294,6 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
               )}
             />
         </div>
-
-        <FormField
-            control={form.control}
-            name="keterangan"
-            render={({ field }) => (
-            <FormItem>
-                <FormLabel>Keterangan (Opsional)</FormLabel>
-                <FormControl>
-                    <Textarea placeholder="Tambahkan catatan jika perlu..." {...field} />
-                </FormControl>
-                <FormMessage />
-            </FormItem>
-            )}
-        />
         
         <FormField
             control={form.control}
@@ -344,9 +339,10 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
 
         <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
-            <Button type="submit">Simpan Proses</Button>
+            <Button type="submit">Simpan</Button>
         </div>
       </form>
     </Form>
   );
 }
+
