@@ -40,7 +40,7 @@ const formSchema = z.object({
   tanggalLahir: z.date({ required_error: 'Tanggal lahir harus diisi.' }),
   tanggalMasuk: z.date({ required_error: 'Tanggal masuk harus diisi.' }),
   pangkat: z.string().min(2, { message: 'Pangkat harus diisi.' }),
-  golongan: z.string().min(2, { message: 'Golongan harus diisi.' }),
+  golongan: z.string().min(1, { message: 'Golongan harus diisi.' }),
   status: z.enum(['Aktif', 'Cuti', 'Pensiun']),
   alamat: z.string().min(5, { message: 'Alamat harus diisi.' }),
 });
@@ -65,9 +65,8 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
     },
   });
 
-  const uniqueDepartments = [...new Set(allData().pegawai.map(p => p.departemen))];
-  const uniquePangkat = [...new Set(allData().pegawai.map(p => p.pangkat))];
-  const uniqueGolongan = [...new Set(allData().pegawai.map(p => p.golongan))];
+  const { departemen, pangkatGolongan } = allData();
+  const uniqueDepartments = departemen.map(d => d.nama);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -177,42 +176,31 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
                 control={form.control}
                 name="pangkat"
                 render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Pangkat</FormLabel>
-                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormItem className="md:col-span-2">
+                    <FormLabel>Pangkat / Golongan</FormLabel>
+                     <Select onValueChange={(value) => {
+                        const selected = pangkatGolongan.find(p => p.id === value);
+                        if (selected) {
+                            form.setValue('pangkat', selected.pangkat);
+                            form.setValue('golongan', selected.golongan);
+                        }
+                     }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value)?.id}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue placeholder="Pilih pangkat" />
+                            <SelectValue placeholder="Pilih pangkat / golongan" />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                           {uniquePangkat.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                           {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.id}>{p.pangkat} ({p.golongan})</SelectItem>)}
                         </SelectContent>
                     </Select>
                     <FormMessage />
                     </FormItem>
                 )}
             />
-             <FormField
-                control={form.control}
-                name="golongan"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Golongan</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Pilih golongan" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {uniqueGolongan.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+            {/* Hidden fields for validation, their values are set by the combined select */}
+            <FormField control={form.control} name="golongan" render={() => <FormItem className="hidden"><FormControl><Input/></FormControl></FormItem>} />
+           
             <FormField
               control={form.control}
               name="tanggalLahir"

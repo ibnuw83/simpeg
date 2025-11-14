@@ -82,7 +82,7 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
     resolver: zodResolver(formSchema),
   });
 
-  const { pegawai, departemen, pangkatGolongan } = allData;
+  const { pegawai, departemen, pangkatGolongan } = allData();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const dataToSave = {
@@ -153,48 +153,35 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
             );
         case 'pangkat':
             return (
-                <div className="grid grid-cols-2 gap-4">
+                <>
                     <FormField
                         control={form.control}
                         name="pangkatBaru"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Pangkat Baru</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormLabel>Pangkat / Golongan Baru</FormLabel>
+                                <Select onValueChange={(value) => {
+                                    const selected = pangkatGolongan.find(p => p.id === value);
+                                    if (selected) {
+                                        form.setValue('pangkatBaru', selected.pangkat);
+                                        form.setValue('golonganBaru', selected.golongan);
+                                    }
+                                }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value)?.id}>
                                     <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Pilih pangkat" />
+                                        <SelectValue placeholder="Pilih pangkat / golongan baru" />
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.pangkat}>{p.pangkat}</SelectItem>)}
+                                        {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.id}>{p.pangkat} ({p.golongan})</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="golonganBaru"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Golongan Baru</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Pilih golongan" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.golongan}>{p.golongan}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                    <FormField control={form.control} name="golonganBaru" render={() => <FormItem className="hidden"><FormControl><Input/></FormControl></FormItem>} />
+                </>
             );
         default:
             return null;
@@ -328,3 +315,5 @@ export function MutationForm({ mutationType, onSave, onCancel }: MutationFormPro
     </Form>
   );
 }
+
+    
