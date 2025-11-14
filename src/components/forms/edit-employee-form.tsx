@@ -61,6 +61,8 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...employeeData,
+      eselon: employeeData.eselon || '',
+      avatarUrl: employeeData.avatarUrl || '',
       tanggalLahir: employeeData.tanggalLahir ? new Date(employeeData.tanggalLahir) : undefined,
       tanggalMasuk: employeeData.tanggalMasuk ? new Date(employeeData.tanggalMasuk) : undefined,
     },
@@ -249,7 +251,7 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Eselon</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Pilih eselon" />
