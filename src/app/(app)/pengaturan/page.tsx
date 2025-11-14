@@ -13,6 +13,12 @@ import { allData, updateAllData } from '@/lib/data';
 import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Trash } from 'lucide-react';
+
+const collageImageSchema = z.object({
+  url: z.string().url({ message: "URL gambar tidak valid." }).or(z.literal('')),
+  alt: z.string().min(1, { message: "Teks alternatif harus diisi." }),
+});
 
 const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
@@ -20,6 +26,7 @@ const formSchema = z.object({
   footerText: z.string().optional(),
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
+  collageImages: z.array(collageImageSchema).optional(),
 });
 
 export default function PengaturanPage() {
@@ -32,14 +39,23 @@ export default function PengaturanPage() {
       footerText: '',
       heroTitle: '',
       heroSubtitle: '',
+      collageImages: [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "collageImages",
   });
 
   useEffect(() => {
     // Load settings from localStorage when component mounts
     const settings = allData().appSettings;
     if (settings) {
-      form.reset(settings);
+      form.reset({
+        ...settings,
+        collageImages: settings.collageImages || []
+      });
     }
   }, [form]);
 
@@ -153,6 +169,60 @@ export default function PengaturanPage() {
                 </FormItem>
               )}
             />
+
+            <Separator className="my-8" />
+
+            <div>
+              <h3 className="text-lg font-medium">Pengaturan Carousel Gambar</h3>
+              <FormDescription className="mb-4">Atur gambar yang tampil di carousel halaman utama.</FormDescription>
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-end gap-4 p-4 border rounded-md">
+                    <div className="grid grid-cols-2 gap-4 flex-1">
+                      <FormField
+                        control={form.control}
+                        name={`collageImages.${index}.url`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>URL Gambar</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://example.com/image.jpg" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`collageImages.${index}.alt`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teks Alternatif</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Deskripsi singkat gambar" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => append({ url: '', alt: '' })}
+              >
+                Tambah Gambar
+              </Button>
+            </div>
+
 
             <div className="flex justify-end pt-4">
               <Button type="submit">Simpan Perubahan</Button>

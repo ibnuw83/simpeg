@@ -307,6 +307,24 @@ const appSettingsInitial: AppSettings = {
     footerText: '© 2024 Pemerintah Kota',
     heroTitle: 'Administrasi Kepegawaian <span class=\'text-primary\'>Terintegrasi</span>',
     heroSubtitle: 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.',
+    collageImages: [
+      {
+        url: "https://picsum.photos/seed/101/400/300",
+        alt: "Pegawai bekerja di kantor modern"
+      },
+      {
+        url: "https://picsum.photos/seed/102/400/300",
+        alt: "Grafik data analitik di layar komputer"
+      },
+      {
+        url: "https://picsum.photos/seed/103/400/300",
+        alt: "Dokumen dan laporan di atas meja"
+      },
+      {
+        url: "https://picsum.photos/seed/104/400/300",
+        alt: "Rapat tim di ruang pertemuan"
+      }
+    ]
 };
 
 

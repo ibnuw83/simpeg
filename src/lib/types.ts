@@ -133,12 +133,18 @@ export interface PangkatGolongan {
   golongan: string;
 }
 
+export interface CollageImage {
+  url: string;
+  alt: string;
+}
+
 export interface AppSettings {
   appName: string;
   logoUrl: string;
   footerText: string;
   heroTitle?: string;
   heroSubtitle?: string;
+  collageImages?: CollageImage[];
 }
 
 export interface AllData {

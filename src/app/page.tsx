@@ -3,14 +3,14 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, CalendarOff, Users, FileText } from 'lucide-react';
+import { Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { allData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import images from '@/lib/placeholder-images.json';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 
 export default function HomePage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -71,23 +71,38 @@ export default function HomePage() {
             </div>
         </section>
 
-        {/* Image Collage Section */}
+        {/* Carousel Section */}
         <section className="py-16 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {images.collage.map((image, index) => (
-                        <div key={index} className="overflow-hidden rounded-lg shadow-lg group">
-                            <Image
-                                src={image.src}
-                                alt={image.alt}
-                                width={image.width}
-                                height={image.height}
-                                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                                data-ai-hint={image.hint}
-                            />
-                        </div>
-                    ))}
-                </div>
+                <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                        {(settings?.collageImages || []).map((image, index) => (
+                            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                                <div className="p-1">
+                                    <Card>
+                                        <CardContent className="flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                                             <Image
+                                                src={image.url}
+                                                alt={image.alt}
+                                                width={400}
+                                                height={300}
+                                                className="h-full w-full object-cover transition-transform duration-300 ease-in-out hover:scale-105"
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                </Carousel>
             </div>
         </section>
 
