@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -28,7 +29,6 @@ const allNavItems = [
 
 const bottomNavItems = [
     { href: '/pengaturan', icon: Settings, label: 'Pengaturan', roles: ['Admin'] },
-    { href: '/bantuan', icon: LifeBuoy, label: 'Bantuan', roles: ['Admin', 'Pengguna'] },
 ]
 
 export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
