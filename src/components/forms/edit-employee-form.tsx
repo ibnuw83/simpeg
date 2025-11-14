@@ -37,6 +37,7 @@ const formSchema = z.object({
   departemen: z.string().min(2, { message: 'Departemen harus dipilih.' }),
   email: z.string().email({ message: 'Format email tidak valid.' }),
   phone: z.string().min(10, { message: 'Nomor telepon minimal 10 digit.' }),
+  tempatLahir: z.string().min(2, { message: 'Tempat lahir harus diisi.' }),
   tanggalLahir: z.date({ required_error: 'Tanggal lahir harus diisi.' }),
   tanggalMasuk: z.date({ required_error: 'Tanggal masuk harus diisi.' }),
   pangkat: z.string().min(2, { message: 'Pangkat harus diisi.' }),
@@ -133,69 +134,19 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                     </FormItem>
                 )}
             />
-             <FormField
-                control={form.control}
-                name="jabatan"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Jabatan</FormLabel>
-                    <FormControl>
-                        <Input placeholder="cth: Analis Kebijakan" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-             />
-              <FormField
-                control={form.control}
-                name="departemen"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Departemen</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Pilih departemen" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        {uniqueDepartments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-
             <FormField
-                control={form.control}
-                name="pangkat"
-                render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                    <FormLabel>Pangkat / Golongan</FormLabel>
-                     <Select onValueChange={(value) => {
-                        const selected = pangkatGolongan.find(p => p.id === value);
-                        if (selected) {
-                            form.setValue('pangkat', selected.pangkat);
-                            form.setValue('golongan', selected.golongan);
-                        }
-                     }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value && p.golongan === form.getValues('golongan'))?.id}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Pilih pangkat / golongan" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                           {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.id}>{p.pangkat} ({p.golongan})</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
+              control={form.control}
+              name="tempatLahir"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tempat Lahir</FormLabel>
+                  <FormControl>
+                    <Input placeholder="cth: Jakarta" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-             {/* Hidden fields for validation, their values are set by the combined select */}
-            <FormField control={form.control} name="golongan" render={() => <FormItem className="hidden"><FormControl><Input/></FormControl></FormItem>} />
-
             <FormField
               control={form.control}
               name="tanggalLahir"
@@ -241,6 +192,69 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
               )}
             />
              <FormField
+                control={form.control}
+                name="jabatan"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Jabatan</FormLabel>
+                    <FormControl>
+                        <Input placeholder="cth: Analis Kebijakan" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+             />
+              <FormField
+                control={form.control}
+                name="departemen"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Departemen</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Pilih departemen" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {uniqueDepartments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+
+            <FormField
+                control={form.control}
+                name="pangkat"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Pangkat / Golongan</FormLabel>
+                     <Select onValueChange={(value) => {
+                        const selected = pangkatGolongan.find(p => p.id === value);
+                        if (selected) {
+                            form.setValue('pangkat', selected.pangkat);
+                            form.setValue('golongan', selected.golongan);
+                        }
+                     }} defaultValue={pangkatGolongan.find(p => p.pangkat === field.value && p.golongan === form.getValues('golongan'))?.id}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Pilih pangkat / golongan" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                           {pangkatGolongan.map(p => <SelectItem key={p.id} value={p.id}>{p.pangkat} ({p.golongan})</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+             {/* Hidden fields for validation, their values are set by the combined select */}
+            <FormField control={form.control} name="golongan" render={() => <FormItem className="hidden"><FormControl><Input/></FormControl></FormItem>} />
+
+            <FormField
               control={form.control}
               name="tanggalMasuk"
               render={({ field }) => (

@@ -379,7 +379,7 @@ export default function PegawaiDetailPage() {
                 <div className="flex items-center"><Phone className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.phone}</span></div>
                 <div className="flex items-center"><MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.alamat}</span></div>
                 {pegawai.tanggalLahir && (
-                  <div className="flex items-center"><Cake className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}</span></div>
+                  <div className="flex items-center"><Cake className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.tempatLahir}, {format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}</span></div>
                 )}
               </CardContent>
             </Card>

@@ -12,6 +12,7 @@ export interface Pegawai {
   avatarUrl: string;
   imageHint: string;
   tanggalMasuk: string;
+  tempatLahir: string;
   tanggalLahir: string;
   alamat: string;
 }
