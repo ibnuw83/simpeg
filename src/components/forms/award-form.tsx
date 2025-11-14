@@ -30,9 +30,10 @@ const formSchema = z.object({
 interface AwardFormProps {
   onSave: (data: any) => void;
   awardData?: Penghargaan | null;
+  onCancel: () => void;
 }
 
-export function AwardForm({ onSave, awardData }: AwardFormProps) {
+export function AwardForm({ onSave, awardData, onCancel }: AwardFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -135,7 +136,8 @@ export function AwardForm({ onSave, awardData }: AwardFormProps) {
             </FormItem>
             )}
         />
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-2 pt-4">
+          <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
           <Button type="submit">Simpan</Button>
         </div>
       </form>

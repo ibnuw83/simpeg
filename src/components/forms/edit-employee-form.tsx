@@ -48,9 +48,10 @@ const formSchema = z.object({
 interface EditEmployeeFormProps {
   onSave: (employee: Pegawai) => void;
   employeeData: Pegawai;
+  onCancel: () => void;
 }
 
-export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps) {
+export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmployeeFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -318,7 +319,8 @@ export function EditEmployeeForm({ onSave, employeeData }: EditEmployeeFormProps
                 )}
             />
         </div>
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
             <Button type="submit">Simpan Perubahan</Button>
         </div>
       </form>

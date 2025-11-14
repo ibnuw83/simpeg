@@ -40,14 +40,17 @@ const formSchema = z.object({
 interface HistoryFormProps {
   onSave: (data: any) => void;
   historyData?: RiwayatJabatan | null;
+  onCancel: () => void;
 }
 
-export function HistoryForm({ onSave, historyData }: HistoryFormProps) {
+export function HistoryForm({ onSave, historyData, onCancel }: HistoryFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       jabatan: '',
       departemen: '',
+      tanggalMulai: undefined,
+      tanggalSelesai: undefined,
     },
   });
   
@@ -200,7 +203,8 @@ export function HistoryForm({ onSave, historyData }: HistoryFormProps) {
             )}
           />
         </div>
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-2 pt-4">
+          <Button type="button" variant="ghost" onClick={onCancel}>Batal</Button>
           <Button type="submit">Simpan Riwayat</Button>
         </div>
       </form>

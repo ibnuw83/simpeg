@@ -95,6 +95,7 @@ export default function PegawaiDetailPage() {
     updateAllData({ ...currentData, pegawai: updatedPegawaiList });
     loadData();
     setIsEditDialogOpen(false);
+    toast({ title: 'Sukses', description: `Data pegawai berhasil diperbarui.` });
   };
   
   const handleSaveHistory = (type: DialogState['type'], newData: any) => {
@@ -154,6 +155,7 @@ export default function PegawaiDetailPage() {
             toastMessage = 'Riwayat penghargaan';
             break;
         default:
+            showNotImplementedToast();
             return;
     }
 
@@ -164,7 +166,11 @@ export default function PegawaiDetailPage() {
   }
 
   const openHistoryDialog = (type: DialogState['type'], data: any | null = null) => {
-    setHistoryDialogState({ isOpen: true, type, data });
+    if (['jabatan', 'penghargaan'].includes(type as string)) {
+        setHistoryDialogState({ isOpen: true, type, data });
+    } else {
+        showNotImplementedToast();
+    }
   }
 
   const closeHistoryDialog = () => {
@@ -172,8 +178,12 @@ export default function PegawaiDetailPage() {
   }
 
   const openDeleteDialog = (type: DialogState['type'], data: any) => {
-    setHistoryDialogState({ isOpen: false, type, data });
-    setIsDeleteDialogOpen(true);
+    if (['jabatan', 'penghargaan'].includes(type as string)) {
+        setHistoryDialogState({ isOpen: false, type, data });
+        setIsDeleteDialogOpen(true);
+    } else {
+        showNotImplementedToast();
+    }
   }
 
   const closeDeleteDialog = () => {
@@ -193,9 +203,9 @@ export default function PegawaiDetailPage() {
   const renderHistoryForm = () => {
       switch (historyDialogState.type) {
           case 'jabatan':
-              return <HistoryForm onSave={(data) => handleSaveHistory('jabatan', data)} historyData={historyDialogState.data} />;
+              return <HistoryForm onSave={(data) => handleSaveHistory('jabatan', data)} historyData={historyDialogState.data} onCancel={closeHistoryDialog} />;
           case 'penghargaan':
-              return <AwardForm onSave={(data) => handleSaveHistory('penghargaan', data)} awardData={historyDialogState.data} />;
+              return <AwardForm onSave={(data) => handleSaveHistory('penghargaan', data)} awardData={historyDialogState.data} onCancel={closeHistoryDialog} />;
           default:
               return null;
       }
@@ -382,7 +392,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Pendidikan</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => openHistoryDialog('pendidikan')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -403,7 +413,7 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.jurusan}</TableCell>
                           <TableCell>{item.tahunLulus}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('pendidikan', item)}><MoreHorizontal className="h-4 w-4" /></Button>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -419,7 +429,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Diklat</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => openHistoryDialog('diklat')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -440,7 +450,7 @@ export default function PegawaiDetailPage() {
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.jumlahJam}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('diklat', item)}><MoreHorizontal className="h-4 w-4" /></Button>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -456,7 +466,7 @@ export default function PegawaiDetailPage() {
             <Card>
                <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Cuti</CardTitle>
-                 <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Ajukan Cuti</Button>
+                 <Button size="sm" onClick={() => openHistoryDialog('cuti')}><PlusCircle className="mr-2 h-4 w-4" /> Ajukan Cuti</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -477,7 +487,7 @@ export default function PegawaiDetailPage() {
                         <TableCell>{item.keterangan}</TableCell>
                         <TableCell><Badge variant="outline">{item.status}</Badge></TableCell>
                         <TableCell className="text-right">
-                            <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('cuti', item)}><MoreHorizontal className="h-4 w-4" /></Button>
                         </TableCell>
                       </TableRow>
                     )) : (
@@ -536,7 +546,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Hukuman</CardTitle>
-                <Button size="sm" variant="destructive" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" variant="destructive" onClick={() => openHistoryDialog('hukuman')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -555,7 +565,7 @@ export default function PegawaiDetailPage() {
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                           <TableCell>{item.keterangan}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('hukuman', item)}><MoreHorizontal className="h-4 w-4" /></Button>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -571,7 +581,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Manajemen Dokumen</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Unggah Dokumen</Button>
+                <Button size="sm" onClick={() => openHistoryDialog('dokumen')}><PlusCircle className="mr-2 h-4 w-4" /> Unggah Dokumen</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -593,7 +603,7 @@ export default function PegawaiDetailPage() {
                           <Button variant="ghost" size="icon" asChild>
                             <a href={item.fileUrl} download><Download className="h-4 w-4" /></a>
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => openDeleteDialog('dokumen', item)}><MoreHorizontal className="h-4 w-4" /></Button>
                         </TableCell>
                       </TableRow>
                     )) : (
@@ -616,7 +626,7 @@ export default function PegawaiDetailPage() {
                     Lakukan perubahan pada data pegawai. Klik simpan jika sudah selesai.
                 </DialogDescription>
                 </DialogHeader>
-                <EditEmployeeForm onSave={handleUpdate} employeeData={pegawai} />
+                <EditEmployeeForm onSave={handleUpdate} employeeData={pegawai} onCancel={() => setIsEditDialogOpen(false)} />
             </DialogContent>
         </Dialog>
       )}
