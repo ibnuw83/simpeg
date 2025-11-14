@@ -109,6 +109,7 @@ export interface Cuti {
   tanggalSelesai: string;
   keterangan: string;
   status: 'Disetujui' | 'Ditolak' | 'Menunggu';
+  linkBuktiDukung?: string;
 }
 
 export interface Dokumen {

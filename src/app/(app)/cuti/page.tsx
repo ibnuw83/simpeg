@@ -20,7 +20,7 @@ import type { Cuti, Pegawai, Pengguna } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Link as LinkIcon } from 'lucide-react';
 
 type CutiWithPegawai = Cuti & { pegawai: Pegawai | undefined };
 
@@ -134,6 +134,7 @@ export default function ManajemenCutiPage() {
                   <TableHead>Jenis Cuti</TableHead>
                   <TableHead>Tanggal</TableHead>
                   <TableHead>Keterangan</TableHead>
+                  <TableHead>Bukti</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right w-[200px]">Aksi</TableHead>
                 </TableRow>
@@ -161,6 +162,15 @@ export default function ManajemenCutiPage() {
                         {format(new Date(c.tanggalMulai), 'dd/MM/yy')} - {format(new Date(c.tanggalSelesai), 'dd/MM/yy')}
                       </TableCell>
                        <TableCell className="max-w-[200px] truncate">{c.keterangan}</TableCell>
+                       <TableCell>
+                         {c.linkBuktiDukung && (
+                           <Button variant="ghost" size="icon" asChild>
+                              <a href={c.linkBuktiDukung} target="_blank" rel="noopener noreferrer" aria-label="Link Bukti Dukung">
+                                <LinkIcon className="h-4 w-4" />
+                              </a>
+                            </Button>
+                         )}
+                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(c.status)}>{c.status}</Badge>
                       </TableCell>
@@ -180,7 +190,7 @@ export default function ManajemenCutiPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       Tidak ada pengajuan cuti dengan status '{filter}'.
                     </TableCell>
                   </TableRow>

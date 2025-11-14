@@ -28,12 +28,14 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Textarea } from '../ui/textarea';
 import { getAuthenticatedUser } from '@/lib/data';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
   jenisCuti: z.enum(['Tahunan', 'Sakit', 'Penting', 'Melahirkan'], { required_error: 'Jenis cuti harus dipilih.' }),
   tanggalMulai: z.date({ required_error: 'Tanggal mulai harus diisi.' }),
   tanggalSelesai: z.date({ required_error: 'Tanggal selesai harus diisi.' }),
   keterangan: z.string().min(5, { message: 'Keterangan harus diisi.' }),
+  linkBuktiDukung: z.string().url({ message: 'URL tidak valid.' }).or(z.literal('')).optional(),
   status: z.enum(['Disetujui', 'Ditolak', 'Menunggu'], { required_error: 'Status harus dipilih.' }),
 });
 
@@ -52,6 +54,7 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
     defaultValues: {
       jenisCuti: undefined,
       keterangan: '',
+      linkBuktiDukung: '',
       status: 'Menunggu',
     },
   });
@@ -62,6 +65,7 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
         ...leaveData,
         tanggalMulai: new Date(leaveData.tanggalMulai),
         tanggalSelesai: new Date(leaveData.tanggalSelesai),
+        linkBuktiDukung: leaveData.linkBuktiDukung || '',
       });
     } else {
       form.reset({
@@ -69,6 +73,7 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
         tanggalMulai: undefined,
         tanggalSelesai: undefined,
         keterangan: '',
+        linkBuktiDukung: '',
         status: 'Menunggu',
       });
     }
@@ -172,6 +177,19 @@ export function LeaveForm({ onSave, leaveData, onCancel }: LeaveFormProps) {
               <FormLabel>Keterangan</FormLabel>
               <FormControl>
                 <Textarea placeholder="Alasan pengajuan cuti..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="linkBuktiDukung"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link Bukti Dukung (Opsional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://docs.google.com/document/..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
