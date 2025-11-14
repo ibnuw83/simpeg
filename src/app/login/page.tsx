@@ -82,7 +82,7 @@ export default function LoginPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="flex flex-col items-center gap-2 mb-2">
+          <div className="flex flex-col items-center gap-2 mb-4">
             {settings ? (
               settings.logoUrl ? (
                 <img src={settings.logoUrl} alt="Logo" className="h-8 w-8" />
@@ -92,7 +92,6 @@ export default function LoginPage() {
             ) : <Skeleton className="h-8 w-8 rounded-full" />}
             <span className="text-2xl font-bold">{settings?.appName || <Skeleton className="h-7 w-36" />}</span>
           </div>
-          <CardTitle className="text-xl">Login Akun</CardTitle>
           <CardDescription>
             Masuk untuk mengakses dasbor kepegawaian Anda.
           </CardDescription>
