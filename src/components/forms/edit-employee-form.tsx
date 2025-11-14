@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -29,12 +29,14 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { Pegawai } from '@/lib/types';
 import { allData } from '@/lib/data';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Nama harus diisi, minimal 2 karakter.' }),
   nip: z.string().min(10, { message: 'NIP harus diisi, minimal 10 digit.' }),
   jabatan: z.string().min(2, { message: 'Jabatan harus diisi.' }),
   jenisJabatan: z.enum(['Jabatan Struktural', 'Jabatan Fungsional Tertentu', 'Jabatan Fungsional Umum'], { required_error: 'Jenis jabatan harus dipilih.' }),
+  eselon: z.string().optional(),
   departemen: z.string().min(2, { message: 'Departemen harus dipilih.' }),
   email: z.string().email({ message: 'Format email tidak valid.' }),
   phone: z.string().min(10, { message: 'Nomor telepon minimal 10 digit.' }),
@@ -67,6 +69,17 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
   const { departemen, pangkatGolongan } = allData();
   const uniqueDepartments = departemen.map(d => d.nama);
 
+  const watchedJenisJabatan = useWatch({
+    control: form.control,
+    name: 'jenisJabatan'
+  });
+
+  useEffect(() => {
+    if (watchedJenisJabatan !== 'Jabatan Struktural') {
+        form.setValue('eselon', '');
+    }
+  }, [watchedJenisJabatan, form]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const updatedEmployee: Pegawai = {
@@ -74,6 +87,7 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
         ...values,
         tanggalLahir: format(values.tanggalLahir, 'yyyy-MM-dd'),
         tanggalMasuk: format(values.tanggalMasuk, 'yyyy-MM-dd'),
+        eselon: values.jenisJabatan === 'Jabatan Struktural' ? values.eselon : undefined,
     };
     onSave(updatedEmployee);
     form.reset();
@@ -227,6 +241,37 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
                     </FormItem>
                 )}
             />
+
+            {watchedJenisJabatan === 'Jabatan Struktural' && (
+                 <FormField
+                    control={form.control}
+                    name="eselon"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Eselon</FormLabel>
+                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Pilih eselon" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                               <SelectItem value="I.a">I.a</SelectItem>
+                               <SelectItem value="I.b">I.b</SelectItem>
+                               <SelectItem value="II.a">II.a</SelectItem>
+                               <SelectItem value="II.b">II.b</SelectItem>
+                               <SelectItem value="III.a">III.a</SelectItem>
+                               <SelectItem value="III.b">III.b</SelectItem>
+                               <SelectItem value="IV.a">IV.a</SelectItem>
+                               <SelectItem value="IV.b">IV.b</SelectItem>
+                               <SelectItem value="V.a">V.a</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
               <FormField
                 control={form.control}
                 name="departemen"

@@ -349,7 +349,7 @@ export default function PegawaiDetailPage() {
                 <CardDescription className="mt-1 text-base">NIP: {pegawai.nip}</CardDescription>
                 <div className="mt-4 flex flex-col gap-2">
                     <div className="flex items-center gap-4 flex-wrap">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Briefcase className="h-4 w-4" /> {pegawai.jabatan}</div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Briefcase className="h-4 w-4" /> {pegawai.jabatan} {pegawai.eselon && `(${pegawai.eselon})`}</div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4" /> {pegawai.pangkat} ({pegawai.golongan})</div>
                         <Badge variant={getStatusVariant(pegawai.status)}>{pegawai.status}</Badge>
                     </div>

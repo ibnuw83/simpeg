@@ -6,6 +6,7 @@ export interface Pegawai {
   pangkat: string;
   golongan: string;
   jabatan: string;
+  eselon?: string;
   jenisJabatan: 'Jabatan Struktural' | 'Jabatan Fungsional Tertentu' | 'Jabatan Fungsional Umum';
   departemen: string;
   email: string;
