@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button"
@@ -25,8 +26,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [email, setEmail] = useState('admin@simpeg.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -114,7 +115,8 @@ export default function LoginPage() {
                 <Label htmlFor="password">Password</Label>
                 <Input 
                     id="password" 
-                    type="password" 
+                    type="password"
+                    placeholder="******"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
