@@ -42,6 +42,40 @@ export interface RiwayatPangkat {
   tanggalKenaikan: string;
 }
 
+export interface RiwayatPendidikan {
+    id: string;
+    pegawaiId: string;
+    jenjang: string;
+    institusi: string;
+    jurusan: string;
+    tahunLulus: string;
+}
+
+export interface RiwayatDiklat {
+    id: string;
+    pegawaiId: string;
+    nama: string;
+    penyelenggara: string;
+    tanggal: Date;
+    jumlahJam: number;
+}
+
+export interface Penghargaan {
+    id: string;
+    pegawaiId: string;
+    nama: string;
+    pemberi: string;
+    tanggal: Date;
+}
+
+export interface Hukuman {
+    id: string;
+    pegawaiId: string;
+    jenis: string;
+    keterangan: string;
+    tanggal: Date;
+}
+
 export interface Cuti {
   id: string;
   pegawaiId: string;
@@ -77,6 +111,10 @@ export interface AllData {
   pengguna: Pengguna[];
   riwayatJabatan: RiwayatJabatan[];
   riwayatPangkat: RiwayatPangkat[];
+  riwayatPendidikan: RiwayatPendidikan[];
+  riwayatDiklat: RiwayatDiklat[];
+  penghargaan: Penghargaan[];
+  hukuman: Hukuman[];
   cuti: Cuti[];
   dokumen: Dokumen[];
   departemen: Departemen[];

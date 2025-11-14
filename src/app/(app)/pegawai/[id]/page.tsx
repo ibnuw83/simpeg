@@ -12,11 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake, PlusCircle, ArrowRightLeft, GraduationCap, BookOpen, Gavel, Trophy, User as UserIcon } from 'lucide-react';
-import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
+import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
+import { useToast } from '@/hooks/use-toast';
+import { HistoryForm } from '@/components/forms/history-form';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -29,17 +31,24 @@ function getStatusVariant(status: Pegawai['status']) {
 
 export default function PegawaiDetailPage() {
   const params = useParams();
+  const { toast } = useToast();
   
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
   const [riwayatPangkat, setRiwayatPangkat] = useState<RiwayatPangkat[]>([]);
+  const [riwayatPendidikan, setRiwayatPendidikan] = useState<RiwayatPendidikan[]>([]);
+  const [riwayatDiklat, setRiwayatDiklat] = useState<RiwayatDiklat[]>([]);
   const [cuti, setCuti] = useState<Cuti[]>([]);
+  const [penghargaan, setPenghargaan] = useState<Penghargaan[]>([]);
+  const [hukuman, setHukuman] = useState<Hukuman[]>([]);
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
+  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddHistoryDialogOpen, setIsAddHistoryDialogOpen] = useState(false);
   
   const id = typeof params.id === 'string' ? params.id : null;
 
-  useEffect(() => {
+  const loadData = React.useCallback(() => {
     if (!id) return;
 
     const storedData = localStorage.getItem('simpegSmartData');
@@ -51,10 +60,18 @@ export default function PegawaiDetailPage() {
     if (pegawaiData) {
       setRiwayatJabatan(data.riwayatJabatan.filter(rj => rj.pegawaiId === id));
       setRiwayatPangkat(data.riwayatPangkat.filter(rp => rp.pegawaiId === id));
+      setRiwayatPendidikan(data.riwayatPendidikan.filter(rp => rp.pegawaiId === id));
+      setRiwayatDiklat(data.riwayatDiklat.filter(rd => rd.pegawaiId === id));
       setCuti(data.cuti.filter(c => c.pegawaiId === id));
+      setPenghargaan(data.penghargaan.filter(p => p.pegawaiId === id));
+      setHukuman(data.hukuman.filter(h => h.pegawaiId === id));
       setDokumen(data.dokumen.filter(d => d.pegawaiId === id));
     }
   }, [id]);
+
+  useEffect(() => {
+    loadData();
+  }, [id, loadData]);
 
   useEffect(() => {
     if (pegawai === null) {
@@ -63,10 +80,8 @@ export default function PegawaiDetailPage() {
   }, [pegawai]);
 
   const handleUpdate = (updatedEmployee: Pegawai) => {
-    // Update state on this page
     setPegawai(updatedEmployee);
 
-    // Update localStorage
     try {
         const storedData = localStorage.getItem('simpegSmartData');
         const currentData = storedData ? JSON.parse(storedData) : allData;
@@ -79,7 +94,35 @@ export default function PegawaiDetailPage() {
     
     setIsEditDialogOpen(false);
   };
+  
+  const handleSaveJabatan = (newHistory: Omit<RiwayatJabatan, 'id' | 'pegawaiId'>) => {
+    if (!id) return;
+    const newRecord: RiwayatJabatan = {
+      ...newHistory,
+      id: new Date().getTime().toString(),
+      pegawaiId: id,
+    };
+    
+    try {
+      const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData));
+      currentData.riwayatJabatan.push(newRecord);
+      localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
+      loadData();
+      setIsAddHistoryDialogOpen(false);
+      toast({ title: 'Sukses', description: 'Riwayat jabatan berhasil ditambahkan.' });
+    } catch (e) {
+      console.error("Failed to update localStorage", e);
+      toast({ variant: 'destructive', title: 'Gagal', description: 'Gagal menyimpan riwayat jabatan.' });
+    }
+  };
 
+  const showNotImplementedToast = () => {
+    toast({
+        variant: 'destructive',
+        title: 'Fitur Belum Tersedia',
+        description: 'Fungsionalitas untuk menambahkan data ini sedang dalam pengembangan.',
+    });
+  }
 
   if (pegawai === undefined) {
     return (
@@ -112,7 +155,6 @@ export default function PegawaiDetailPage() {
   }
 
   if (!pegawai) {
-    // This case should be handled by the notFound call, but it's here as a safeguard.
     return null;
   }
 
@@ -177,7 +219,9 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Jabatan</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => setIsAddHistoryDialogOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat
+                </Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -210,7 +254,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Mutasi</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -234,7 +278,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Pendidikan</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -247,7 +291,16 @@ export default function PegawaiDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      {riwayatPendidikan.length > 0 ? riwayatPendidikan.map(item => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.jenjang}</TableCell>
+                          <TableCell>{item.institusi}</TableCell>
+                          <TableCell>{item.jurusan}</TableCell>
+                          <TableCell>{item.tahunLulus}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -258,7 +311,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Diklat</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -271,7 +324,16 @@ export default function PegawaiDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                      <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      {riwayatDiklat.length > 0 ? riwayatDiklat.map(item => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.nama}</TableCell>
+                          <TableCell>{item.penyelenggara}</TableCell>
+                          <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
+                          <TableCell>{item.jumlahJam}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow><TableCell colSpan={4} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -282,7 +344,7 @@ export default function PegawaiDetailPage() {
             <Card>
                <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Cuti</CardTitle>
-                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Ajukan Cuti</Button>
+                 <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Ajukan Cuti</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -315,7 +377,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Penghargaan</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -327,7 +389,15 @@ export default function PegawaiDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      {penghargaan.length > 0 ? penghargaan.map(item => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.nama}</TableCell>
+                          <TableCell>{item.pemberi}</TableCell>
+                          <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -338,7 +408,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Hukuman</CardTitle>
-                <Button size="sm" variant="destructive"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" variant="destructive" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -350,7 +420,15 @@ export default function PegawaiDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                      <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      {hukuman.length > 0 ? hukuman.map(item => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.jenis}</TableCell>
+                          <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
+                          <TableCell>{item.keterangan}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow><TableCell colSpan={3} className="text-center">Tidak ada data.</TableCell></TableRow>
+                      )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -361,7 +439,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Manajemen Dokumen</CardTitle>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Unggah Dokumen</Button>
+                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Unggah Dokumen</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -409,8 +487,18 @@ export default function PegawaiDetailPage() {
             </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={isAddHistoryDialogOpen} onOpenChange={setIsAddHistoryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tambah Riwayat Jabatan</DialogTitle>
+            <DialogDescription>
+              Isi detail riwayat jabatan baru untuk pegawai ini.
+            </DialogDescription>
+          </DialogHeader>
+          <HistoryForm onSave={handleSaveJabatan} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
-
-    

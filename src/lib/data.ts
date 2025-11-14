@@ -1,6 +1,6 @@
 'use client';
 
-import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan } from './types';
+import type { AllData, Cuti, Dokumen, Pegawai, Pengguna, RiwayatJabatan, RiwayatPangkat, Departemen, PangkatGolongan, RiwayatPendidikan, RiwayatDiklat, Penghargaan, Hukuman } from './types';
 
 const penggunaDataInitial: Pengguna[] = [
   {
@@ -222,6 +222,21 @@ const riwayatPangkatDataInitial: RiwayatPangkat[] = [
   { id: 'p6', pegawaiId: '3', pangkat: 'Pembina', golongan: 'IV/a', tanggalKenaikan: '2009-04-01' },
 ];
 
+const riwayatPendidikanDataInitial: RiwayatPendidikan[] = [
+    { id: 'pd1', pegawaiId: '1', jenjang: 'S1', institusi: 'Universitas Gadjah Mada', jurusan: 'Ilmu Pemerintahan', tahunLulus: '2008' },
+    { id: 'pd2', pegawaiId: '2', jenjang: 'S1', institusi: 'Universitas Indonesia', jurusan: 'Akuntansi', tahunLulus: '2012' },
+];
+
+const riwayatDiklatDataInitial: RiwayatDiklat[] = [
+    { id: 'dk1', pegawaiId: '1', nama: 'Diklat PIM IV', penyelenggara: 'Lembaga Administrasi Negara', tanggal: new Date('2019-10-01'), jumlahJam: 72 },
+];
+
+const penghargaanDataInitial: Penghargaan[] = [
+    { id: 'pg1', pegawaiId: '5', nama: 'Satyalancana Karya Satya XX Tahun', pemberi: 'Presiden RI', tanggal: new Date('2021-08-17') },
+];
+
+const hukumanDataInitial: Hukuman[] = [];
+
 const cutiDataInitial: Cuti[] = [
   { id: 'c1', pegawaiId: '2', jenisCuti: 'Tahunan', tanggalMulai: '2023-07-20', tanggalSelesai: '2023-07-25', keterangan: 'Liburan keluarga', status: 'Disetujui' },
   { id: 'c2', pegawaiId: '4', jenisCuti: 'Melahirkan', tanggalMulai: '2024-05-01', tanggalSelesai: '2024-08-01', keterangan: 'Cuti melahirkan', status: 'Disetujui' },
@@ -250,6 +265,10 @@ const allDataInitial: AllData = {
     pengguna: penggunaDataInitial,
     riwayatJabatan: riwayatJabatanDataInitial,
     riwayatPangkat: riwayatPangkatDataInitial,
+    riwayatPendidikan: riwayatPendidikanDataInitial,
+    riwayatDiklat: riwayatDiklatDataInitial,
+    penghargaan: penghargaanDataInitial,
+    hukuman: hukumanDataInitial,
     cuti: cutiDataInitial,
     dokumen: dokumenDataInitial,
     departemen: departemenDataInitial,
@@ -303,6 +322,11 @@ export const cutiData: Cuti[] = data.cuti;
 export const dokumenData: Dokumen[] = data.dokumen;
 export const departemenData: Departemen[] = data.departemen;
 export const pangkatGolonganData: PangkatGolongan[] = data.pangkatGolongan;
+export const riwayatPendidikanData: RiwayatPendidikan[] = data.riwayatPendidikan;
+export const riwayatDiklatData: RiwayatDiklat[] = data.riwayatDiklat;
+export const penghargaanData: Penghargaan[] = data.penghargaan;
+export const hukumanData: Hukuman[] = data.hukuman;
+
 
 
 export const getPegawaiById = (id: string) => pegawaiData.find(p => p.id === id);
