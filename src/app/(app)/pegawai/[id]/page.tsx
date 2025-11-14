@@ -11,9 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download } from 'lucide-react';
+import { Edit, Mail, Phone, MapPin, Briefcase, Award, Download, Cake } from 'lucide-react';
 import type { Pegawai, RiwayatJabatan, RiwayatPangkat, Cuti, Dokumen } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -26,7 +27,6 @@ function getStatusVariant(status: Pegawai['status']) {
 
 export default function PegawaiDetailPage() {
   const params = useParams();
-  const id = typeof params.id === 'string' ? params.id : null;
   
   const [pegawai, setPegawai] = useState<Pegawai | null | undefined>(undefined);
   const [riwayatJabatan, setRiwayatJabatan] = useState<RiwayatJabatan[]>([]);
@@ -35,6 +35,7 @@ export default function PegawaiDetailPage() {
   const [dokumen, setDokumen] = useState<Dokumen[]>([]);
   
   useEffect(() => {
+    const id = typeof params.id === 'string' ? params.id : null;
     if (!id) return;
 
     const pegawaiData = allData.pegawai.find(p => p.id === id);
@@ -46,7 +47,7 @@ export default function PegawaiDetailPage() {
       setCuti(allData.cuti.filter(c => c.pegawaiId === id));
       setDokumen(allData.dokumen.filter(d => d.pegawaiId === id));
     }
-  }, [id]);
+  }, [params.id]);
 
   useEffect(() => {
     if (pegawai === null) {
@@ -133,6 +134,7 @@ export default function PegawaiDetailPage() {
               <div className="flex items-center"><Mail className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.email}</span></div>
               <div className="flex items-center"><Phone className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.phone}</span></div>
               <div className="flex items-center"><MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{pegawai.alamat}</span></div>
+              <div className="flex items-center"><Cake className="mr-2 h-4 w-4 text-muted-foreground" /> <span>{format(new Date(pegawai.tanggalLahir), 'dd MMMM yyyy')}</span></div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -7,12 +7,80 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building } from "lucide-react";
+import { Users, UserCheck, UserX, Building, Bell } from "lucide-react";
 import { pegawaiData } from "@/lib/data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { add, format, differenceInYears } from 'date-fns';
+import type { Pegawai } from "@/lib/types";
+
+const RETIREMENT_AGE = 58;
+
+const UpcomingRetirements = ({ data }: { data: Pegawai[] }) => {
+  const [upcomingRetirements, setUpcomingRetirements] = useState<any[]>([]);
+
+  useEffect(() => {
+    const today = new Date();
+    const oneYearFromNow = add(today, { years: 1 });
+
+    const retiringSoon = data
+      .filter(p => p.status === 'Aktif' && p.tanggalLahir)
+      .map(p => {
+        const birthDate = new Date(p.tanggalLahir);
+        const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
+        const age = differenceInYears(today, birthDate);
+        return { ...p, retirementDate, age };
+      })
+      .filter(p => p.retirementDate > today && p.retirementDate <= oneYearFromNow)
+      .sort((a, b) => a.retirementDate.getTime() - b.retirementDate.getTime());
+
+    setUpcomingRetirements(retiringSoon);
+  }, [data]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+            <Bell className="h-6 w-6" />
+            <div>
+                <CardTitle>Notifikasi Pensiun</CardTitle>
+                <CardDescription>Pegawai yang akan pensiun dalam 1 tahun ke depan.</CardDescription>
+            </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {upcomingRetirements.length > 0 ? (
+          <div className="space-y-4">
+            {upcomingRetirements.map((pegawai) => (
+              <div key={pegawai.id} className="flex items-center gap-4">
+                 <Avatar className="h-10 w-10">
+                    <AvatarImage src={pegawai.avatarUrl} alt={pegawai.name} data-ai-hint={pegawai.imageHint} />
+                    <AvatarFallback>{pegawai.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <p className="text-sm font-medium leading-none">{pegawai.name}</p>
+                  <p className="text-sm text-muted-foreground">{pegawai.jabatan}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm font-semibold">{format(pegawai.retirementDate, 'dd MMM yyyy')}</p>
+                    <p className="text-xs text-muted-foreground">Usia {pegawai.age} thn</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+            <div className="text-center text-sm text-muted-foreground py-6">
+                Tidak ada pegawai yang akan pensiun dalam waktu dekat.
+            </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 
 export default function DashboardPage() {
   const [data, setData] = useState(pegawaiData);
@@ -78,6 +146,8 @@ export default function DashboardPage() {
         <StatusChart data={data} />
         <DepartmentChart data={data} />
       </div>
+      
+      <UpcomingRetirements data={data} />
 
 
       <div className="grid gap-6 md:grid-cols-2">

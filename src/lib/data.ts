@@ -44,6 +44,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/1/100/100',
     imageHint: 'man portrait',
     tanggalMasuk: '2010-01-15',
+    tanggalLahir: '1985-03-15',
     alamat: 'Jl. Merdeka No. 10, Jakarta',
   },
   {
@@ -60,6 +61,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/2/100/100',
     imageHint: 'woman portrait',
     tanggalMasuk: '2014-02-01',
+    tanggalLahir: '1990-08-20',
     alamat: 'Jl. Pahlawan No. 5, Bandung',
   },
   {
@@ -76,6 +78,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/3/100/100',
     imageHint: 'male professional',
     tanggalMasuk: '2005-03-01',
+    tanggalLahir: '1982-11-10',
     alamat: 'Jl. Sudirman No. 12, Surabaya',
   },
   {
@@ -92,6 +95,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/4/100/100',
     imageHint: 'female professional',
     tanggalMasuk: '2018-01-10',
+    tanggalLahir: '1992-05-25',
     alamat: 'Jl. Gajah Mada No. 8, Medan',
   },
   {
@@ -108,6 +112,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/5/100/100',
     imageHint: 'older man',
     tanggalMasuk: '2000-12-01',
+    tanggalLahir: '1975-01-01',
     alamat: 'Jl. Diponegoro No. 20, Semarang',
   },
   {
@@ -124,6 +129,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/6/100/100',
     imageHint: 'woman smiling',
     tanggalMasuk: '2012-06-01',
+    tanggalLahir: '1967-07-12',
     alamat: 'Jl. Kartini No. 1, Yogyakarta',
   },
   {
@@ -140,6 +146,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/7/100/100',
     imageHint: 'man glasses',
     tanggalMasuk: '2003-11-01',
+    tanggalLahir: '1979-09-09',
     alamat: 'Jl. Imam Bonjol No. 3, Makassar',
   },
   {
@@ -156,6 +163,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/8/100/100',
     imageHint: 'young woman',
     tanggalMasuk: '2020-01-02',
+    tanggalLahir: '1995-02-18',
     alamat: 'Jl. Ahmad Yani No. 15, Palembang',
   },
   {
@@ -172,6 +180,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/9/100/100',
     imageHint: 'man outdoors',
     tanggalMasuk: '2011-03-01',
+    tanggalLahir: '1986-04-01',
     alamat: 'Jl. Gatot Subroto No. 9, Denpasar',
   },
   {
@@ -188,6 +197,7 @@ const pegawaiDataInitial: Pegawai[] = [
     avatarUrl: 'https://picsum.photos/seed/10/100/100',
     imageHint: 'senior man',
     tanggalMasuk: '1995-03-01',
+    tanggalLahir: '1966-12-25',
     alamat: 'Jl. Teuku Umar No. 2, Balikpapan',
   },
 ];
