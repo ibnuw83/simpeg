@@ -22,6 +22,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
 import { useToast } from '@/hooks/use-toast';
 import { HistoryForm } from '@/components/forms/history-form';
+import { AwardForm } from '@/components/forms/award-form';
 
 function getStatusVariant(status: Pegawai['status']) {
     switch (status) {
@@ -31,6 +32,12 @@ function getStatusVariant(status: Pegawai['status']) {
       default: return 'outline';
     }
 }
+
+type DialogState = {
+    isOpen: boolean;
+    type: 'jabatan' | 'penghargaan' | 'pendidikan' | 'diklat' | 'hukuman' | 'dokumen' | 'cuti' | null;
+    data: any | null;
+};
 
 export default function PegawaiDetailPage() {
   const params = useParams();
@@ -48,9 +55,8 @@ export default function PegawaiDetailPage() {
   
   // Dialog States
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [historyDialogState, setHistoryDialogState] = useState<DialogState>({ isOpen: false, type: null, data: null });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedHistory, setSelectedHistory] = useState<{type: string, data: any} | null>(null);
 
   const id = typeof params.id === 'string' ? params.id : null;
 
@@ -91,56 +97,88 @@ export default function PegawaiDetailPage() {
     setIsEditDialogOpen(false);
   };
   
-  const handleSaveHistory = (newHistory: Omit<RiwayatJabatan, 'id' | 'pegawaiId'>) => {
-    if (!id) return;
+  const handleSaveHistory = (type: DialogState['type'], newData: any) => {
+      if (!id || !type) return;
 
-    const currentData = allData();
-    let updatedHistory;
+      const currentData = allData();
+      let updatedHistory;
+      let toastMessage = '';
 
-    if (selectedHistory) { // Update
-        updatedHistory = currentData.riwayatJabatan.map(item => item.id === selectedHistory.data.id ? { ...selectedHistory.data, ...newHistory } : item);
-    } else { // Create
-        const newRecord: RiwayatJabatan = {
-          ...newHistory,
-          id: new Date().getTime().toString(),
-          pegawaiId: id,
-        };
-        updatedHistory = [...currentData.riwayatJabatan, newRecord];
-    }
-    
-    updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
-    loadData();
-    setIsHistoryDialogOpen(false);
-    setSelectedHistory(null);
-    toast({ title: 'Sukses', description: `Riwayat jabatan berhasil ${selectedHistory ? 'diperbarui' : 'ditambahkan'}.` });
+      switch (type) {
+          case 'jabatan':
+              if (historyDialogState.data) { // Update
+                  updatedHistory = currentData.riwayatJabatan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item);
+              } else { // Create
+                  const newRecord: RiwayatJabatan = { ...newData, id: new Date().getTime().toString(), pegawaiId: id };
+                  updatedHistory = [...currentData.riwayatJabatan, newRecord];
+              }
+              updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+              toastMessage = 'Riwayat jabatan';
+              break;
+          case 'penghargaan':
+                if (historyDialogState.data) { // Update
+                    updatedHistory = currentData.penghargaan.map(item => item.id === historyDialogState.data.id ? { ...historyDialogState.data, ...newData } : item);
+                } else { // Create
+                    const newRecord: Penghargaan = { ...newData, id: new Date().getTime().toString(), pegawaiId: id };
+                    updatedHistory = [...currentData.penghargaan, newRecord];
+                }
+                updateAllData({ ...currentData, penghargaan: updatedHistory });
+                toastMessage = 'Riwayat penghargaan';
+                break;
+          default:
+              showNotImplementedToast();
+              return;
+      }
+      
+      loadData();
+      closeHistoryDialog();
+      toast({ title: 'Sukses', description: `${toastMessage} berhasil ${historyDialogState.data ? 'diperbarui' : 'ditambahkan'}.` });
   };
 
   const handleDeleteHistory = () => {
-    if (!selectedHistory) return;
+    if (!historyDialogState.type || !historyDialogState.data) return;
     
     const currentData = allData();
     let updatedHistory;
+    let toastMessage = '';
 
-    // A more generic delete logic can be implemented here if needed
-    if (selectedHistory.type === 'jabatan') {
-        updatedHistory = currentData.riwayatJabatan.filter(item => item.id !== selectedHistory.data.id);
-        updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+    switch (historyDialogState.type) {
+        case 'jabatan':
+            updatedHistory = currentData.riwayatJabatan.filter(item => item.id !== historyDialogState.data.id);
+            updateAllData({ ...currentData, riwayatJabatan: updatedHistory });
+            toastMessage = 'Riwayat jabatan';
+            break;
+        case 'penghargaan':
+            updatedHistory = currentData.penghargaan.filter(item => item.id !== historyDialogState.data.id);
+            updateAllData({ ...currentData, penghargaan: updatedHistory });
+            toastMessage = 'Riwayat penghargaan';
+            break;
+        default:
+            return;
     }
 
     loadData();
     setIsDeleteDialogOpen(false);
-    setSelectedHistory(null);
-    toast({ title: 'Sukses', description: 'Data riwayat berhasil dihapus.' });
+    setHistoryDialogState({ isOpen: false, type: null, data: null });
+    toast({ title: 'Sukses', description: `${toastMessage} berhasil dihapus.` });
   }
 
-  const openHistoryDialog = (type: string, data: any | null = null) => {
-    setSelectedHistory({ type, data });
-    setIsHistoryDialogOpen(true);
+  const openHistoryDialog = (type: DialogState['type'], data: any | null = null) => {
+    setHistoryDialogState({ isOpen: true, type, data });
   }
 
-  const openDeleteDialog = (type: string, data: any) => {
-    setSelectedHistory({ type, data });
+  const closeHistoryDialog = () => {
+      setHistoryDialogState({ isOpen: false, type: null, data: null });
+  }
+
+  const openDeleteDialog = (type: DialogState['type'], data: any) => {
+    setHistoryDialogState({ isOpen: false, type, data });
     setIsDeleteDialogOpen(true);
+  }
+
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setHistoryDialogState({ isOpen: false, type: null, data: null });
   }
 
 
@@ -150,6 +188,32 @@ export default function PegawaiDetailPage() {
         title: 'Fitur Belum Tersedia',
         description: 'Fungsionalitas untuk ini sedang dalam pengembangan.',
     });
+  }
+
+  const renderHistoryForm = () => {
+      switch (historyDialogState.type) {
+          case 'jabatan':
+              return <HistoryForm onSave={(data) => handleSaveHistory('jabatan', data)} historyData={historyDialogState.data} />;
+          case 'penghargaan':
+              return <AwardForm onSave={(data) => handleSaveHistory('penghargaan', data)} awardData={historyDialogState.data} />;
+          default:
+              return null;
+      }
+  }
+
+  const getDialogTitle = () => {
+      if (!historyDialogState.type) return '';
+      const action = historyDialogState.data ? 'Ubah' : 'Tambah';
+      const titles = {
+          jabatan: 'Riwayat Jabatan',
+          penghargaan: 'Riwayat Penghargaan',
+          pendidikan: 'Riwayat Pendidikan',
+          diklat: 'Riwayat Diklat',
+          hukuman: 'Riwayat Hukuman',
+          dokumen: 'Dokumen',
+          cuti: 'Cuti'
+      };
+      return `${action} ${titles[historyDialogState.type]}`;
   }
 
   if (pegawai === undefined) {
@@ -429,7 +493,7 @@ export default function PegawaiDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Riwayat Penghargaan</CardTitle>
-                <Button size="sm" onClick={showNotImplementedToast}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
+                <Button size="sm" onClick={() => openHistoryDialog('penghargaan')}><PlusCircle className="mr-2 h-4 w-4" /> Tambah Riwayat</Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -448,7 +512,15 @@ export default function PegawaiDetailPage() {
                           <TableCell>{item.pemberi}</TableCell>
                           <TableCell>{format(new Date(item.tanggal), 'dd-MM-yyyy')}</TableCell>
                            <TableCell className="text-right">
-                                <Button size="icon" variant="ghost" onClick={showNotImplementedToast}><MoreHorizontal className="h-4 w-4" /></Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                    <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => openHistoryDialog('penghargaan', item)}>Ubah</DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog('penghargaan', item)}>Hapus</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                            </TableCell>
                         </TableRow>
                       )) : (
@@ -549,24 +621,21 @@ export default function PegawaiDetailPage() {
         </Dialog>
       )}
 
-      <Dialog open={isHistoryDialogOpen} onOpenChange={(isOpen) => {
-          setIsHistoryDialogOpen(isOpen);
-          if (!isOpen) setSelectedHistory(null);
+      <Dialog open={historyDialogState.isOpen} onOpenChange={(isOpen) => {
+          if (!isOpen) closeHistoryDialog();
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedHistory?.data ? 'Ubah' : 'Tambah'} Riwayat {selectedHistory?.type === 'jabatan' && 'Jabatan'}</DialogTitle>
+            <DialogTitle>{getDialogTitle()}</DialogTitle>
             <DialogDescription>
               Isi detail riwayat baru atau perbarui yang sudah ada.
             </DialogDescription>
           </DialogHeader>
-          {selectedHistory?.type === 'jabatan' && (
-            <HistoryForm onSave={handleSaveHistory} historyData={selectedHistory.data} />
-          )}
+          {renderHistoryForm()}
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={closeDeleteDialog}>
           <AlertDialogContent>
               <AlertDialogHeader>
               <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
@@ -575,7 +644,7 @@ export default function PegawaiDetailPage() {
               </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setSelectedHistory(null)}>Batal</AlertDialogCancel>
+              <AlertDialogCancel onClick={closeDeleteDialog}>Batal</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteHistory} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
