@@ -305,6 +305,7 @@ const appSettingsInitial: AppSettings = {
     appName: 'Simpeg Smart',
     logoUrl: '',
     footerText: '© 2024 Pemerintah Kota',
+    runningText: 'Selamat datang di Simpeg Smart! Sistem Informasi Manajemen Kepegawaian terpadu dan modern.',
     heroTitle: 'Administrasi Kepegawaian <span class=\'text-primary\'>Terintegrasi</span>',
     heroSubtitle: 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.',
     collageImages: [

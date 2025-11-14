@@ -28,6 +28,18 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-grow">
+        
+        {settings?.runningText && (
+          <div className="bg-secondary text-secondary-foreground overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+            <div className="marquee-text inline-block pl-[100%]">
+              {settings.runningText}
+            </div>
+             <div className="marquee-text inline-block pl-[100%]">
+              {settings.runningText}
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 text-center">
             <div

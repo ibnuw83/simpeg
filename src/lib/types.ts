@@ -142,6 +142,7 @@ export interface AppSettings {
   appName: string;
   logoUrl: string;
   footerText: string;
+  runningText?: string;
   heroTitle?: string;
   heroSubtitle?: string;
   collageImages?: CollageImage[];

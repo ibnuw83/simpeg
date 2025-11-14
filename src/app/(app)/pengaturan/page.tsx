@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -24,6 +23,7 @@ const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
   logoUrl: z.string().url({ message: 'URL logo tidak valid.' }).or(z.literal('')),
   footerText: z.string().optional(),
+  runningText: z.string().optional(),
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
   collageImages: z.array(collageImageSchema).optional(),
@@ -37,6 +37,7 @@ export default function PengaturanPage() {
       appName: '',
       logoUrl: '',
       footerText: '',
+      runningText: '',
       heroTitle: '',
       heroSubtitle: '',
       collageImages: [],
@@ -138,6 +139,23 @@ export default function PengaturanPage() {
 
             <Separator className="my-8" />
             <h3 className="text-lg font-medium">Halaman Utama</h3>
+
+            <FormField
+              control={form.control}
+              name="runningText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teks Berjalan (Marquee)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Pengumuman atau teks selamat datang..." {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Teks ini akan muncul sebagai teks berjalan di bagian atas halaman utama.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={form.control}
