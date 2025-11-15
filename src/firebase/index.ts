@@ -7,7 +7,7 @@ let app: FirebaseApp;
 let auth: Auth;
 let firestore: Firestore;
 
-function initializeFirebase() {
+export function initializeFirebase() {
   const apps = getApps();
   if (apps.length === 0) {
     app = initializeApp(firebaseConfig);
@@ -30,10 +30,10 @@ export function getFirebase() {
 
 
 export {
-  initializeFirebase,
   FirebaseProvider,
-  FirebaseClientProvider,
   useFirebaseApp,
   useFirestore,
   useAuth,
 } from './provider';
+
+export { FirebaseClientProvider } from './client-provider';

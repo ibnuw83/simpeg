@@ -57,7 +57,3 @@ export const useFirestore = () => {
   }
   return context.firestore;
 };
-
-// Re-export FirebaseClientProvider for convenience
-import { FirebaseClientProvider as OriginalFirebaseClientProvider } from './client-provider';
-export const FirebaseClientProvider = OriginalFirebaseClientProvider;

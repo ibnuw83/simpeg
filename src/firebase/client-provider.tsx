@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { initializeFirebase } from './index';
-import { FirebaseProvider, FirebaseProviderProps } from './provider';
+import { FirebaseProvider } from './provider';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
