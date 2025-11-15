@@ -3,11 +3,11 @@
 import type { FirebaseOptions } from 'firebase/app';
 
 export const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyDepYqODHkvcNZm--86J5ct08a9NpyMT2Y",
-  authDomain: "simpeg-46128.firebaseapp.com",
-  projectId: "simpeg-46128",
-  storageBucket: "simpeg-46128.firebasestorage.app",
-  messagingSenderId: "829482145598",
-  appId: "1:829482145598:web:ff93b65ed29aaf0c463e6f",
-  measurementId: "G-0MGKS9HGTZ"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
