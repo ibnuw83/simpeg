@@ -106,7 +106,9 @@ export function MutationForm({ mutationType, onSave, onCancel, prefilledEmployee
   useEffect(() => {
     if (prefilledEmployee) {
       form.setValue('pegawaiId', prefilledEmployee.id);
-      form.setValue('tanggalEfektif', (prefilledEmployee as any).effectiveDate || new Date());
+      if ('effectiveDate' in prefilledEmployee) {
+        form.setValue('tanggalEfektif', (prefilledEmployee as any).effectiveDate || new Date());
+      }
     }
   }, [prefilledEmployee, form]);
 
@@ -346,3 +348,4 @@ export function MutationForm({ mutationType, onSave, onCancel, prefilledEmployee
   );
 }
 
+    

@@ -20,14 +20,14 @@ import type { Pegawai, Pengguna, RiwayatMutasi } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { MutationForm, MutationType } from "@/components/forms/mutation-form";
+import { MutationForm } from "@/components/forms/mutation-form";
 import { useToast } from "@/hooks/use-toast";
 
 
 type NotificationItem = Pegawai & { 
     effectiveDate: Date;
     notificationType: 'Kenaikan Gaji Berkala' | 'Kenaikan Pangkat Reguler' | 'Pensiun';
-    mutationType: MutationType;
+    mutationType: "perpindahan" | "promosi" | "gaji" | "pangkat" | "pensiun";
 };
 
 const SALARY_INCREASE_INTERVAL = 2; // years
@@ -53,7 +53,7 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
                 const yearsOfService = differenceInCalendarYears(today, startDate);
                 const nextIncreaseYear = Math.floor((yearsOfService / SALARY_INCREASE_INTERVAL) + 1) * SALARY_INCREASE_INTERVAL;
                 const nextIncreaseDate = add(startDate, { years: nextIncreaseYear });
-                return { ...p, effectiveDate: nextIncreaseDate, notificationType: 'Kenaikan Gaji Berkala', mutationType: 'gaji' as MutationType };
+                return { ...p, effectiveDate: nextIncreaseDate, notificationType: 'Kenaikan Gaji Berkala', mutationType: 'gaji' as "gaji" };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
@@ -64,7 +64,7 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
                 const yearsOfService = differenceInCalendarYears(today, startDate);
                 const nextPromotionYear = Math.floor((yearsOfService / PROMOTION_INTERVAL) + 1) * PROMOTION_INTERVAL;
                 const nextPromotionDate = add(startDate, { years: nextPromotionYear });
-                return { ...p, effectiveDate: nextPromotionDate, notificationType: 'Kenaikan Pangkat Reguler', mutationType: 'pangkat' as MutationType };
+                return { ...p, effectiveDate: nextPromotionDate, notificationType: 'Kenaikan Pangkat Reguler', mutationType: 'pangkat' as "pangkat" };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
@@ -73,7 +73,7 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
             .map(p => {
                 const birthDate = new Date(p.tanggalLahir);
                 const retirementDate = add(birthDate, { years: RETIREMENT_AGE });
-                return { ...p, effectiveDate: retirementDate, notificationType: 'Pensiun', mutationType: 'pensiun' as MutationType };
+                return { ...p, effectiveDate: retirementDate, notificationType: 'Pensiun', mutationType: 'pensiun' as "pensiun" };
             })
             .filter(p => p.effectiveDate > today && p.effectiveDate <= oneYearFromNow);
 
@@ -351,4 +351,6 @@ export default function DashboardPage() {
       </div>
     </div>
   );
- 
+}
+
+    
