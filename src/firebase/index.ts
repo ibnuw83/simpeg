@@ -19,21 +19,14 @@ export function initializeFirebase() {
   return { app, auth, firestore };
 }
 
-// DEPRECATED: This is a temporary export for the migration script.
-// It will be removed once the app is fully migrated to Firestore.
-export function getFirebase() {
-    if (!app || !auth || !firestore) {
-        return initializeFirebase();
-    }
-    return { app, auth, firestore };
-}
-
-
+// Export hooks
 export {
   FirebaseProvider,
   useFirebaseApp,
   useFirestore,
   useAuth,
 } from './provider';
-
 export { FirebaseClientProvider } from './client-provider';
+export { useCollection } from './firestore/use-collection';
+export { useDoc } from './firestore/use-doc';
+export { useUser } from './auth/use-user';
