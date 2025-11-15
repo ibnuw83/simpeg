@@ -3,31 +3,12 @@
 
 import type { FirebaseOptions } from 'firebase/app';
 
-function parseFirebaseConfig(): FirebaseOptions {
-    const configString = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
-    if (!configString) {
-        console.error("Firebase config environment variable NEXT_PUBLIC_FIREBASE_CONFIG is not set.");
-        return {};
-    }
-    
-    try {
-        // First, try to parse it as-is. This works for local .env files.
-        return JSON.parse(configString);
-    } catch (e) {
-        // If it fails, it might be the Vercel format: a string containing escaped JSON.
-        // e.g., "{\"apiKey\":\"...\"}"
-        console.warn("Could not parse NEXT_PUBLIC_FIREBASE_CONFIG directly, attempting to clean and re-parse. This is common in environments like Vercel.");
-        try {
-            // Un-escape the string and parse again.
-            // The initial parse turns the Vercel string "{\"key\":...}" into a regular string `{"key":...}`
-            const unescapedString = JSON.parse(configString);
-            // The second parse turns the regular string into a JSON object.
-            return JSON.parse(unescapedString);
-        } catch (e2) {
-            console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG after attempting to clean it. Make sure it's a valid JSON string.", e2, "Received:", configString);
-            return {};
-        }
-    }
-}
-
-export const firebaseConfig: FirebaseOptions = parseFirebaseConfig();
+export const firebaseConfig: FirebaseOptions = {
+  apiKey: "AIzaSyB0uvb518UssBGfl-UIsSqH730IyGU5fB0",
+  authDomain: "simpeg-46128.firebaseapp.com",
+  projectId: "simpeg-46128",
+  storageBucket: "simpeg-46128.appspot.com",
+  messagingSenderId: "829482145598",
+  appId: "1:829482145598:web:ff93b65ed29aaf0c463e6f",
+  measurementId: "G-0MGKS9HGTZ"
+};
