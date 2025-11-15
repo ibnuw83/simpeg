@@ -11,9 +11,13 @@ function parseFirebaseConfig(): FirebaseOptions {
         return {};
     }
     try {
-        return JSON.parse(configString);
+        // Clean up the string to ensure it's valid JSON.
+        // Vercel might strip quotes, so we'll try to handle that.
+        const cleanedString = configString
+            .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+        return JSON.parse(cleanedString);
     } catch (e) {
-        console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG. Make sure it's a valid JSON string.", e);
+        console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG. Make sure it's a valid JSON string.", e, "Received:", configString);
         return {};
     }
 }
