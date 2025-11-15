@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -22,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Pegawai, Pengguna } from '@/lib/types';
 import { useEffect } from 'react';
-import { allData } from '@/lib/data';
+import { useCollection } from '@/firebase';
 
 const formSchema = z.object({
   pegawaiId: z.string().optional(),
@@ -51,7 +52,7 @@ export function UserForm({ onSave, userData, onCancel }: UserFormProps) {
     },
   });
 
-  const { pegawai: pegawaiList } = allData();
+  const { data: pegawaiList } = useCollection<Pegawai>('pegawai');
   const isEditing = !!userData;
 
   useEffect(() => {
@@ -211,3 +212,5 @@ export function UserForm({ onSave, userData, onCancel }: UserFormProps) {
     </Form>
   );
 }
+
+    

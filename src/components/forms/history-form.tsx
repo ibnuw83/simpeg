@@ -26,8 +26,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { allData } from '@/lib/data';
-import { RiwayatJabatan } from '@/lib/types';
+import { useCollection } from '@/firebase';
+import { RiwayatJabatan, Departemen } from '@/lib/types';
 import { useEffect } from 'react';
 
 const formSchema = z.object({
@@ -72,7 +72,7 @@ export function HistoryForm({ onSave, historyData, onCancel }: HistoryFormProps)
     }
   }, [historyData, form]);
 
-  const { departemen } = allData();
+  const { data: departemen } = useCollection<Departemen>('departemen');
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave({
@@ -211,3 +211,5 @@ export function HistoryForm({ onSave, historyData, onCancel }: HistoryFormProps)
     </Form>
   );
 }
+
+    

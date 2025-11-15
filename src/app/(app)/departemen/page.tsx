@@ -12,8 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import { allData, updateAllData } from '@/lib/data';
+import { PlusCircle, MoreHorizontal, Loader2 } from 'lucide-react';
 import type { Departemen } from '@/lib/types';
 import {
   AlertDialog,
@@ -34,61 +33,62 @@ import {
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DepartmentForm } from '@/components/forms/department-form';
-
-
-interface DepartmentData extends Departemen {}
+import { useCollection, useFirestore } from '@/firebase';
+import { doc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DepartemenPage() {
-  const [departemenList, setDepartemenList] = React.useState<DepartmentData[]>([]);
+  const { toast } = useToast();
+  const firestore = useFirestore();
+  const { data: departemenList, isLoading } = useCollection<Departemen>('departemen');
   
   // Dialog states
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [selectedDepartment, setSelectedDepartment] = React.useState<DepartmentData | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = React.useState<Departemen | null>(null);
 
-  const loadData = React.useCallback(() => {
-    const data = allData();
-    setDepartemenList(data.departemen || []);
-  }, []);
-
-
-  React.useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleAdd = (newDepartment: { nama: string }) => {
-    const currentData = allData();
-    const updatedDepartments: Departemen[] = [...currentData.departemen, { id: new Date().getTime().toString(), nama: newDepartment.nama }];
-    updateAllData({ ...currentData, departemen: updatedDepartments });
-    loadData();
-    setIsAddEditDialogOpen(false);
+  const handleAdd = async (newDepartment: { nama: string }) => {
+    try {
+      const collectionRef = collection(firestore, 'departemen');
+      await addDoc(collectionRef, newDepartment);
+      toast({ title: 'Sukses', description: 'Departemen baru berhasil ditambahkan.' });
+      setIsAddEditDialogOpen(false);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal menambahkan departemen.', variant: 'destructive' });
+    }
   };
   
-  const handleUpdate = (updatedDepartment: { id: string, nama: string }) => {
-    const currentData = allData();
-    const updatedDepartments = currentData.departemen.map(d => d.id === updatedDepartment.id ? updatedDepartment : d);
-    updateAllData({ ...currentData, departemen: updatedDepartments });
-    loadData();
-    setIsAddEditDialogOpen(false);
-    setSelectedDepartment(null);
+  const handleUpdate = async (updatedDepartment: { id: string, nama: string }) => {
+    try {
+      const docRef = doc(firestore, 'departemen', updatedDepartment.id);
+      await updateDoc(docRef, { nama: updatedDepartment.nama });
+      toast({ title: 'Sukses', description: 'Departemen berhasil diperbarui.' });
+      setIsAddEditDialogOpen(false);
+      setSelectedDepartment(null);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal memperbarui departemen.', variant: 'destructive' });
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedDepartment) return;
-    const currentData = allData();
-    const updatedDepartments = currentData.departemen.filter(d => d.id !== selectedDepartment.id);
-    updateAllData({ ...currentData, departemen: updatedDepartments });
-    loadData();
-    setIsDeleteDialogOpen(false);
-    setSelectedDepartment(null);
+    try {
+      const docRef = doc(firestore, 'departemen', selectedDepartment.id);
+      await deleteDoc(docRef);
+      toast({ title: 'Sukses', description: 'Departemen berhasil dihapus.' });
+      setIsDeleteDialogOpen(false);
+      setSelectedDepartment(null);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal menghapus departemen.', variant: 'destructive' });
+    }
   };
 
-  const openEditDialog = (department: DepartmentData) => {
+  const openEditDialog = (department: Departemen) => {
     setSelectedDepartment(department);
     setIsAddEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (department: DepartmentData) => {
+  const openDeleteDialog = (department: Departemen) => {
     setSelectedDepartment(department);
     setIsDeleteDialogOpen(true);
   };
@@ -97,6 +97,10 @@ export default function DepartemenPage() {
     setSelectedDepartment(null);
     setIsAddEditDialogOpen(true);
   };
+  
+  if (isLoading) {
+      return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <>
@@ -199,3 +203,5 @@ export default function DepartemenPage() {
     </>
   );
 }
+
+    

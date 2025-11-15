@@ -12,8 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import { allData, updateAllData } from '@/lib/data';
+import { PlusCircle, MoreHorizontal, Loader2 } from 'lucide-react';
 import type { PangkatGolongan } from '@/lib/types';
 import {
   AlertDialog,
@@ -34,71 +33,73 @@ import {
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PangkatForm } from '@/components/forms/pangkat-form';
-
-interface PangkatData extends PangkatGolongan {}
+import { useCollection, useFirestore } from '@/firebase';
+import { doc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PangkatPage() {
-  const [pangkatList, setPangkatList] = React.useState<PangkatData[]>([]);
-
+  const { toast } = useToast();
+  const firestore = useFirestore();
+  const { data, isLoading } = useCollection<PangkatGolongan>('pangkatGolongan');
+  
   // Dialog states
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [selectedPangkat, setSelectedPangkat] = React.useState<PangkatData | null>(null);
+  const [selectedPangkat, setSelectedPangkat] = React.useState<PangkatGolongan | null>(null);
 
-  const loadData = React.useCallback(() => {
-    const data = allData();
-    const pangkatGolongan: PangkatGolongan[] = data.pangkatGolongan || [];
-    
-    pangkatGolongan.sort((a, b) => {
+  const pangkatList = React.useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
         if (a.golongan > b.golongan) return -1;
         if (a.golongan < b.golongan) return 1;
         if (a.pangkat > b.pangkat) return -1;
         if (a.pangkat < b.pangkat) return 1;
         return 0;
     });
+  }, [data]);
 
-    setPangkatList(pangkatGolongan);
-  }, []);
-
-
-  React.useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-
-  const handleAdd = (newPangkat: { pangkat: string, golongan: string }) => {
-    const currentData = allData();
-    const updatedPangkat: PangkatGolongan[] = [...currentData.pangkatGolongan, { id: new Date().getTime().toString(), ...newPangkat }];
-    updateAllData({ ...currentData, pangkatGolongan: updatedPangkat });
-    loadData();
-    setIsAddEditDialogOpen(false);
+  const handleAdd = async (newPangkat: { pangkat: string, golongan: string }) => {
+    try {
+      const collectionRef = collection(firestore, 'pangkatGolongan');
+      await addDoc(collectionRef, newPangkat);
+      toast({ title: 'Sukses', description: 'Pangkat/Golongan baru berhasil ditambahkan.' });
+      setIsAddEditDialogOpen(false);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal menambahkan data.', variant: 'destructive' });
+    }
   };
   
-  const handleUpdate = (updatedPangkat: PangkatGolongan) => {
-    const currentData = allData();
-    const updatedPangkatList = currentData.pangkatGolongan.map(p => p.id === updatedPangkat.id ? updatedPangkat : p);
-    updateAllData({ ...currentData, pangkatGolongan: updatedPangkatList });
-    loadData();
-    setIsAddEditDialogOpen(false);
-    setSelectedPangkat(null);
+  const handleUpdate = async (updatedPangkat: PangkatGolongan) => {
+    try {
+      const docRef = doc(firestore, 'pangkatGolongan', updatedPangkat.id);
+      await updateDoc(docRef, { pangkat: updatedPangkat.pangkat, golongan: updatedPangkat.golongan });
+      toast({ title: 'Sukses', description: 'Pangkat/Golongan berhasil diperbarui.' });
+      setIsAddEditDialogOpen(false);
+      setSelectedPangkat(null);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal memperbarui data.', variant: 'destructive' });
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedPangkat) return;
-    const currentData = allData();
-    const updatedPangkatList = currentData.pangkatGolongan.filter(p => p.id !== selectedPangkat.id);
-    updateAllData({ ...currentData, pangkatGolongan: updatedPangkatList });
-    loadData();
-    setIsDeleteDialogOpen(false);
-    setSelectedPangkat(null);
+    try {
+      const docRef = doc(firestore, 'pangkatGolongan', selectedPangkat.id);
+      await deleteDoc(docRef);
+      toast({ title: 'Sukses', description: 'Data berhasil dihapus.' });
+      setIsDeleteDialogOpen(false);
+      setSelectedPangkat(null);
+    } catch(error) {
+      toast({ title: 'Error', description: 'Gagal menghapus data.', variant: 'destructive' });
+    }
   };
 
-  const openEditDialog = (pangkat: PangkatData) => {
+  const openEditDialog = (pangkat: PangkatGolongan) => {
     setSelectedPangkat(pangkat);
     setIsAddEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (pangkat: PangkatData) => {
+  const openDeleteDialog = (pangkat: PangkatGolongan) => {
     setSelectedPangkat(pangkat);
     setIsDeleteDialogOpen(true);
   };
@@ -107,6 +108,10 @@ export default function PangkatPage() {
     setSelectedPangkat(null);
     setIsAddEditDialogOpen(true);
   };
+  
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <>
@@ -211,3 +216,5 @@ export default function PangkatPage() {
     </>
   );
 }
+
+    

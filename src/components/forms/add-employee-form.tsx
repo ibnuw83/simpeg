@@ -27,8 +27,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { Pegawai } from '@/lib/types';
-import { allData } from '@/lib/data';
+import type { Pegawai, PangkatGolongan, Departemen } from '@/lib/types';
+import { useCollection } from '@/firebase';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Nama harus diisi, minimal 2 karakter.' }),
@@ -50,7 +50,7 @@ const formSchema = z.object({
 });
 
 interface AddEmployeeFormProps {
-  onSave: (employee: Pegawai) => void;
+  onSave: (employee: Omit<Pegawai, 'id'>) => void;
 }
 
 export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
@@ -73,7 +73,9 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
     },
   });
 
-  const { departemen, pangkatGolongan } = allData();
+  const { data: departemen } = useCollection<Departemen>('departemen');
+  const { data: pangkatGolongan } = useCollection<PangkatGolongan>('pangkatGolongan');
+  
   const uniqueDepartments = departemen.map(d => d.nama);
 
   const watchedJenisJabatan = useWatch({
@@ -83,8 +85,7 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newEmployee: Pegawai = {
-        id: new Date().getTime().toString(),
+    const newEmployee: Omit<Pegawai, 'id'> = {
         imageHint: 'person face',
         ...values,
         avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
@@ -429,3 +430,5 @@ export function AddEmployeeForm({ onSave }: AddEmployeeFormProps) {
     </Form>
   );
 }
+
+    

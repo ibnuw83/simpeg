@@ -1,42 +1,47 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { allData, getAuthenticatedUser } from '@/lib/data';
-import type { Pegawai } from '@/lib/types';
+import { useCollection, useDoc, useUser } from '@/firebase';
+import type { AppSettings, Pegawai } from '@/lib/types';
 
 export default function LaporanPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { userData } = useUser();
+  const { data: pegawaiData, isLoading: isPegawaiLoading } = useCollection<Pegawai>('pegawai');
+  const { data: appSettings, isLoading: isSettingsLoading } = useDoc<AppSettings>('settings/app');
 
   const generateEmployeeReport = () => {
+    if (!appSettings || !pegawaiData) {
+        toast({ title: "Data belum siap", description: "Harap tunggu data selesai dimuat.", variant: "destructive" });
+        return;
+    }
+    
     setIsGenerating(true);
     try {
       const doc = new jsPDF();
-      const settings = allData().appSettings;
-      const user = getAuthenticatedUser();
-
+      
       // Header
       doc.setFontSize(18);
-      doc.text(settings.appName || 'Laporan Kepegawaian', 14, 22);
+      doc.text(appSettings.appName || 'Laporan Kepegawaian', 14, 22);
       doc.setFontSize(11);
       doc.text('Laporan Daftar Pegawai', 14, 30);
       
       doc.setFontSize(10);
-      const generationDate = `Dicetak oleh: ${user?.name || 'Admin'} pada ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+      const generationDate = `Dicetak oleh: ${userData?.name || 'Admin'} pada ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
       doc.text(generationDate, 14, 36);
       
       const tableColumn = ["No", "Nama", "NIP", "Jabatan", "Departemen", "Status"];
       const tableRows: any[][] = [];
 
-      const employees = allData().pegawai;
-      employees.forEach((employee, index) => {
+      pegawaiData.forEach((employee, index) => {
         const employeeData = [
           index + 1,
           employee.name,
@@ -72,6 +77,8 @@ export default function LaporanPage() {
     }
   };
 
+  const isLoading = isPegawaiLoading || isSettingsLoading;
+
   return (
     <div className="flex flex-col gap-6">
        <div className="space-y-2">
@@ -92,12 +99,14 @@ export default function LaporanPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={generateEmployeeReport} disabled={isGenerating}>
-            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            {isGenerating ? 'Membuat Laporan...' : 'Unduh PDF'}
+          <Button onClick={generateEmployeeReport} disabled={isGenerating || isLoading}>
+            {isGenerating || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+            {isGenerating ? 'Membuat Laporan...' : (isLoading ? 'Memuat data...' : 'Unduh PDF')}
           </Button>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+    

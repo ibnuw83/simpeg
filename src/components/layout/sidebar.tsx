@@ -1,20 +1,20 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, User, Settings, UserCog, Building, ShieldCheck, ArrowRightLeft, Archive, CalendarOff, FileText, TrendingUp as TrendingUpIcon } from 'lucide-react';
+import { LayoutDashboard, Users, User, Settings, UserCog, Building, ShieldCheck, Archive, CalendarOff, FileText, TrendingUp as TrendingUpIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { allData, getAuthenticatedUser } from '@/lib/data';
-import type { AppSettings, Pengguna } from '@/lib/types';
+import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
+import { useDoc, useUser } from '@/firebase';
 
 const allNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Pengguna'] },
@@ -35,19 +35,12 @@ const bottomNavItems = [
 
 export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
-  const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
-
-  useEffect(() => {
-    const loadedSettings = allData().appSettings;
-    const user = getAuthenticatedUser();
-    setSettings(loadedSettings);
-    setCurrentUser(user);
-  }, []);
+  const { data: settings, isLoading: isSettingsLoading } = useDoc<AppSettings>('settings/app');
+  const { userData, isLoading: isUserLoading } = useUser();
 
   const getVisibleItems = (items: typeof allNavItems) => {
-    if (!currentUser) return [];
-    return items.filter(item => item.roles.includes(currentUser.role));
+    if (!userData) return [];
+    return items.filter(item => item.roles.includes(userData.role));
   }
   
   const navItems = getVisibleItems(allNavItems);
@@ -57,7 +50,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const renderNavItems = (items: typeof navItems) => {
     return items.map((item) => {
       const href = item.href.includes('[id]')
-        ? item.href.replace('[id]', currentUser?.pegawaiId || '')
+        ? item.href.replace('[id]', userData?.pegawaiId || '')
         : item.href;
 
       const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href) && !item.href.includes('[id]'));
@@ -81,7 +74,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const renderNavItemsCollapsed = (items: typeof navItems) => {
     return items.map((item) => {
        const href = item.href.includes('[id]')
-        ? item.href.replace('[id]', currentUser?.pegawaiId || '')
+        ? item.href.replace('[id]', userData?.pegawaiId || '')
         : item.href;
       
       const isActive = pathname === href || (item.href !== '/dashboard' && pathname.startsWith(item.href) && !item.href.includes('[id]'));
@@ -112,28 +105,28 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          {settings ? (
-              settings.logoUrl ? (
+          {isSettingsLoading ? <Skeleton className="h-6 w-6 rounded-full" /> : (
+              settings?.logoUrl ? (
                 <img src={settings.logoUrl} alt="Logo" className="h-6 w-6" />
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 12c-3.33 0-5 2.67-5 4s1.67 4 5 4 5-2.67 5-4-1.67-4-5-4zm0-8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
               )
-          ) : <Skeleton className="h-6 w-6 rounded-full" />}
+          )}
           
-          <span className="">{settings ? settings.appName : <Skeleton className="h-4 w-24" />}</span>
+          <span className="">{isSettingsLoading ? <Skeleton className="h-4 w-24" /> : settings?.appName}</span>
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           <ul className="space-y-1">
-            {isMobile ? renderNavItems(navItems) : renderNavItems(navItems)}
+            {isUserLoading ? <Skeleton className="h-20 w-full" /> : (isMobile ? renderNavItems(navItems) : renderNavItems(navItems))}
           </ul>
         </nav>
       </div>
       <div className="mt-auto p-4 border-t">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           <ul className="space-y-1">
-            {isMobile ? renderNavItems(visibleBottomNavItems) : renderNavItems(visibleBottomNavItems)}
+            {isUserLoading ? <Skeleton className="h-8 w-full" /> : (isMobile ? renderNavItems(visibleBottomNavItems) : renderNavItems(visibleBottomNavItems))}
           </ul>
         </nav>
         {settings?.footerText && (
@@ -157,3 +150,5 @@ function SidebarDesktop() {
 export function Sidebar() {
     return <SidebarDesktop />;
 }
+
+    

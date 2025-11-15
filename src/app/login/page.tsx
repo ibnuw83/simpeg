@@ -14,63 +14,47 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { allData, setAuthenticatedUser } from "@/lib/data";
-import type { AppSettings, Pengguna } from "@/lib/types";
+import type { AppSettings } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Briefcase } from 'lucide-react';
+import { useAuth, useDoc } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [settings, setSettings] = useState<AppSettings | null>(null);
+  const auth = useAuth();
+
+  const { data: settings, isLoading: isSettingsLoading } = useDoc<AppSettings>('settings/app');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  useEffect(() => {
-    // Ensure data is initialized on client-side
-    const initialData = allData();
-    setAuthenticatedUser(null);
-    setSettings(initialData.appSettings);
-    setIsLoading(false);
-  }, []);
-
-  const handleLogin = () => {
-    if (isLoading) return;
+  const handleLogin = async () => {
+    if (isSettingsLoading) return;
 
     setIsLoggingIn(true);
-    const users = allData().pengguna;
-    const user = users.find(u => u.email === email && u.password === password);
-
-    setTimeout(() => {
-        if (user) {
-          if (user.status === 'Aktif') {
-            setAuthenticatedUser(user);
-            toast({
-              title: 'Login Berhasil',
-              description: `Selamat datang kembali, ${user.name}!`,
-            });
-            router.push('/dashboard');
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Login Gagal',
-              description: 'Akun Anda saat ini tidak aktif.',
-            });
-          }
-        } else {
-          toast({
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+            title: 'Login Berhasil',
+            description: `Selamat datang kembali!`,
+        });
+        router.push('/dashboard');
+    } catch (error: any) {
+         toast({
             variant: 'destructive',
             title: 'Login Gagal',
             description: 'Email atau password yang Anda masukkan salah.',
-          });
-        }
+        });
+        console.error(error);
+    } finally {
         setIsLoggingIn(false);
-    }, 500); // Simulate network delay
+    }
   }
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -83,14 +67,14 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="flex flex-col items-center gap-2 mb-4">
-            {settings ? (
-              settings.logoUrl ? (
+            {isSettingsLoading ? <Skeleton className="h-8 w-8 rounded-full" /> : (
+              settings?.logoUrl ? (
                 <img src={settings.logoUrl} alt="Logo" className="h-8 w-8" />
               ) : (
                 <Briefcase className="h-8 w-8 text-primary" />
               )
-            ) : <Skeleton className="h-8 w-8 rounded-full" />}
-            <span className="text-2xl font-bold">{settings?.appName || <Skeleton className="h-7 w-36" />}</span>
+            )}
+            <span className="text-2xl font-bold">{isSettingsLoading ? <Skeleton className="h-7 w-36" /> : settings?.appName}</span>
           </div>
           <CardDescription>
             Masuk untuk mengakses dasbor kepegawaian Anda.
@@ -107,7 +91,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={isLoading || isLoggingIn}
+                    disabled={isSettingsLoading || isLoggingIn}
                 />
             </div>
             <div className="grid gap-2">
@@ -119,12 +103,12 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
-                    disabled={isLoading || isLoggingIn}
+                    disabled={isSettingsLoading || isLoggingIn}
                 />
             </div>
             </CardContent>
             <CardFooter>
-            <Button className="w-full" type="submit" disabled={isLoading || isLoggingIn}>
+            <Button className="w-full" type="submit" disabled={isSettingsLoading || isLoggingIn}>
                 {isLoggingIn && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoggingIn ? 'Memproses...' : 'Masuk'}
             </Button>
@@ -139,3 +123,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+    

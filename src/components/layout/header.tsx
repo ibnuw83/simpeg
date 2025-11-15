@@ -20,9 +20,9 @@ import { Menu, User, LogOut, Settings } from "lucide-react";
 import { SidebarNav } from "./sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Pengguna } from "@/lib/types";
-import { getAuthenticatedUser, setAuthenticatedUser } from "@/lib/data";
+import { useEffect } from "react";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
 
 const pathToTitle: { [key: string]: string } = {
   '/dashboard': 'Dashboard',
@@ -48,24 +48,26 @@ function getTitle(path: string): string {
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
+  const { userData, isLoading } = useUser();
   const title = getTitle(pathname);
-  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
-
+  
   useEffect(() => {
-    const user = getAuthenticatedUser();
-    if (!user) {
+    if (!isLoading && !userData) {
       router.push('/login');
-    } else {
-      setCurrentUser(user);
     }
-  }, [router]);
+  }, [isLoading, userData, router]);
 
-  const handleLogout = () => {
-    setAuthenticatedUser(null);
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        router.push('/login');
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
   };
 
-  const userInitial = currentUser?.name?.substring(0, 2).toUpperCase() || 'AD';
+  const userInitial = userData?.name?.substring(0, 2).toUpperCase() || 'AD';
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
@@ -89,24 +91,24 @@ export function Header() {
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
             <Avatar>
-              <AvatarImage src={currentUser?.avatarUrl} alt={currentUser?.name} data-ai-hint="person face" />
+              <AvatarImage src={userData?.avatarUrl} alt={userData?.name} data-ai-hint="person face" />
               <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
             <span className="sr-only">Toggle user menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>{currentUser?.name || 'Pengguna'}</DropdownMenuLabel>
+          <DropdownMenuLabel>{userData?.name || 'Pengguna'}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {currentUser?.role === 'Pengguna' && (
+          {userData?.role === 'Pengguna' && (
              <DropdownMenuItem asChild>
-                <Link href={`/pegawai/${currentUser.pegawaiId}`}>
+                <Link href={`/pegawai/${userData.pegawaiId}`}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profil Saya</span>
                 </Link>
             </DropdownMenuItem>
           )}
-          {currentUser?.role === 'Admin' && (
+          {userData?.role === 'Admin' && (
              <DropdownMenuItem asChild>
                 <Link href="/pengaturan">
                     <Settings className="mr-2 h-4 w-4" />
@@ -124,3 +126,5 @@ export function Header() {
     </header>
   );
 }
+
+    

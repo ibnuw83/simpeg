@@ -2,31 +2,24 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { allData } from '@/lib/data';
 import type { AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay"
+import { useDoc } from '@/firebase';
 
 export default function HomePage() {
-  const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: settings, isLoading } = useDoc<AppSettings>('settings/app');
 
    const plugin = useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true, stopOnHover: true })
   )
-
-  useEffect(() => {
-    const appData = allData();
-    setSettings(appData.appSettings);
-    setIsLoading(false);
-  }, []);
-
+  
   const heroTitle = settings?.heroTitle || 'Administrasi Kepegawaian <span class="text-primary">Terintegrasi</span>';
   const heroSubtitle = settings?.heroSubtitle || 'Kelola data pegawai hingga pensiun dalam satu sistem yang ringkas dan cerdas—tanpa ribet, tanpa tumpukan berkas.';
   
@@ -136,3 +129,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

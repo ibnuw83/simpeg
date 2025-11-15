@@ -27,10 +27,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { allData, getAuthenticatedUser } from '@/lib/data';
+import { useCollection, useUser } from '@/firebase';
 import { Textarea } from '../ui/textarea';
 import { useEffect, useMemo } from 'react';
-import type { Pegawai } from '@/lib/types';
+import type { Pegawai, Departemen, PangkatGolongan } from '@/lib/types';
 
 export type MutationType = 'perpindahan' | 'promosi' | 'gaji' | 'pangkat' | 'pensiun';
 
@@ -95,13 +95,11 @@ export function MutationForm({ mutationType, onSave, onCancel, prefilledEmployee
     }
   });
 
-  const { departemen, pangkatGolongan } = allData();
-  const currentUser = getAuthenticatedUser();
-  const isUserRole = currentUser?.role === 'Pengguna';
-
-  const employeeList: Pegawai[] = useMemo(() => {
-    return allData().pegawai;
-  }, []);
+  const { data: departemen } = useCollection<Departemen>('departemen');
+  const { data: pangkatGolongan } = useCollection<PangkatGolongan>('pangkatGolongan');
+  const { data: employeeList } = useCollection<Pegawai>('pegawai');
+  const { userData } = useUser();
+  const isUserRole = userData?.role === 'Pengguna';
   
   useEffect(() => {
     if (prefilledEmployee) {

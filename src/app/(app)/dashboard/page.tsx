@@ -8,13 +8,11 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp, PlusCircle } from "lucide-react";
-import { allData, getAuthenticatedUser, updateAllData } from "@/lib/data";
+import { Users, UserCheck, UserX, Building, Bell, CheckCircle, Gift, TrendingUp, PlusCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { DepartmentChart, StatusChart } from "@/components/charts/status-chart";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { add, format, differenceInCalendarYears } from 'date-fns';
 import type { Pegawai, Pengguna, RiwayatMutasi } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +20,8 @@ import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { MutationForm } from "@/components/forms/mutation-form";
 import { useToast } from "@/hooks/use-toast";
+import { useCollection, useFirestore, useUser } from "@/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 
 type NotificationItem = Pegawai & { 
@@ -35,12 +35,15 @@ const PROMOTION_INTERVAL = 4; // years
 const RETIREMENT_AGE = 58; // years
 
 const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], currentUser: Pengguna | null }) => {
+    const firestore = useFirestore();
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedNotification, setSelectedNotification] = React.useState<NotificationItem | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
+        if (!data || data.length === 0) return;
+
         const today = new Date();
         const oneYearFromNow = add(today, { years: 1 });
 
@@ -97,12 +100,10 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
         setSelectedNotification(null);
     }
     
-    const handleSave = (data: any) => {
-        const currentData = allData();
+    const handleSave = async (data: any) => {
         const { mutationType, pegawaiId, ...mutationData } = data;
 
-        const newMutation: RiwayatMutasi = {
-          id: `mut-${new Date().getTime()}`,
+        const newMutation: Omit<RiwayatMutasi, 'id'> = {
           pegawaiId: pegawaiId,
           jenisMutasi: mutationType,
           keterangan: data.keterangan || `Proses ${mutationType}`,
@@ -111,23 +112,22 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
           googleDriveLink: data.googleDriveLink,
         };
 
-        const updatedRiwayatMutasi = [...currentData.riwayatMutasi, newMutation];
-        
-        let updatedPegawai = [...currentData.pegawai];
+        try {
+            const collectionRef = collection(firestore, 'pegawai', pegawaiId, 'riwayatMutasi');
+            await addDoc(collectionRef, newMutation);
 
-        // This flow from dashboard is for documentation, not for applying the change.
-        // Admin applies the change from mutation module.
-        
-        updateAllData({ 
-            ...currentData, 
-            riwayatMutasi: updatedRiwayatMutasi 
-        });
-
-        toast({
-            title: 'Sukses',
-            description: `Dokumen untuk proses ${selectedNotification?.notificationType} berhasil disimpan.`,
-        });
-        handleCloseDialog();
+            toast({
+                title: 'Sukses',
+                description: `Dokumen untuk proses ${selectedNotification?.notificationType} berhasil disimpan.`,
+            });
+            handleCloseDialog();
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: 'Gagal Menyimpan',
+                description: `Terjadi kesalahan: ${error instanceof Error ? error.message : String(error)}`,
+            });
+        }
     }
 
     const renderNotificationItem = (item: NotificationItem) => {
@@ -167,10 +167,10 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
         )
     };
 
-
-    if (notifications.length === 0) {
+    if (notifications.length === 0 || currentUser?.role !== 'Admin') {
         return null;
     }
+
 
     return (
         <>
@@ -215,41 +215,41 @@ const ImportantNotifications = ({ data, currentUser }: { data: Pegawai[], curren
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [data, setData] = useState<Pegawai[]>([]);
-  const [currentUser, setCurrentUser] = useState<Pengguna | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { userData, isLoading: isUserLoading } = useUser();
+  const { data: pegawaiData, isLoading: isPegawaiLoading } = useCollection<Pegawai>('pegawai');
+  const { data: departemenData, isLoading: isDepartemenLoading } = useCollection<any>('departemen');
+  
+  const isLoading = isUserLoading || isPegawaiLoading || isDepartemenLoading;
 
   useEffect(() => {
-    const user = getAuthenticatedUser();
-    if (!user) {
+    if (!isUserLoading && !userData) {
         router.push('/login');
-        return;
     }
-    setCurrentUser(user);
-    setData(allData().pegawai);
-    setIsLoading(false);
-  }, [router]);
+  }, [userData, isUserLoading, router]);
 
-  const totalPegawai = data.length;
-  const pegawaiAktif = data.filter(p => p.status === 'Aktif').length;
-  const pegawaiCuti = data.filter(p => p.status === 'Cuti').length;
-  const departments = [...new Set(data.map(p => p.departemen))].length;
-  const recentHires = data.slice(0, 5);
+  const totalPegawai = pegawaiData.length;
+  const pegawaiAktif = pegawaiData.filter(p => p.status === 'Aktif').length;
+  const pegawaiCuti = pegawaiData.filter(p => p.status === 'Cuti').length;
+  const departments = departemenData.length;
+
+  const recentHires = React.useMemo(() => 
+    [...pegawaiData]
+        .sort((a,b) => new Date(b.tanggalMasuk).getTime() - new Date(a.tanggalMasuk).getTime())
+        .slice(0, 5),
+    [pegawaiData]);
 
   const notificationData = React.useMemo(() => {
-    if (!currentUser) return [];
-    if (currentUser.role === 'Admin') {
-      return data;
+    if (!userData) return [];
+    if (userData.role === 'Admin') {
+      return pegawaiData;
     }
-    // For 'Pengguna' role, filter to only their own data
-    return data.filter(p => p.id === currentUser.pegawaiId);
-  }, [data, currentUser]);
+    return pegawaiData.filter(p => p.id === userData.pegawaiId);
+  }, [pegawaiData, userData]);
 
 
   if (isLoading) {
     return (
         <div className="flex flex-col gap-6">
-            <Skeleton className="h-32 w-full" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
@@ -266,7 +266,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-       <ImportantNotifications data={notificationData} currentUser={currentUser} />
+       <ImportantNotifications data={notificationData} currentUser={userData} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-blue-50 dark:bg-blue-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -311,8 +311,8 @@ export default function DashboardPage() {
       </div>
 
        <div className="grid gap-6 md:grid-cols-2">
-        <StatusChart data={data} />
-        <DepartmentChart data={data} />
+        <StatusChart data={pegawaiData} />
+        <DepartmentChart data={pegawaiData} />
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
@@ -344,8 +344,12 @@ export default function DashboardPage() {
              <Link href="/pegawai">
                 <Button className="w-full justify-start" variant="outline">Lihat Semua Pegawai</Button>
             </Link>
-            <Button className="w-full justify-start" variant="outline">Laporan Kepegawaian</Button>
-            <Button className="w-full justify-start">Tambah Pegawai Baru</Button>
+             <Link href="/laporan">
+                <Button className="w-full justify-start" variant="outline">Laporan Kepegawaian</Button>
+            </Link>
+             <Link href="/pegawai">
+                <Button className="w-full justify-start">Tambah Pegawai Baru</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
