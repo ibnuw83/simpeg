@@ -117,7 +117,7 @@ export default function PengaturanPage() {
                     <Input placeholder="https://example.com/logo.png" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Masukkan URL gambar untuk logo. Biarkan kosong untuk menggunakan logo default.
+                    URL ini akan digunakan untuk logo di sidebar, favicon browser, dan ikon PWA di perangkat seluler.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

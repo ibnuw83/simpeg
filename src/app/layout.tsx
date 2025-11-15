@@ -2,11 +2,17 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import { allData } from "@/lib/data";
 
+// Metadata is now static to prevent calling client-side functions on the server.
 export const metadata: Metadata = {
   title: "Simpeg Smart",
   description: "Aplikasi pendataan pegawai untuk dinas pemerintah.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: '/icon-192x192.png',
+    apple: '/icon-192x192.png',
+  },
 };
 
 export default function RootLayout({
@@ -14,6 +20,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
