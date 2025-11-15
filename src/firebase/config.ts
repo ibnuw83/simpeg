@@ -9,36 +9,24 @@ function parseFirebaseConfig(): FirebaseOptions {
         console.error("Firebase config environment variable NEXT_PUBLIC_FIREBASE_CONFIG is not set.");
         return {};
     }
+    
     try {
-        // Attempt to parse directly first
+        // First, try to parse it as-is. This works for local .env files.
         return JSON.parse(configString);
     } catch (e) {
-        console.warn("Could not parse NEXT_PUBLIC_FIREBASE_CONFIG directly, attempting to manually extract keys. This can happen in some environments like Vercel.", e);
-        
-        // If direct parsing fails, manually extract the keys.
-        // This is more robust against environments that might strip quotes.
-        const extractValue = (key: string) => {
-            const regex = new RegExp(`"${key}"\\s*:\\s*"([^"]+)"`);
-            const match = configString.match(regex);
-            return match ? match[1] : undefined;
-        };
-
-        const config: FirebaseOptions = {
-            apiKey: extractValue("apiKey"),
-            authDomain: extractValue("authDomain"),
-            projectId: extractValue("projectId"),
-            storageBucket: extractValue("storageBucket"),
-            messagingSenderId: extractValue("messagingSenderId"),
-            appId: extractValue("appId"),
-            measurementId: extractValue("measurementId"),
-        };
-        
-        if (!config.apiKey || !config.projectId) {
-            console.error("Failed to manually parse NEXT_PUBLIC_FIREBASE_CONFIG. Critical keys (apiKey, projectId) are missing. Received:", configString);
+        // If it fails, it might be the Vercel format: a string containing escaped JSON.
+        // e.g., "{\"apiKey\":\"...\"}"
+        console.warn("Could not parse NEXT_PUBLIC_FIREBASE_CONFIG directly, attempting to clean and re-parse. This is common in environments like Vercel.");
+        try {
+            // Un-escape the string and parse again.
+            // The initial parse turns the Vercel string "{\"key\":...}" into a regular string `{"key":...}`
+            const unescapedString = JSON.parse(configString);
+            // The second parse turns the regular string into a JSON object.
+            return JSON.parse(unescapedString);
+        } catch (e2) {
+            console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG after attempting to clean it. Make sure it's a valid JSON string.", e2, "Received:", configString);
             return {};
         }
-        
-        return config;
     }
 }
 
