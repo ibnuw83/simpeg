@@ -6,6 +6,7 @@ import { FirebaseProvider } from './provider';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseClientProviderProps {
   children: React.ReactNode;
@@ -34,6 +35,7 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
       auth={firebase.auth}
       firestore={firebase.firestore}
     >
+      {process.env.NODE_ENV === 'development' && <FirebaseErrorListener />}
       {children}
     </FirebaseProvider>
   );

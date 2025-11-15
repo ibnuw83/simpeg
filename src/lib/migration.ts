@@ -4,6 +4,8 @@
 import { doc, getFirestore, writeBatch } from "firebase/firestore";
 import { allData as getLegacyData } from "./data";
 import { getFirebase } from "@/firebase";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
  * Migrates all data from localStorage to Firestore.
@@ -70,12 +72,24 @@ export async function migrateLocalStorageToFirestore() {
     if (legacyData.appSettings) {
         console.log("Migrating app settings...");
         const settingsRef = doc(firestore, "settings", "app");
-        // Remove password from pengguna before saving settings if needed for any reason, though it should be handled elsewhere.
         batch.set(settingsRef, legacyData.appSettings);
     }
 
-    // Commit all batched writes to Firestore
-    await batch.commit();
-
-    console.log("Firestore migration completed successfully.");
+    try {
+        await batch.commit();
+        console.log("Firestore migration completed successfully.");
+    } catch (serverError) {
+        // Here we catch the generic error and emit our specific, contextual error.
+        const permissionError = new FirestorePermissionError({
+            path: '/ (batch write)',
+            operation: 'write',
+            requestResourceData: { 
+                collections: Object.keys(legacyData).filter(k => Array.isArray((legacyData as any)[k]) && (legacyData as any)[k].length > 0),
+                note: 'This was a batch write operation. The specific document that failed is not provided by the SDK in batch errors.'
+            }
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        // We also re-throw the original error to be safe, though the emitted one is what we'll see.
+        throw serverError;
+    }
 }
