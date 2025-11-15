@@ -10,11 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { allData, updateAllData } from '@/lib/data';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Database, Loader2, Trash } from 'lucide-react';
-import { migrateLocalStorageToFirestore } from '@/lib/migration';
+import { Trash } from 'lucide-react';
 
 const collageImageSchema = z.object({
   url: z.string().url({ message: "URL gambar tidak valid." }).or(z.literal('')),
@@ -31,53 +30,6 @@ const formSchema = z.object({
   collageImages: z.array(collageImageSchema).optional(),
 });
 
-function MigrationCard() {
-    const [isMigrating, startMigration] = useTransition();
-    const { toast } = useToast();
-
-    const handleMigration = () => {
-        startMigration(async () => {
-            try {
-                toast({
-                    title: 'Migrasi Dimulai',
-                    description: 'Memindahkan data dari local storage ke Firestore. Ini mungkin memakan waktu beberapa saat...',
-                });
-                await migrateLocalStorageToFirestore();
-                toast({
-                    title: 'Migrasi Berhasil',
-                    description: 'Semua data telah berhasil dipindahkan ke Firestore.',
-                });
-            } catch (error: any) {
-                console.error("Migration failed:", error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Migrasi Gagal',
-                    description: error.message || 'Terjadi kesalahan saat memigrasikan data.',
-                });
-            }
-        });
-    }
-
-    return (
-         <Card className="border-amber-500 bg-amber-50 dark:bg-amber-900/20">
-            <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                    <Database className='h-5 w-5 text-amber-700 dark:text-amber-400' />
-                    <span>Migrasi Data ke Firestore</span>
-                </CardTitle>
-                <CardDescription>
-                    Pindahkan semua data dari penyimpanan lokal browser (local storage) ke database Firestore. Proses ini hanya perlu dijalankan sekali.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button onClick={handleMigration} disabled={isMigrating} variant="secondary">
-                     {isMigrating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-                    {isMigrating ? 'Sedang Memigrasi...' : 'Mulai Migrasi Data'}
-                </Button>
-            </CardContent>
-        </Card>
-    )
-}
 
 export default function PengaturanPage() {
   const { toast } = useToast();
@@ -133,7 +85,6 @@ export default function PengaturanPage() {
 
   return (
     <div className='flex flex-col gap-6'>
-    <MigrationCard />
     <Card>
       <CardHeader>
         <CardTitle>Pengaturan Aplikasi</CardTitle>
@@ -304,4 +255,3 @@ export default function PengaturanPage() {
     </div>
   );
 }
-
