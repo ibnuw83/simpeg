@@ -23,6 +23,9 @@ const collageImageSchema = z.object({
 const formSchema = z.object({
   appName: z.string().min(3, { message: 'Nama aplikasi minimal 3 karakter.' }),
   logoUrl: z.string().url({ message: 'URL logo tidak valid.' }).or(z.literal('')),
+  faviconUrl: z.string().url({ message: 'URL favicon tidak valid.' }).or(z.literal('')),
+  pwaIcon192Url: z.string().url({ message: 'URL ikon PWA 192x192 tidak valid.' }).or(z.literal('')),
+  pwaIcon512Url: z.string().url({ message: 'URL ikon PWA 512x512 tidak valid.' }).or(z.literal('')),
   footerText: z.string().optional(),
   runningText: z.string().optional(),
   heroTitle: z.string().optional(),
@@ -38,6 +41,9 @@ export default function PengaturanPage() {
     defaultValues: {
       appName: '',
       logoUrl: '',
+      faviconUrl: '',
+      pwaIcon192Url: '',
+      pwaIcon512Url: '',
       footerText: '',
       runningText: '',
       heroTitle: '',
@@ -52,7 +58,6 @@ export default function PengaturanPage() {
   });
 
   useEffect(() => {
-    // Load settings from localStorage when component mounts
     const settings = allData().appSettings;
     if (settings) {
       form.reset({
@@ -71,7 +76,6 @@ export default function PengaturanPage() {
         title: 'Pengaturan Disimpan',
         description: 'Perubahan Anda telah berhasil disimpan. Beberapa perubahan mungkin memerlukan refresh halaman.',
       });
-      // Optionally force a reload to see all changes immediately
       window.location.reload();
     } catch (error) {
       console.error(error);
@@ -93,8 +97,8 @@ export default function PengaturanPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <h3 className="text-lg font-medium">Pengaturan Umum</h3>
-            <FormField
+            <h3 className="text-lg font-medium">Pengaturan Branding</h3>
+             <FormField
               control={form.control}
               name="appName"
               render={({ field }) => (
@@ -112,12 +116,57 @@ export default function PengaturanPage() {
               name="logoUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL Logo</FormLabel>
+                  <FormLabel>URL Logo Sidebar</FormLabel>
                   <FormControl>
                     <Input placeholder="https://example.com/logo.png" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="faviconUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL Favicon</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/favicon.ico" {...field} />
+                  </FormControl>
                   <FormDescription>
-                    URL ini akan digunakan untuk logo di sidebar, favicon browser, dan ikon PWA di perangkat seluler.
+                    Icon untuk tab browser. Sebaiknya .ico atau .png 32x32.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="pwaIcon192Url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL Ikon PWA (192x192)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/icon-192.png" {...field} />
+                  </FormControl>
+                   <FormDescription>
+                    Ikon untuk PWA di perangkat seluler.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="pwaIcon512Url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL Ikon PWA (512x512)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/icon-512.png" {...field} />
+                  </FormControl>
+                   <FormDescription>
+                    Ikon PWA resolusi tinggi untuk splash screen.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

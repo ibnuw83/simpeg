@@ -141,6 +141,9 @@ export interface CollageImage {
 export interface AppSettings {
   appName: string;
   logoUrl: string;
+  faviconUrl: string;
+  pwaIcon192Url: string;
+  pwaIcon512Url: string;
   footerText: string;
   runningText?: string;
   heroTitle?: string;

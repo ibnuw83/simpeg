@@ -200,6 +200,9 @@
             "properties": {
                 "appName": { "type": "string" },
                 "logoUrl": { "type": "string", "format": "uri" },
+                "faviconUrl": { "type": "string", "format": "uri" },
+                "pwaIcon192Url": { "type": "string", "format": "uri" },
+                "pwaIcon512Url": { "type": "string", "format": "uri" },
                 "footerText": { "type": "string" },
                 "runningText": { "type": "string" },
                 "heroTitle": { "type": "string" },
