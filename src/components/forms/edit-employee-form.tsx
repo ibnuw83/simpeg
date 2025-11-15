@@ -92,7 +92,6 @@ export function EditEmployeeForm({ onSave, employeeData, onCancel }: EditEmploye
         eselon: values.jenisJabatan === 'Jabatan Struktural' ? values.eselon : undefined,
     };
     onSave(updatedEmployee);
-    form.reset();
   }
 
   return (

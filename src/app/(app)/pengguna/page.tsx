@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -25,7 +26,6 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import {
     AlertDialog,
@@ -66,34 +66,25 @@ export default function PenggunaPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<Pengguna | null>(null);
 
-  const loadData = () => {
+  const loadData = React.useCallback(() => {
     const data = allData();
     setPenggunaList(data.pengguna || []);
-  };
+  }, []);
   
   React.useEffect(() => {
     loadData();
-  }, []);
-
-  const updateLocalStorage = (updatedUsers: Pengguna[]) => {
-     try {
-        const currentData = allData();
-        currentData.pengguna = updatedUsers;
-        updateAllData(currentData);
-    } catch(e) {
-        console.error("Failed to update localStorage", e);
-    }
-  }
+  }, [loadData]);
 
   const handleSave = (userData: Partial<Pengguna>) => {
+    const currentData = allData();
     if (selectedUser) { // Update
-      const updatedList = penggunaList.map(u => {
+      const updatedList = currentData.pengguna.map(u => {
         if (u.id === selectedUser.id) {
           return { ...u, ...userData };
         }
         return u;
       });
-      updateLocalStorage(updatedList);
+      updateAllData({ ...currentData, pengguna: updatedList });
       toast({ title: 'Sukses', description: `Data pengguna ${userData.name} berhasil diperbarui.` });
     } else { // Add
       const newUser: Pengguna = {
@@ -101,8 +92,8 @@ export default function PenggunaPage() {
         avatarUrl: allData().pegawai.find(p => p.id === userData.pegawaiId)?.avatarUrl || `https://picsum.photos/seed/${new Date().getTime()}/100/100`,
         ...userData
       } as Pengguna;
-      const updatedList = [...penggunaList, newUser];
-      updateLocalStorage(updatedList);
+      const updatedList = [...currentData.pengguna, newUser];
+      updateAllData({ ...currentData, pengguna: updatedList });
       toast({ title: 'Sukses', description: `Pengguna baru ${userData.name} berhasil ditambahkan.` });
     }
     loadData();
@@ -112,8 +103,9 @@ export default function PenggunaPage() {
   
   const handleDelete = () => {
     if (!selectedUser) return;
-    const updatedList = penggunaList.filter(p => p.id !== selectedUser.id);
-    updateLocalStorage(updatedList);
+    const currentData = allData();
+    const updatedList = currentData.pengguna.filter(p => p.id !== selectedUser.id);
+    updateAllData({ ...currentData, pengguna: updatedList });
     loadData();
     setIsDeleteDialogOpen(false);
     toast({ variant: 'destructive', title: 'Sukses', description: `Pengguna ${selectedUser.name} berhasil dihapus.` });

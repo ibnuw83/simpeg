@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -12,8 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import { allData } from '@/lib/data';
-import type { Pegawai, Departemen } from '@/lib/types';
+import { allData, updateAllData } from '@/lib/data';
+import type { Departemen } from '@/lib/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,10 +36,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { DepartmentForm } from '@/components/forms/department-form';
 
 
-interface DepartmentData {
-  id: string;
-  nama: string;
-}
+interface DepartmentData extends Departemen {}
 
 export default function DepartemenPage() {
   const [departemenList, setDepartemenList] = React.useState<DepartmentData[]>([]);
@@ -48,40 +46,28 @@ export default function DepartemenPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedDepartment, setSelectedDepartment] = React.useState<DepartmentData | null>(null);
 
-  const loadData = () => {
-    const storedData = localStorage.getItem('simpegSmartData');
-    const data = storedData ? JSON.parse(storedData) : allData;
-    const departemen: Departemen[] = data.departemen || [];
-    setDepartemenList(departemen);
-  };
+  const loadData = React.useCallback(() => {
+    const data = allData();
+    setDepartemenList(data.departemen || []);
+  }, []);
 
 
   React.useEffect(() => {
     loadData();
-  }, []);
-
-  const updateLocalStorage = (updatedDepartments: Departemen[]) => {
-     try {
-        const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData));
-        currentData.departemen = updatedDepartments;
-        localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
-    } catch(e) {
-        console.error("Failed to update localStorage", e);
-    }
-  }
+  }, [loadData]);
 
   const handleAdd = (newDepartment: { nama: string }) => {
-    const rawDepartments = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).departemen;
-    const updatedDepartments: Departemen[] = [...rawDepartments, { id: new Date().getTime().toString(), nama: newDepartment.nama }];
-    updateLocalStorage(updatedDepartments);
+    const currentData = allData();
+    const updatedDepartments: Departemen[] = [...currentData.departemen, { id: new Date().getTime().toString(), nama: newDepartment.nama }];
+    updateAllData({ ...currentData, departemen: updatedDepartments });
     loadData();
     setIsAddEditDialogOpen(false);
   };
   
   const handleUpdate = (updatedDepartment: { id: string, nama: string }) => {
-    const rawDepartments = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).departemen;
-    const updatedDepartments = rawDepartments.map(d => d.id === updatedDepartment.id ? updatedDepartment : d);
-    updateLocalStorage(updatedDepartments);
+    const currentData = allData();
+    const updatedDepartments = currentData.departemen.map(d => d.id === updatedDepartment.id ? updatedDepartment : d);
+    updateAllData({ ...currentData, departemen: updatedDepartments });
     loadData();
     setIsAddEditDialogOpen(false);
     setSelectedDepartment(null);
@@ -89,9 +75,9 @@ export default function DepartemenPage() {
 
   const handleDelete = () => {
     if (!selectedDepartment) return;
-    const rawDepartments = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).departemen;
-    const updatedDepartments = rawDepartments.filter(d => d.id !== selectedDepartment.id);
-    updateLocalStorage(updatedDepartments);
+    const currentData = allData();
+    const updatedDepartments = currentData.departemen.filter(d => d.id !== selectedDepartment.id);
+    updateAllData({ ...currentData, departemen: updatedDepartments });
     loadData();
     setIsDeleteDialogOpen(false);
     setSelectedDepartment(null);

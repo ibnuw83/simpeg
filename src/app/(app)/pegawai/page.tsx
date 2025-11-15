@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -43,7 +44,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
-import { allData, getAuthenticatedUser } from '@/lib/data';
+import { allData, getAuthenticatedUser, updateAllData } from '@/lib/data';
 import type { Pegawai, Pengguna } from '@/lib/types';
 import { AddEmployeeForm } from '@/components/forms/add-employee-form';
 import { EditEmployeeForm } from '@/components/forms/edit-employee-form';
@@ -73,6 +74,11 @@ export default function PegawaiPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedPegawai, setSelectedPegawai] = React.useState<Pegawai | null>(null);
 
+  const loadData = React.useCallback(() => {
+    const data = allData();
+    setPegawaiList(data.pegawai || []);
+  }, []);
+
   React.useEffect(() => {
     const user = getAuthenticatedUser();
     if (user?.role === 'Pengguna' && user.pegawaiId) {
@@ -86,53 +92,31 @@ export default function PegawaiPage() {
     setCurrentUser(user);
     loadData();
 
-  }, [router]);
-  
-  const loadData = () => {
-     const storedData = localStorage.getItem('simpegSmartData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setPegawaiList(parsedData.pegawai || []);
-      } catch (e) {
-        console.error("Failed to parse data from localStorage", e);
-        setPegawaiList([]);
-      }
-    } else {
-        setPegawaiList([]);
-    }
-  }
-
-  const updateLocalStorage = (updatedPegawaiList: Pegawai[]) => {
-     try {
-        const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData));
-        currentData.pegawai = updatedPegawaiList;
-        localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
-    } catch(e) {
-        console.error("Failed to update localStorage", e);
-    }
-  }
+  }, [router, loadData]);
 
   const handleAdd = (newEmployee: Pegawai) => {
-    const updatedPegawaiList = [...pegawaiList, newEmployee];
-    setPegawaiList(updatedPegawaiList);
-    updateLocalStorage(updatedPegawaiList);
+    const currentData = allData();
+    const updatedPegawaiList = [...currentData.pegawai, newEmployee];
+    updateAllData({ ...currentData, pegawai: updatedPegawaiList });
+    loadData();
     setIsAddDialogOpen(false); // Close dialog on save
   };
 
   const handleUpdate = (updatedEmployee: Pegawai) => {
-    const updatedPegawaiList = pegawaiList.map(p => p.id === updatedEmployee.id ? updatedEmployee : p);
-    setPegawaiList(updatedPegawaiList);
-    updateLocalStorage(updatedPegawaiList);
+    const currentData = allData();
+    const updatedPegawaiList = currentData.pegawai.map(p => p.id === updatedEmployee.id ? updatedEmployee : p);
+    updateAllData({ ...currentData, pegawai: updatedPegawaiList });
+    loadData();
     setIsEditDialogOpen(false);
     setSelectedPegawai(null);
   };
 
   const handleDelete = () => {
     if (!selectedPegawai) return;
-    const updatedPegawaiList = pegawaiList.filter(p => p.id !== selectedPegawai.id);
-    setPegawaiList(updatedPegawaiList);
-    updateLocalStorage(updatedPegawaiList);
+    const currentData = allData();
+    const updatedPegawaiList = currentData.pegawai.filter(p => p.id !== selectedPegawai.id);
+    updateAllData({ ...currentData, pegawai: updatedPegawaiList });
+    loadData();
     setIsDeleteDialogOpen(false);
     setSelectedPegawai(null);
   }
@@ -280,7 +264,7 @@ export default function PegawaiPage() {
                     Lakukan perubahan pada data pegawai. Klik simpan jika sudah selesai.
                 </DialogDescription>
                 </DialogHeader>
-                <EditEmployeeForm onSave={handleUpdate} employeeData={selectedPegawai} />
+                <EditEmployeeForm onSave={handleUpdate} employeeData={selectedPegawai} onCancel={() => setIsEditDialogOpen(false)} />
             </DialogContent>
         </Dialog>
       )}
@@ -292,8 +276,7 @@ export default function PegawaiPage() {
                 <AlertDialogHeader>
                 <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data pegawai secara permanen
-                    dari server.
+                    Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data pegawai <span className="font-semibold">{selectedPegawai.name}</span> secara permanen.
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

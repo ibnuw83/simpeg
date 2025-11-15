@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -12,8 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import { allData } from '@/lib/data';
-import type { Pegawai, PangkatGolongan } from '@/lib/types';
+import { allData, updateAllData } from '@/lib/data';
+import type { PangkatGolongan } from '@/lib/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,9 +45,8 @@ export default function PangkatPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedPangkat, setSelectedPangkat] = React.useState<PangkatData | null>(null);
 
-  const loadData = () => {
-    const storedData = localStorage.getItem('simpegSmartData');
-    const data = storedData ? JSON.parse(storedData) : allData;
+  const loadData = React.useCallback(() => {
+    const data = allData();
     const pangkatGolongan: PangkatGolongan[] = data.pangkatGolongan || [];
     
     pangkatGolongan.sort((a, b) => {
@@ -58,35 +58,26 @@ export default function PangkatPage() {
     });
 
     setPangkatList(pangkatGolongan);
-  };
+  }, []);
 
 
   React.useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const updateLocalStorage = (updatedPangkat: PangkatGolongan[]) => {
-     try {
-        const currentData = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData));
-        currentData.pangkatGolongan = updatedPangkat;
-        localStorage.setItem('simpegSmartData', JSON.stringify(currentData));
-    } catch(e) {
-        console.error("Failed to update localStorage", e);
-    }
-  }
 
   const handleAdd = (newPangkat: { pangkat: string, golongan: string }) => {
-    const rawPangkat = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).pangkatGolongan;
-    const updatedPangkat: PangkatGolongan[] = [...rawPangkat, { id: new Date().getTime().toString(), ...newPangkat }];
-    updateLocalStorage(updatedPangkat);
+    const currentData = allData();
+    const updatedPangkat: PangkatGolongan[] = [...currentData.pangkatGolongan, { id: new Date().getTime().toString(), ...newPangkat }];
+    updateAllData({ ...currentData, pangkatGolongan: updatedPangkat });
     loadData();
     setIsAddEditDialogOpen(false);
   };
   
   const handleUpdate = (updatedPangkat: PangkatGolongan) => {
-    const rawPangkat = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).pangkatGolongan;
-    const updatedPangkatList = rawPangkat.map(p => p.id === updatedPangkat.id ? updatedPangkat : p);
-    updateLocalStorage(updatedPangkatList);
+    const currentData = allData();
+    const updatedPangkatList = currentData.pangkatGolongan.map(p => p.id === updatedPangkat.id ? updatedPangkat : p);
+    updateAllData({ ...currentData, pangkatGolongan: updatedPangkatList });
     loadData();
     setIsAddEditDialogOpen(false);
     setSelectedPangkat(null);
@@ -94,9 +85,9 @@ export default function PangkatPage() {
 
   const handleDelete = () => {
     if (!selectedPangkat) return;
-    const rawPangkat = JSON.parse(localStorage.getItem('simpegSmartData') || JSON.stringify(allData)).pangkatGolongan;
-    const updatedPangkatList = rawPangkat.filter(p => p.id !== selectedPangkat.id);
-    updateLocalStorage(updatedPangkatList);
+    const currentData = allData();
+    const updatedPangkatList = currentData.pangkatGolongan.filter(p => p.id !== selectedPangkat.id);
+    updateAllData({ ...currentData, pangkatGolongan: updatedPangkatList });
     loadData();
     setIsDeleteDialogOpen(false);
     setSelectedPangkat(null);

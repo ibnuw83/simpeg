@@ -72,20 +72,30 @@ export default function ManajemenCutiPage() {
     
     let updatedPegawaiList = [...currentData.pegawai];
     
-    // Check if the leave is approved and current
-    if (newStatus === 'Disetujui') {
-        const cuti = updatedCutiList.find(c => c.id === cutiId);
-        if (cuti) {
-            const today = new Date();
-            const startDate = new Date(cuti.tanggalMulai);
-            const endDate = new Date(cuti.tanggalSelesai);
-            if (today >= startDate && today <= endDate) {
-                updatedPegawaiList = updatedPegawaiList.map(p => 
-                    p.id === cuti.pegawaiId ? { ...p, status: 'Cuti' } : p
+    const cuti = updatedCutiList.find(c => c.id === cutiId);
+    
+    if (cuti) {
+        const today = new Date();
+        const startDate = new Date(cuti.tanggalMulai);
+        const endDate = new Date(cuti.tanggalSelesai);
+        
+        // If leave is approved and current, set employee status to 'Cuti'
+        if (newStatus === 'Disetujui' && today >= startDate && today <= endDate) {
+            updatedPegawaiList = updatedPegawaiList.map(p => 
+                p.id === cuti.pegawaiId ? { ...p, status: 'Cuti' } : p
+            );
+        } else {
+            // Revert status to 'Aktif' if it's not an approved and current leave
+            // This handles cases where an approved leave is rejected, or a future/past leave is being handled.
+            const employeeOnLeave = updatedPegawaiList.find(p => p.id === cuti.pegawaiId);
+            if (employeeOnLeave?.status === 'Cuti') {
+                 updatedPegawaiList = updatedPegawaiList.map(p => 
+                    p.id === cuti.pegawaiId ? { ...p, status: 'Aktif' } : p
                 );
             }
         }
     }
+
 
     updateAllData({ ...currentData, cuti: updatedCutiList, pegawai: updatedPegawaiList });
     loadData();
