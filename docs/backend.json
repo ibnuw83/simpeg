@@ -1,0 +1,285 @@
+
+{
+    "entities": {
+        "pegawai": {
+            "title": "Pegawai",
+            "description": "Represents an employee in the system.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string", "description": "Unique identifier for the employee." },
+                "name": { "type": "string", "description": "Full name of the employee." },
+                "nip": { "type": "string", "description": "Employee identification number." },
+                "pangkat": { "type": "string" },
+                "golongan": { "type": "string" },
+                "jabatan": { "type": "string" },
+                "eselon": { "type": "string" },
+                "jenisJabatan": { "type": "string", "enum": ["Jabatan Struktural", "Jabatan Fungsional Tertentu", "Jabatan Fungsional Umum"] },
+                "departemen": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "phone": { "type": "string" },
+                "status": { "type": "string", "enum": ["Aktif", "Cuti", "Pensiun"] },
+                "avatarUrl": { "type": "string", "format": "uri" },
+                "imageHint": { "type": "string" },
+                "tanggalMasuk": { "type": "string", "format": "date" },
+                "tempatLahir": { "type": "string" },
+                "tanggalLahir": { "type": "string", "format": "date" },
+                "alamat": { "type": "string" }
+            },
+            "required": ["id", "name", "nip", "email"]
+        },
+        "pengguna": {
+            "title": "Pengguna",
+            "description": "Represents a user of the application.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "name": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "role": { "type": "string", "enum": ["Admin", "Pengguna"] },
+                "status": { "type": "string", "enum": ["Aktif", "Nonaktif"] },
+                "avatarUrl": { "type": "string", "format": "uri" }
+            },
+            "required": ["id", "name", "email", "role"]
+        },
+        "riwayatJabatan": {
+            "title": "Riwayat Jabatan",
+            "description": "Job history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "jabatan": { "type": "string" },
+                "departemen": { "type": "string" },
+                "tanggalMulai": { "type": "string", "format": "date" },
+                "tanggalSelesai": { "type": "string", "format": "date" }
+            }
+        },
+        "riwayatPangkat": {
+            "title": "Riwayat Pangkat",
+            "description": "Rank history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "pangkat": { "type": "string" },
+                "golongan": { "type": "string" },
+                "tanggalKenaikan": { "type": "string", "format": "date" }
+            }
+        },
+        "riwayatPendidikan": {
+            "title": "Riwayat Pendidikan",
+            "description": "Education history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "jenjang": { "type": "string" },
+                "institusi": { "type": "string" },
+                "jurusan": { "type": "string" },
+                "tahunLulus": { "type": "string" }
+            }
+        },
+        "riwayatDiklat": {
+            "title": "Riwayat Diklat",
+            "description": "Training history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "nama": { "type": "string" },
+                "penyelenggara": { "type": "string" },
+                "tanggal": { "type": "string", "format": "date" },
+                "jumlahJam": { "type": "number" }
+            }
+        },
+        "riwayatPensiun": {
+            "title": "Riwayat Pensiun",
+            "description": "Retirement history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "tanggalPensiun": { "type": "string", "format": "date" },
+                "keterangan": { "type": "string" },
+                "nomorSK": { "type": "string" }
+            }
+        },
+        "riwayatMutasi": {
+            "title": "Riwayat Mutasi",
+            "description": "Mutation/transfer history of an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "jenisMutasi": { "type": "string", "enum": ["perpindahan", "promosi", "gaji", "pangkat", "pensiun"] },
+                "keterangan": { "type": "string" },
+                "tanggalEfektif": { "type": "string", "format": "date" },
+                "nomorSK": { "type": "string" },
+                "googleDriveLink": { "type": "string", "format": "uri" }
+            }
+        },
+        "penghargaan": {
+            "title": "Penghargaan",
+            "description": "Awards received by an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "nama": { "type": "string" },
+                "pemberi": { "type": "string" },
+                "tanggal": { "type": "string", "format": "date" }
+            }
+        },
+        "hukuman": {
+            "title": "Hukuman",
+            "description": "Disciplinary actions for an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "jenis": { "type": "string", "enum": ["Ringan", "Sedang", "Berat"] },
+                "keterangan": { "type": "string" },
+                "tanggal": { "type": "string", "format": "date" }
+            }
+        },
+        "cuti": {
+            "title": "Cuti",
+            "description": "Leave requests for an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "jenisCuti": { "type": "string", "enum": ["Tahunan", "Sakit", "Penting", "Melahirkan"] },
+                "tanggalMulai": { "type": "string", "format": "date" },
+                "tanggalSelesai": { "type": "string", "format": "date" },
+                "keterangan": { "type": "string" },
+                "status": { "type": "string", "enum": ["Disetujui", "Ditolak", "Menunggu"] },
+                "linkBuktiDukung": { "type": "string", "format": "uri" }
+            }
+        },
+        "dokumen": {
+            "title": "Dokumen",
+            "description": "Documents related to an employee.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pegawaiId": { "type": "string" },
+                "namaDokumen": { "type": "string" },
+                "jenisDokumen": { "type": "string", "enum": ["Kontrak", "Sertifikat", "SK", "Lainnya"] },
+                "tanggalUnggah": { "type": "string", "format": "date" },
+                "fileUrl": { "type": "string", "format": "uri" },
+                "googleDriveLink": { "type": "string", "format": "uri" }
+            }
+        },
+        "departemen": {
+            "title": "Departemen",
+            "description": "Represents a department or work unit.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "nama": { "type": "string" }
+            },
+            "required": ["id", "nama"]
+        },
+        "pangkatGolongan": {
+            "title": "Pangkat Golongan",
+            "description": "Represents rank and group.",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "pangkat": { "type": "string" },
+                "golongan": { "type": "string" }
+            },
+            "required": ["id", "pangkat", "golongan"]
+        },
+        "appSettings": {
+            "title": "App Settings",
+            "description": "Global settings for the application.",
+            "type": "object",
+            "properties": {
+                "appName": { "type": "string" },
+                "logoUrl": { "type": "string", "format": "uri" },
+                "footerText": { "type": "string" },
+                "runningText": { "type": "string" },
+                "heroTitle": { "type": "string" },
+                "heroSubtitle": { "type": "string" },
+                "collageImages": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "url": { "type": "string", "format": "uri" },
+                            "alt": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "auth": {
+        "providers": ["password"]
+    },
+    "firestore": {
+        "/pegawai/{pegawaiId}": {
+            "schema": { "$ref": "#/entities/pegawai" },
+            "description": "Stores individual employee data."
+        },
+        "/pengguna/{penggunaId}": {
+            "schema": { "$ref": "#/entities/pengguna" },
+            "description": "Stores application user accounts."
+        },
+        "/pegawai/{pegawaiId}/riwayatJabatan/{riwayatJabatanId}": {
+            "schema": { "$ref": "#/entities/riwayatJabatan" },
+            "description": "Stores job history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/riwayatPangkat/{riwayatPangkatId}": {
+            "schema": { "$ref": "#/entities/riwayatPangkat" },
+            "description": "Stores rank history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/riwayatPendidikan/{riwayatPendidikanId}": {
+            "schema": { "$ref": "#/entities/riwayatPendidikan" },
+            "description": "Stores education history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/riwayatDiklat/{riwayatDiklatId}": {
+            "schema": { "$ref": "#/entities/riwayatDiklat" },
+            "description": "Stores training history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/riwayatPensiun/{riwayatPensiunId}": {
+            "schema": { "$ref": "#/entities/riwayatPensiun" },
+            "description": "Stores retirement history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/riwayatMutasi/{riwayatMutasiId}": {
+            "schema": { "$ref": "#/entities/riwayatMutasi" },
+            "description": "Stores mutation history for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/penghargaan/{penghargaanId}": {
+            "schema": { "$ref": "#/entities/penghargaan" },
+            "description": "Stores awards for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/hukuman/{hukumanId}": {
+            "schema": { "$ref": "#/entities/hukuman" },
+            "description": "Stores disciplinary actions for a specific employee."
+        },
+        "/pegawai/{pegawaiId}/dokumen/{dokumenId}": {
+            "schema": { "$ref": "#/entities/dokumen" },
+            "description": "Stores documents for a specific employee."
+        },
+        "/cuti/{cutiId}": {
+            "schema": { "$ref": "#/entities/cuti" },
+            "description": "Stores all leave requests from all employees."
+        },
+        "/departemen/{departemenId}": {
+            "schema": { "$ref": "#/entities/departemen" },
+            "description": "Stores the list of all departments."
+        },
+        "/pangkatGolongan/{pangkatGolonganId}": {
+            "schema": { "$ref": "#/entities/pangkatGolongan" },
+            "description": "Stores the list of all ranks and groups."
+        },
+        "/settings/app": {
+            "schema": { "$ref": "#/entities/appSettings" },
+            "description": "Stores global application settings in a single document."
+        }
+    }
+}
